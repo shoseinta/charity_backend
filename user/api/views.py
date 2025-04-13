@@ -2,8 +2,14 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
-from .serializers import CharityRegistrationSerializer, CharityLoginSerializer, BeneficiaryRegistrationSerializer, BeneficiaryLoginSerializer
+from django.shortcuts import get_object_or_404
+from .serializers import (CharityRegistrationSerializer,
+                        CharityLoginSerializer,
+                        BeneficiaryRegistrationSerializer, 
+                        BeneficiaryLoginSerializer,
+                        BeneficiaryUserRegistrationInfoSerializer)
 from django.contrib.auth.models import User
+from beneficiary.models import BeneficiaryUserRegistration
 
 class CharityRegistrationView(generics.CreateAPIView):
     serializer_class = CharityRegistrationSerializer
@@ -66,4 +72,31 @@ class BeneficiaryLoginView(APIView):
             'token': token.key,
             'user_id': user.pk,
             'username': user.username,
+        }, status=status.HTTP_200_OK)
+    
+class BeneficiaryUserRegistrationInfoView(generics.UpdateAPIView):
+    queryset = BeneficiaryUserRegistration.objects.all()
+    serializer_class = BeneficiaryUserRegistrationInfoSerializer
+    lookup_field = 'pk'
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        
+        # Only update fields that were provided
+        if 'phone_number' in serializer.validated_data:
+            instance.phone_number = serializer.validated_data['phone_number'] or None
+        if 'email' in serializer.validated_data:
+            instance.email = serializer.validated_data['email'] or None
+        
+        instance.save()
+        
+        return Response({
+            'status': 'success',
+            'data': {
+                'phone_number': instance.phone_number,
+                'email': instance.email,
+                'beneficiary_id': instance.beneficiary_id
+            }
         }, status=status.HTTP_200_OK)

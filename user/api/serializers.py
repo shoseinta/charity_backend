@@ -5,7 +5,8 @@ from charity.models import Charity
 from beneficiary.models import BeneficiaryUserRegistration
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
-
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 
 class CharityRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -139,4 +140,49 @@ class BeneficiaryLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Must include 'username' and 'password'.")
         
         data['user'] = user
+        return data
+
+class BeneficiaryUserRegistrationInfoSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        validators=[
+            RegexValidator(
+                regex='^09\d{9}$',
+                message="Phone number must be 11 digits starting with '09'"
+            )
+        ]
+    )
+    
+    email = serializers.EmailField(
+        required=False,
+        allow_null=True,
+        allow_blank=True
+    )
+
+    class Meta:
+        model = BeneficiaryUserRegistration
+        fields = ['phone_number', 'email']
+
+    def validate_phone_number(self, value):
+        """Validate phone number if provided"""
+        if value:  # Only validate if phone number exists
+            value = value.strip()
+            if BeneficiaryUserRegistration.objects.exclude(pk=self.instance.pk).filter(phone_number=value).exists():
+                raise serializers.ValidationError("This phone number is already registered")
+        return value
+
+    def validate_email(self, value):
+        """Validate email if provided"""
+        if value:  # Only validate if email exists
+            value = value.strip()
+            if BeneficiaryUserRegistration.objects.exclude(pk=self.instance.pk).filter(email=value).exists():
+                raise serializers.ValidationError("This email is already registered")
+        return value
+
+    def validate(self, data):
+        """Ensure at least one contact method is provided"""
+        if not data.get('phone_number') and not data.get('email'):
+            raise serializers.ValidationError("Either phone number or email must be provided")
         return data
