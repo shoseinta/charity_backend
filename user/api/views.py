@@ -2,7 +2,8 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
-from .serializers import CharityRegistrationSerializer, CharityLoginSerializer
+from .serializers import CharityRegistrationSerializer, CharityLoginSerializer, BeneficiaryRegistrationSerializer, BeneficiaryLoginSerializer
+from django.contrib.auth.models import User
 
 class CharityRegistrationView(generics.CreateAPIView):
     serializer_class = CharityRegistrationSerializer
@@ -23,6 +24,39 @@ class CharityRegistrationView(generics.CreateAPIView):
 class CharityLoginView(APIView):
     def post(self, request):
         serializer = CharityLoginSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        
+        token, created = Token.objects.get_or_create(user=user)
+        
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'username': user.username,
+        }, status=status.HTTP_200_OK)
+    
+class BeneficiaryRegisterView(generics.CreateAPIView):
+    serializer_class = BeneficiaryRegistrationSerializer
+    queryset = User.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        
+        return Response({
+            'status': 'success',
+            'data': {
+                'user_id': user.id,
+                'beneficiary_id': user.username,
+                'charity_id': user.beneficiaryuserregistration.charity.charity_id,
+                'message': 'Beneficiary registered successfully'
+            }
+        }, status=status.HTTP_201_CREATED)
+    
+class BeneficiaryLoginView(APIView):
+    def post(self, request):
+        serializer = BeneficiaryLoginSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         

@@ -23,9 +23,9 @@ class City(models.Model):
 class BeneficiaryUserRegistration(models.Model):
     beneficiary_user_registration_id = models.AutoField(primary_key=True)
     benficiary_user_id = models.OneToOneField(User, on_delete=models.CASCADE)  # username
-    identification_number = models.IntegerField(unique=True)
-    beneficiary_id = models.IntegerField(unique=True)  # username
-    phone_number = models.IntegerField(unique=True, blank=True, null=True)
+    identification_number = models.CharField(max_length=10,unique=True)
+    beneficiary_id = models.CharField(unique=True, max_length=10)  # username
+    phone_number = models.CharField(unique=True, blank=True, null=True, max_length=11)
     email = models.EmailField(unique=True, blank=True, null=True)
     password = models.CharField(max_length=255, blank=True, null=True)  # default: identification_number
     beneficiary_user_registration_created_at = models.DateTimeField(auto_now_add=True)
@@ -34,6 +34,7 @@ class BeneficiaryUserRegistration(models.Model):
 
     def __str__(self):
         return f"Beneficiary {self.beneficiary_id}"
+
 
 class BeneficiaryUserInformation(models.Model):
     GENDER_CHOICES = [
