@@ -229,3 +229,4 @@ class BeneficiaryInformationSingleSerializer(serializers.ModelSerializer):
         if not persian_regex.match(value):
             raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
         return value
+

@@ -14,6 +14,9 @@ from .serializers import (CharityRegistrationSerializer,
 from django.contrib.auth.models import User
 from beneficiary.models import (BeneficiaryUserRegistration,
                                 BeneficiaryUserInformation)
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsAdminOrCharity, IsCertainBeneficiary
+
 
 class CharityRegistrationView(generics.CreateAPIView):
     serializer_class = CharityRegistrationSerializer
@@ -78,10 +81,11 @@ class BeneficiaryLoginView(APIView):
             'username': user.username,
         }, status=status.HTTP_200_OK)
     
-class BeneficiaryUserRegistrationInfoView(generics.UpdateAPIView):
+class BeneficiaryUserRegistrationInfoView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsCertainBeneficiary]
     queryset = BeneficiaryUserRegistration.objects.all()
     serializer_class = BeneficiaryUserRegistrationInfoSerializer
-    lookup_field = 'pk'
+    lookup_field = 'beneficiary_user_registration_id'
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -106,11 +110,13 @@ class BeneficiaryUserRegistrationInfoView(generics.UpdateAPIView):
         }, status=status.HTTP_200_OK)
     
 class BeneficiaryInformationCreateView(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
     queryset = BeneficiaryUserInformation.objects.all()
     serializer_class = BeneficiaryInformationSerializer
 
 
 class BeneficiaryInformationSingleCreateView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = BeneficiaryInformationSingleSerializer
     
     def create(self, request, beneficiary_user_registration_id):
@@ -147,3 +153,12 @@ class BeneficiaryInformationSingleCreateView(generics.CreateAPIView):
                 {"detail": "User not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Delete the user's authentication token
+        request.user.auth_token.delete()
+        return Response({"message": "Logged out successfully"}, status=200)

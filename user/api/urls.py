@@ -5,7 +5,8 @@ from .views import (CharityRegistrationView,
                     BeneficiaryLoginView,
                     BeneficiaryUserRegistrationInfoView,
                     BeneficiaryInformationCreateView,
-                    BeneficiaryInformationSingleCreateView)
+                    BeneficiaryInformationSingleCreateView,
+                    LogoutView)
 
 urlpatterns = [
     # Define your API endpoints here
@@ -17,12 +18,13 @@ urlpatterns = [
     path('beneficiary/login/', BeneficiaryLoginView.as_view(), name='beneficiary-login'),
 
     #additional info paths
-    path('beneficiary/<int:pk>/register-info/', BeneficiaryUserRegistrationInfoView.as_view(), name='beneficiary-register-info'),
+    path('beneficiary/<int:beneficiary_user_registration_id>/register-info/', BeneficiaryUserRegistrationInfoView.as_view(), name='beneficiary-register-info'),
     path('beneficiary/information/', BeneficiaryInformationCreateView.as_view(), name='beneficiary-information-create'),
     path(
         'beneficiary/<int:beneficiary_user_registration_id>/information/',
         BeneficiaryInformationSingleCreateView.as_view(),
         name='beneficiary-information-single-create'
     ),
+    path('logout/', LogoutView.as_view(), name='logout'),
 
 ]
