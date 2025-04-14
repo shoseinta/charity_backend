@@ -9,13 +9,17 @@ from .serializers import (CharityRegistrationSerializer,
                         BeneficiaryLoginSerializer,
                         BeneficiaryUserRegistrationInfoSerializer,
                         BeneficiaryInformationSerializer,
-                        BeneficiaryInformationSingleSerializer
+                        BeneficiaryInformationSingleSerializer,
+                        CharityUsernameUpdate,
+                        CharityPasswordUpdateSerializer,
+                        BeneficiaryPasswordUpdate,
                         )
 from django.contrib.auth.models import User
 from beneficiary.models import (BeneficiaryUserRegistration,
                                 BeneficiaryUserInformation)
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAdminOrCharity, IsCertainBeneficiary
+from charity.models import Charity
 
 
 class CharityRegistrationView(generics.CreateAPIView):
@@ -162,3 +166,88 @@ class LogoutView(APIView):
         # Delete the user's authentication token
         request.user.auth_token.delete()
         return Response({"message": "Logged out successfully"}, status=200)
+    
+class CharityUsernameUpdateView(APIView):
+    permission_classes = [IsAdminOrCharity]
+
+    def patch(self, request, pk):
+        # Fetch the Charity instance
+        try:
+            charity_instance = Charity.objects.get(pk=pk)
+        except Charity.DoesNotExist:
+            return Response({"error": "Charity not found"}, status=404)
+
+        # Get the new username from the request
+        new_username = request.data.get('charity_username')  # Use 'charity_username' instead of 'username'
+
+        if not new_username:
+            return Response({"error": "Charity username is required"}, status=400)
+
+        # Update the Charity model using the serializer
+        serializer = CharityUsernameUpdate(instance=charity_instance, data={'charity_username': new_username}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            # Update the username in the User model
+            user = request.user
+            user.username = new_username
+            user.save()
+
+            return Response({"message": "Charity username updated successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CharityPasswordUpdateView(APIView):
+    permission_classes = [IsAdminOrCharity]
+
+    def patch(self, request, pk):
+        # Fetch the Charity instance
+        try:
+            charity_instance = Charity.objects.get(pk=pk)
+        except Charity.DoesNotExist:
+            return Response({"error": "Charity not found"}, status=404)
+
+        # Get the new password from the request
+        new_password = request.data.get('charity_password')  # Use 'charity_password' instead of 'password'
+
+        if not new_password:
+            return Response({"error": "Charity password is required"}, status=400)
+
+        # Update the Charity model using the serializer
+        serializer = CharityPasswordUpdateSerializer(instance=charity_instance, data={'charity_password': new_password}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            # Update the password in the User model
+            user = request.user
+            user.set_password(new_password)
+            user.save()
+
+            return Response({"message": "Charity password updated successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class BeneficiaryPasswordUpdateView(APIView):
+    permission_classes = [IsCertainBeneficiary]
+
+    def patch(self, request, pk):
+        # Fetch the Charity instance
+        try:
+            charity_instance = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response({"error": "Charity not found"}, status=404)
+
+        # Get the new password from the request
+        new_password = request.data.get('password')  # Use 'charity_password' instead of 'password'
+
+        if not new_password:
+            return Response({"error": "password is required"}, status=400)
+
+        # Update the Charity model using the serializer
+        serializer = BeneficiaryPasswordUpdate(instance=charity_instance, data={'password': new_password}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            # Update the password in the User model
+            user = request.user
+            user.set_password(new_password)
+            user.save()
+
+            return Response({"message": "Beneficiary password updated successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 from charity.models import Charity
 class IsAdminOrCharity(BasePermission):
     def has_permission(self, request, view):
-        return request.user in Charity.objects.all() or request.user.is_staff
+        return Charity.objects.filter(charity_username=request.user).exists() or request.user.is_staff
     
 class IsCertainBeneficiary(BasePermission):
     def has_permission(self, request, view):

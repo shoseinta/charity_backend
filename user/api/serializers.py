@@ -229,4 +229,37 @@ class BeneficiaryInformationSingleSerializer(serializers.ModelSerializer):
         if not persian_regex.match(value):
             raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
         return value
+    
+class CharityUsernameUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = Charity
+        fields = ['charity_username']
+    
+    def validate_charity_username(self, value):
+        if Charity.objects.filter(charity_username=value).exists():
+            raise serializers.ValidationError("This charity username is already taken.")
+        return value
 
+
+class CharityPasswordUpdateSerializer(serializers.ModelSerializer):
+    charity_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        validators=[validate_password]
+    )
+
+    class Meta:
+        model = Charity
+        fields = ['charity_password']
+    
+class BeneficiaryPasswordUpdate(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        validators=[validate_password]
+    )
+
+    class Meta:
+        model = BeneficiaryUserRegistration
+        fields = ['password']
+    
