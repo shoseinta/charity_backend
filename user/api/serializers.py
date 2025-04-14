@@ -262,4 +262,9 @@ class BeneficiaryPasswordUpdate(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryUserRegistration
         fields = ['password']
+
+class BeneficiaryUserRegistartionAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserRegistration
+        fields = '__all__'
     
