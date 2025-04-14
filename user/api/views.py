@@ -7,9 +7,13 @@ from .serializers import (CharityRegistrationSerializer,
                         CharityLoginSerializer,
                         BeneficiaryRegistrationSerializer, 
                         BeneficiaryLoginSerializer,
-                        BeneficiaryUserRegistrationInfoSerializer)
+                        BeneficiaryUserRegistrationInfoSerializer,
+                        BeneficiaryInformationSerializer,
+                        BeneficiaryInformationSingleSerializer
+                        )
 from django.contrib.auth.models import User
-from beneficiary.models import BeneficiaryUserRegistration
+from beneficiary.models import (BeneficiaryUserRegistration,
+                                BeneficiaryUserInformation)
 
 class CharityRegistrationView(generics.CreateAPIView):
     serializer_class = CharityRegistrationSerializer
@@ -100,3 +104,46 @@ class BeneficiaryUserRegistrationInfoView(generics.UpdateAPIView):
                 'beneficiary_id': instance.beneficiary_id
             }
         }, status=status.HTTP_200_OK)
+    
+class BeneficiaryInformationCreateView(generics.CreateAPIView):
+    queryset = BeneficiaryUserInformation.objects.all()
+    serializer_class = BeneficiaryInformationSerializer
+
+
+class BeneficiaryInformationSingleCreateView(generics.CreateAPIView):
+    serializer_class = BeneficiaryInformationSingleSerializer
+    
+    def create(self, request, beneficiary_user_registration_id):
+        try:
+            # Get the user registration from URL parameter
+            user_registration = BeneficiaryUserRegistration.objects.get(pk=beneficiary_user_registration_id)
+            
+            # Check for existing information
+            if BeneficiaryUserInformation.objects.filter(
+                beneficiary_user_registration=user_registration
+            ).exists():
+                return Response(
+                    {"detail": "User information already exists for this user."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate and save with the URL-determined relationship
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            
+            # Create the instance with the enforced relationship
+            beneficiary_info = BeneficiaryUserInformation.objects.create(
+                beneficiary_user_registration=user_registration,
+                **serializer.validated_data
+            )
+            
+            return Response(
+                BeneficiaryInformationSingleSerializer(beneficiary_info).data,
+                status=status.HTTP_201_CREATED
+            )
+            
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response(
+                {"detail": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )

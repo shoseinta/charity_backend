@@ -2,11 +2,13 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from charity.models import Charity
-from beneficiary.models import BeneficiaryUserRegistration
+from beneficiary.models import (BeneficiaryUserRegistration,
+                                BeneficiaryUserInformation)
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+import re
 
 class CharityRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -186,3 +188,44 @@ class BeneficiaryUserRegistrationInfoSerializer(serializers.ModelSerializer):
         if not data.get('phone_number') and not data.get('email'):
             raise serializers.ValidationError("Either phone number or email must be provided")
         return data
+
+class BeneficiaryInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserInformation
+        fields = '__all__'
+
+    def validate_first_name(self, value):
+         # Regular expression to match Persian characters and common punctuation
+        persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
+        
+        if not persian_regex.match(value):
+            raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
+        return value
+    def validate_last_name(self, value):
+         # Regular expression to match Persian characters and common punctuation
+        persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
+        
+        if not persian_regex.match(value):
+            raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
+        return value
+
+class BeneficiaryInformationSingleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserInformation
+        exclude = ['beneficiary_user_registration']
+        read_only_fields = ['beneficiary_user_information_id']
+
+    def validate_first_name(self, value):
+         # Regular expression to match Persian characters and common punctuation
+        persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
+        
+        if not persian_regex.match(value):
+            raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
+        return value
+    def validate_last_name(self, value):
+         # Regular expression to match Persian characters and common punctuation
+        persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
+        
+        if not persian_regex.match(value):
+            raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
+        return value
