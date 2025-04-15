@@ -13,10 +13,12 @@ from .serializers import (CharityRegistrationSerializer,
                         CharityUsernameUpdate,
                         CharityPasswordUpdateSerializer,
                         BeneficiaryPasswordUpdate,
+                        BeneficiaryAddressInfoSerializer
                         )
 from django.contrib.auth.models import User
 from beneficiary.models import (BeneficiaryUserRegistration,
-                                BeneficiaryUserInformation)
+                                BeneficiaryUserInformation,
+                                BeneficiaryUserAddress)
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAdminOrCharity, IsCertainBeneficiary
 from charity.models import Charity
@@ -251,3 +253,42 @@ class BeneficiaryPasswordUpdateView(APIView):
 
             return Response({"message": "Beneficiary password updated successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class BeneficiaryAddressInfoView(generics.CreateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryAddressInfoSerializer
+    
+    def create(self, request, pk):
+        try:
+            # Get the user registration from URL parameter
+            user_registration = BeneficiaryUserRegistration.objects.get(pk=pk)
+            
+            # Check for existing information
+            if BeneficiaryUserAddress.objects.filter(
+                beneficiary_user_registration=user_registration
+            ).exists():
+                return Response(
+                    {"detail": "User address information already exists for this user."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate and save with the URL-determined relationship
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            
+            # Create the instance with the enforced relationship
+            beneficiary_info = BeneficiaryUserAddress.objects.create(
+                beneficiary_user_registration=user_registration,
+                **serializer.validated_data
+            )
+            
+            return Response(
+                BeneficiaryAddressInfoSerializer(beneficiary_info).data,
+                status=status.HTTP_201_CREATED
+            )
+            
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response(
+                {"detail": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )

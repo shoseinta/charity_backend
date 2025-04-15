@@ -71,13 +71,13 @@ class BeneficiaryRequestProcessingStage(models.Model):
 
 class BeneficiaryRequest(models.Model):
     beneficiary_request_id = models.AutoField(primary_key=True)
-    beneficiary_request_type_layer1 = models.ForeignKey(BeneficiaryRequestTypeLayer1, on_delete=models.CASCADE)
-    beneficiary_request_type_layer2 = models.ForeignKey(BeneficiaryRequestTypeLayer2, on_delete=models.CASCADE)
+    beneficiary_request_type_layer1 = models.ForeignKey(BeneficiaryRequestTypeLayer1, on_delete=models.PROTECT)
+    beneficiary_request_type_layer2 = models.ForeignKey(BeneficiaryRequestTypeLayer2, on_delete=models.PROTECT)
     beneficiary_request_title = models.CharField(max_length=255, blank=True, null=True)
     beneficiary_request_description = models.TextField(blank=True, null=True)
     beneficiary_request_duration = models.ForeignKey(
         BeneficiaryRequestDuration, 
-        on_delete=models.CASCADE, 
+        on_delete=models.PROTECT, 
         blank=True, 
         null=True,
         related_name='requests'
@@ -152,7 +152,7 @@ class CharityWorkfield(models.Model):
     charity_workfield_description = models.TextField(blank=True, null=True)
     charity_workfield_created_at = models.DateTimeField(auto_now_add=True)
     charity_workfield_updated_at = models.DateTimeField(auto_now=True)
-    charity = models.ForeignKey(Charity, on_delete=models.CASCADE, blank=True, null=True)
+    charity = models.ForeignKey(Charity, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.charity_workfield_title

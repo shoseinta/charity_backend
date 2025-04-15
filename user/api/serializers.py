@@ -3,7 +3,8 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from charity.models import Charity
 from beneficiary.models import (BeneficiaryUserRegistration,
-                                BeneficiaryUserInformation)
+                                BeneficiaryUserInformation,
+                                BeneficiaryUserAddress)
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
@@ -263,5 +264,22 @@ class BeneficiaryPasswordUpdate(serializers.ModelSerializer):
         model = BeneficiaryUserRegistration
         fields = ['password']
 
+class BeneficiaryAddressInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserAddress
+        exclude = ['beneficiary_user_registration']
+    def validate_postal_code(self, value):
+        if len(value) != 10:
+            raise serializers.ValidationError("Postal code must be 10 digits")
+        if not value.isdigit():
+            raise serializers.ValidationError("Postal code must be numeric")
+    def validate_longitude(self, value):
+        if not (-180 <= value <= 180):
+            raise serializers.ValidationError("Longitude must be between -180 and 180 degrees")
+        return value
+    def validate_latitude(self, value):
+        if not (-90 <= value <= 90):
+            raise serializers.ValidationError("Latitude must be between -90 and 90 degrees")
+        return value
 
     

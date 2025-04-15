@@ -62,17 +62,17 @@ class BeneficiaryUserAddress(models.Model):
     neighborhood = models.CharField(max_length=255, blank=True, null=True)
     street = models.CharField(max_length=255, blank=True, null=True)
     alley = models.CharField(max_length=255, blank=True, null=True)
-    building_number = models.IntegerField(blank=True, null=True)
-    unit = models.IntegerField(blank=True, null=True)
-    postal_code = models.IntegerField(blank=True, null=True)
+    building_number = models.PositiveIntegerField(blank=True, null=True)
+    unit = models.PositiveIntegerField(blank=True, null=True)
+    postal_code = models.CharField(blank=True, null=True, max_length=10)
     longitude = models.FloatField(blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     beneficiary_user_address_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_user_address_updated_at = models.DateTimeField(auto_now=True)
-    beneficiary_user_information = models.ForeignKey(BeneficiaryUserInformation, on_delete=models.CASCADE)
+    beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Address for {self.beneficiary_user_information}"
+        return f"{self.beneficiary_user_registration}"
 
 class BeneficiaryUserAdditionalInfo(models.Model):
     beneficiary_user_additional_info_id = models.AutoField(primary_key=True)
