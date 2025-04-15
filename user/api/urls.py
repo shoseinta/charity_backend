@@ -11,6 +11,7 @@ from .views import (CharityRegistrationView,
                     CharityPasswordUpdateView,
                     BeneficiaryPasswordUpdateView,
                     BeneficiaryAddressInfoView,
+                    BeneficiaryAdditionalInfoView,
                     )
 
 urlpatterns = [
@@ -35,5 +36,6 @@ urlpatterns = [
     path('charity/<int:pk>/password-update/', CharityPasswordUpdateView.as_view(), name='charity-password-update'),
     path('beneficiary/<int:pk>/password-update/', BeneficiaryPasswordUpdateView.as_view(), name='beneficiary-password-update'),
     path('beneficiary/<int:pk>/address-info/', BeneficiaryAddressInfoView.as_view(), name='beneficiary-address-info'),
+    path('beneficiary/<int:pk>/additional-info/', BeneficiaryAdditionalInfoView.as_view(), name='beneficiary-additional-info'),
     
 ]

@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 from charity.models import Charity
 from beneficiary.models import (BeneficiaryUserRegistration,
                                 BeneficiaryUserInformation,
-                                BeneficiaryUserAddress)
+                                BeneficiaryUserAddress,
+                                BeneficiaryUserAdditionalInfo)
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
@@ -281,5 +282,10 @@ class BeneficiaryAddressInfoSerializer(serializers.ModelSerializer):
         if not (-90 <= value <= 90):
             raise serializers.ValidationError("Latitude must be between -90 and 90 degrees")
         return value
+
+class BeneficiaryAdditionalInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserAdditionalInfo
+        exclude = ['beneficiary_user_registration']
 
     
