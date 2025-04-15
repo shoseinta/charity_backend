@@ -33,7 +33,7 @@ class BeneficiaryUserRegistration(models.Model):
     charity = models.ForeignKey(Charity, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Beneficiary {self.beneficiary_id}"
+        return f"{self.beneficiary_id}"
 
 
 class BeneficiaryUserInformation(models.Model):
