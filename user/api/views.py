@@ -15,12 +15,14 @@ from .serializers import (CharityRegistrationSerializer,
                         BeneficiaryPasswordUpdate,
                         BeneficiaryAddressInfoSerializer,
                         BeneficiaryAdditionalInfoSerializer,
+                        CharityWorkFieldSerializer,
                         )
 from django.contrib.auth.models import User
 from beneficiary.models import (BeneficiaryUserRegistration,
                                 BeneficiaryUserInformation,
                                 BeneficiaryUserAddress,
                                 BeneficiaryUserAdditionalInfo)
+from request.models import CharityWorkfield
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAdminOrCharity, IsCertainBeneficiary
 from charity.models import Charity
@@ -303,16 +305,6 @@ class BeneficiaryAdditionalInfoView(generics.CreateAPIView):
         try:
             # Get the user registration from URL parameter
             user_registration = BeneficiaryUserRegistration.objects.get(pk=pk)
-            
-            # Check for existing information
-            if BeneficiaryUserAdditionalInfo.objects.filter(
-                beneficiary_user_registration=user_registration
-            ).exists():
-                return Response(
-                    {"detail": "User additional information already exists for this user."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
             # Validate and save with the URL-determined relationship
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -329,6 +321,33 @@ class BeneficiaryAdditionalInfoView(generics.CreateAPIView):
             )
             
         except BeneficiaryUserRegistration.DoesNotExist:
+            return Response(
+                {"detail": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class CharityWorkFieldView(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = CharityWorkFieldSerializer
+    
+    def create(self, request, pk):
+        try:
+            # Validate and save with the URL-determined relationship
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user_registration = Charity.objects.get(pk=pk)
+            # Create the instance with the enforced relationship
+            beneficiary_info = CharityWorkfield.objects.create(
+                charity=user_registration,
+                **serializer.validated_data
+            )
+            
+            return Response(
+                CharityWorkFieldSerializer(beneficiary_info).data,
+                status=status.HTTP_201_CREATED
+            )
+            
+        except Charity.DoesNotExist:
             return Response(
                 {"detail": "User not found."},
                 status=status.HTTP_404_NOT_FOUND

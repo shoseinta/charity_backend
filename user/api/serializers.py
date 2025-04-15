@@ -6,6 +6,7 @@ from beneficiary.models import (BeneficiaryUserRegistration,
                                 BeneficiaryUserInformation,
                                 BeneficiaryUserAddress,
                                 BeneficiaryUserAdditionalInfo)
+from request.models import CharityWorkfield
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
@@ -287,5 +288,15 @@ class BeneficiaryAdditionalInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryUserAdditionalInfo
         exclude = ['beneficiary_user_registration']
+
+class CharityWorkFieldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityWorkfield
+        exclude = ['charity']
+    
+    def validate_charity_work_field_name(self, value):
+        if CharityWorkfield.objects.filter(charity_work_field_name=value).exists():
+            raise serializers.ValidationError("This charity work field name is already taken.")
+        return value
 
     
