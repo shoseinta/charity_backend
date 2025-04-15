@@ -13,7 +13,6 @@ from .serializers import (CharityRegistrationSerializer,
                         CharityUsernameUpdate,
                         CharityPasswordUpdateSerializer,
                         BeneficiaryPasswordUpdate,
-                        BeneficiaryUserRegistartionAllSerializer
                         )
 from django.contrib.auth.models import User
 from beneficiary.models import (BeneficiaryUserRegistration,
@@ -252,9 +251,3 @@ class BeneficiaryPasswordUpdateView(APIView):
 
             return Response({"message": "Beneficiary password updated successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-class BeneficiaryUserRegistrationInfoUpdateView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsCertainBeneficiary]
-    queryset = BeneficiaryUserRegistration.objects.all()
-    serializer_class = BeneficiaryUserRegistartionAllSerializer
-    lookup_field = 'beneficiary_user_registration_id'

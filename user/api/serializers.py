@@ -263,13 +263,5 @@ class BeneficiaryPasswordUpdate(serializers.ModelSerializer):
         model = BeneficiaryUserRegistration
         fields = ['password']
 
-class BeneficiaryUserRegistartionAllSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BeneficiaryUserRegistration
-        fields = '__all__'
 
-class CharityUserRegistrationAllSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Charity
-        fields = '__all__'
     
