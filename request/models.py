@@ -98,7 +98,7 @@ class BeneficiaryRequestDurationOnetime(models.Model):
     beneficiary_request_duration_onetime_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_duration_onetime_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_request_duration = models.ForeignKey(BeneficiaryRequestDuration, on_delete=models.CASCADE)
-    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE)
+    beneficiary_request = models.OneToOneField(BeneficiaryRequest, on_delete=models.CASCADE,related_name='beneficiary_request_duration_onetime')
 
     def __str__(self):
         return f"One-time deadline: {self.beneficiary_request_duration_onetime_deadline}"
@@ -111,7 +111,7 @@ class BeneficiaryRequestDurationRecurring(models.Model):
     beneficiary_request_duration_recurring_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_duration_recurring_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_request_duration = models.ForeignKey(BeneficiaryRequestDuration, on_delete=models.CASCADE)
-    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE)
+    beneficiary_request = models.OneToOneField(BeneficiaryRequest, on_delete=models.CASCADE,related_name='beneficiary_request_duration_recurring')
 
     def __str__(self):
         return f"Recurring limit: {self.beneficiary_request_duration_recurring_limit}"

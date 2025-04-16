@@ -2,7 +2,9 @@ from rest_framework import serializers
 from beneficiary.models import BeneficiaryUserRegistration,BeneficiaryUserInformation,BeneficiaryUserAddress,BeneficiaryUserAdditionalInfo
 from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestHistory,
-                            BeneficiaryRequestChild)
+                            BeneficiaryRequestChild,
+                            BeneficiaryRequestDurationOnetime,
+                            BeneficiaryRequestDurationRecurring)
 
 class BeneficiaryInformationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -78,10 +80,22 @@ class BeneficiaryChildRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestChild
         fields = '__all__'
-        
+
+class BeneficiaryRequestOneTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationOnetime
+        fields = '__all__'
+
+class BeneficiaryRequestRecurringSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationRecurring
+        fields = '__all__'
+
 class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
     beneficiary_request_history = BeneficiaryRequestHistorySerializer(many=True)
     beneficiary_request_child = BeneficiaryChildRequestSerializer(many=True)
+    beneficiary_request_duration_onetime = BeneficiaryRequestOneTimeSerializer()
+    beneficiary_request_duration_recurring = BeneficiaryRequestRecurringSerializer()
     class Meta:
         model = BeneficiaryRequest
         fields = '__all__'
