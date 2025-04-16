@@ -100,3 +100,8 @@ class SingleRequestHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestHistory
         exclude = ['beneficiary_request']
+
+class SingleRequestChildSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestChild
+        exclude = ['beneficiary_request']

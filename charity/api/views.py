@@ -6,7 +6,8 @@ from request.models import (BeneficiaryRequest,
 from .serializers import (BeneficiaryListSerializer,
                           RequestCreationSerializer,
                           BeneficiaryListSingleSerializer,
-                          SingleRequestHistorySerializer)
+                          SingleRequestHistorySerializer,
+                          SingleRequestChildSerializer)
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
@@ -56,6 +57,35 @@ class BeneficiaryRequestHistoryCreate(generics.CreateAPIView):
         return Response(
             {
                 "message": "Beneficiary request history created successfully!",
+                "data": serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
+    
+class BeneficiaryRequestChildCreate(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = SingleRequestChildSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Extract the 'pk' from the URL
+        beneficiary_request_pk = self.kwargs.get('pk')
+        try:
+            # Get the parent BeneficiaryRequest object
+            beneficiary_request = BeneficiaryRequest.objects.get(pk=beneficiary_request_pk)
+        except BeneficiaryRequest.DoesNotExist:
+            return Response({"error": "BeneficiaryRequest not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Initialize the serializer with the request data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Save the object while associating the BeneficiaryRequest
+        serializer.save(beneficiary_request=beneficiary_request)
+
+        # Customize the response
+        return Response(
+            {
+                "message": "Beneficiary request child created successfully!",
                 "data": serializer.data
             },
             status=status.HTTP_201_CREATED
