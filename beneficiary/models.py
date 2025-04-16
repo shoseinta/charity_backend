@@ -50,7 +50,7 @@ class BeneficiaryUserInformation(models.Model):
     birth_date = models.DateField(blank=True, null=True)
     beneficiary_user_information_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_user_information_updated_at = models.DateTimeField(auto_now=True)
-    beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name="beneficiary_user_information")
+    beneficiary_user_registration = models.OneToOneField(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name="beneficiary_user_information")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -69,7 +69,7 @@ class BeneficiaryUserAddress(models.Model):
     latitude = models.FloatField(blank=True, null=True)
     beneficiary_user_address_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_user_address_updated_at = models.DateTimeField(auto_now=True)
-    beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name="beneficiary_user_address")
+    beneficiary_user_registration = models.OneToOneField(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name="beneficiary_user_address")
 
     def __str__(self):
         return f"{self.beneficiary_user_registration}"

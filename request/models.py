@@ -87,7 +87,7 @@ class BeneficiaryRequest(models.Model):
     beneficiary_request_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_updated_at = models.DateTimeField(auto_now=True)
     charity = models.ForeignKey(Charity, on_delete=models.CASCADE)
-    beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE)
+    beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name='beneficiary_requests')
 
     def __str__(self):
         return f"Request #{self.beneficiary_request_id} - {self.beneficiary_request_title}"
@@ -125,7 +125,7 @@ class BeneficiaryRequestHistory(models.Model):
     beneficiary_request_history_time = models.TimeField(blank=True, null=True)
     beneficiary_request_history_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_history_updated_at = models.DateTimeField(auto_now=True)
-    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE)
+    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE, related_name='beneficiary_request_history')
 
     def __str__(self):
         return f"History: {self.beneficiary_request_history_title}"
@@ -139,7 +139,7 @@ class BeneficiaryRequestChild(models.Model):
     beneficiary_request_child_time = models.TimeField(blank=True, null=True)
     beneficiary_request_child_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_child_updated_at = models.DateTimeField(auto_now=True)
-    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE)
+    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE,related_name='beneficiary_request_child')
 
     def __str__(self):
         return f"Child request of #{self.beneficiary_request.beneficiary_request_id}"

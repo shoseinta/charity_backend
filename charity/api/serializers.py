@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from beneficiary.models import BeneficiaryUserRegistration,BeneficiaryUserInformation,BeneficiaryUserAddress,BeneficiaryUserAdditionalInfo
-from request.models import BeneficiaryRequest
+from request.models import (BeneficiaryRequest,
+                            BeneficiaryRequestHistory,
+                            BeneficiaryRequestChild)
 
 class BeneficiaryInformationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,3 +59,39 @@ class RequestCreationSerializer(serializers.ModelSerializer):
         return data
 
 
+class BeneficiaryInformationAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserInformation
+        fields = '__all__'
+        
+class BeneficiaryAddressAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserAddress
+        fields = '__all__'
+
+class BeneficiaryRequestHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestHistory
+        fields = '__all__'
+
+class BeneficiaryChildRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestChild
+        fields = '__all__'
+        
+class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
+    beneficiary_request_history = BeneficiaryRequestHistorySerializer(many=True)
+    beneficiary_request_child = BeneficiaryChildRequestSerializer(many=True)
+    class Meta:
+        model = BeneficiaryRequest
+        fields = '__all__'
+
+
+class BeneficiaryListSingleSerializer(serializers.ModelSerializer):
+    beneficiary_user_information = BeneficiaryInformationAllSerializer()
+    beneficiary_user_address = BeneficiaryAddressAllSerializer()
+    beneficiary_user_additional_info = BeneficiaryAdditionalInfo(many=True)
+    beneficiary_requests = BeneficiaryGetRequestSerializer(many=True)
+    class Meta:
+        model = BeneficiaryUserRegistration
+        fields = '__all__'
