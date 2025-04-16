@@ -95,3 +95,8 @@ class BeneficiaryListSingleSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryUserRegistration
         fields = '__all__'
+
+class SingleRequestHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestHistory
+        exclude = ['beneficiary_request']
