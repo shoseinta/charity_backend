@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from beneficiary.models import BeneficiaryUserRegistration,BeneficiaryUserInformation,BeneficiaryUserAddress,BeneficiaryUserAdditionalInfo
-
+from request.models import BeneficiaryRequest
 
 class BeneficiaryInformationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,4 +38,22 @@ class BeneficiaryListSerializer(serializers.ModelSerializer):
                   "beneficiary_user_address",
                   "beneficiary_user_additional_info"
                   ]
+
+class RequestCreationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequest
+        fields = '__all__'
+
+    def validate(self, data):
+        layer1 = data.get('beneficiary_request_type_layer1')
+        layer2 = data.get('beneficiary_request_type_layer2')
+
+        # Check if Layer 2 is associated with Layer 1
+        if layer2.beneficiary_request_type_layer1 != layer1:
+            raise serializers.ValidationError(
+                "The selected request type Layer 2 is not associated with the selected request type Layer 1."
+            )
+
+        return data
+
 

@@ -1,7 +1,16 @@
 from rest_framework import generics
 from beneficiary.models import BeneficiaryUserRegistration
-from .serializers import BeneficiaryListSerializer
+from request.models import BeneficiaryRequest
+from .serializers import (BeneficiaryListSerializer,
+                          RequestCreationSerializer)
+from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 
 class BeneficiaryListView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
     queryset = BeneficiaryUserRegistration.objects.all()
     serializer_class = BeneficiaryListSerializer
+
+class BeneficiaryRequestCreateView(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    queryset = BeneficiaryRequest.objects.all()
+    serializer_class = RequestCreationSerializer

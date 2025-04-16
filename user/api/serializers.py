@@ -270,16 +270,28 @@ class BeneficiaryAddressInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryUserAddress
         exclude = ['beneficiary_user_registration']
+    def validate(self, data):
+        city = data.get('city')
+        province = data.get('province')
+        if city != province:
+            raise serializers.ValidationError("City must match the province")
+        return data
     def validate_postal_code(self, value):
+        if not value:
+            return value
         if len(value) != 10:
             raise serializers.ValidationError("Postal code must be 10 digits")
         if not value.isdigit():
             raise serializers.ValidationError("Postal code must be numeric")
     def validate_longitude(self, value):
+        if not value:
+            return value
         if not (-180 <= value <= 180):
             raise serializers.ValidationError("Longitude must be between -180 and 180 degrees")
         return value
     def validate_latitude(self, value):
+        if not value:
+            return value
         if not (-90 <= value <= 90):
             raise serializers.ValidationError("Latitude must be between -90 and 90 degrees")
         return value

@@ -56,12 +56,10 @@ class BeneficiaryRequestProcessingStage(models.Model):
             ('in_progress', 'In Progress'),
             ('completed', 'Completed')
         ],
-        unique=True
     )
     beneficiary_request_status = models.CharField(
         max_length=8,
         choices=[('active', 'Active'), ('inactive', 'Inactive')],
-        unique=True
     )
     beneficiary_request_processing_stage_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_processing_stage_updated_at = models.DateTimeField(auto_now=True)
