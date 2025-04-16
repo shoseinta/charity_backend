@@ -7,7 +7,8 @@ from .serializers import (BeneficiaryListSerializer,
                           RequestCreationSerializer,
                           BeneficiaryListSingleSerializer,
                           SingleRequestHistorySerializer,
-                          SingleRequestChildSerializer)
+                          SingleRequestChildSerializer,
+                          BeneficiaryGetRequestSerializer)
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
@@ -90,3 +91,8 @@ class BeneficiaryRequestChildCreate(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED
         )
+    
+class BeneficiaryAllRequestsView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryGetRequestSerializer
+    queryset = BeneficiaryRequest.objects.all()

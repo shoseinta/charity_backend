@@ -3,7 +3,8 @@ from .views import (BeneficiaryListView,
                     BeneficiaryRequestCreateView,
                     BeneficiaryDetailView,
                     BeneficiaryRequestHistoryCreate,
-                    BeneficiaryRequestChildCreate)
+                    BeneficiaryRequestChildCreate,
+                    BeneficiaryAllRequestsView)
 
 urlpatterns = [
     path('beneficiaries/list/', BeneficiaryListView.as_view(), name='beneficiary-list'),
@@ -11,4 +12,5 @@ urlpatterns = [
     path('beneficiaries/<int:pk>/get/', BeneficiaryDetailView.as_view(), name='beneficiary-detail'),
     path('requests/<int:pk>/create-history/', BeneficiaryRequestHistoryCreate.as_view(), name='beneficiary-request-history-create'),
     path('requests/<int:pk>/create-child/', BeneficiaryRequestChildCreate.as_view(), name='beneficiary-request-child-create'),
+    path('requests/list/', BeneficiaryAllRequestsView.as_view(), name='beneficiary-all-requests'),
 ]
