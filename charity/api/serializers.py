@@ -4,7 +4,8 @@ from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestHistory,
                             BeneficiaryRequestChild,
                             BeneficiaryRequestDurationOnetime,
-                            BeneficiaryRequestDurationRecurring)
+                            BeneficiaryRequestDurationRecurring,
+                            BeneficiaryRequestDuration)
 
 class BeneficiaryInformationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -121,3 +122,21 @@ class SingleRequestChildSerializer(serializers.ModelSerializer):
         exclude = ['beneficiary_request']
 
 
+class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationOnetime
+        exclude = ['beneficiary_request']
+    def validate(self,data):
+        if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(pk=1):
+            raise serializers.ValidationError("This request must be a onetime request.")
+        return data
+
+class BeneficiarySingleRequestRecurringSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationRecurring
+        exclude = ['beneficiary_request']
+
+    def validate(self,data):
+        if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(pk=2):
+            raise serializers.ValidationError("This request must be a recurring request.")
+        return data

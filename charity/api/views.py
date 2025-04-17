@@ -2,13 +2,17 @@ from rest_framework import generics
 from beneficiary.models import BeneficiaryUserRegistration
 from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestHistory,
-                            BeneficiaryRequestChild)
+                            BeneficiaryRequestChild,
+                            BeneficiaryRequestDurationOnetime,
+                            BeneficiaryRequestDurationRecurring,)
 from .serializers import (BeneficiaryListSerializer,
                           RequestCreationSerializer,
                           BeneficiaryListSingleSerializer,
                           SingleRequestHistorySerializer,
                           SingleRequestChildSerializer,
-                          BeneficiaryGetRequestSerializer)
+                          BeneficiaryGetRequestSerializer,
+                          BeneficiarySingleRequestOneTimeSerializer,
+                          BeneficiarySingleRequestRecurringSerializer,)
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
@@ -96,3 +100,64 @@ class BeneficiaryAllRequestsView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryGetRequestSerializer
     queryset = BeneficiaryRequest.objects.all()
+
+class BeneficiaryRequestOnetimeCreationView(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiarySingleRequestOneTimeSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Extract the 'pk' from the URL
+        beneficiary_request_pk = self.kwargs.get('pk')
+        try:
+            # Get the parent BeneficiaryRequest object
+            beneficiary_request = BeneficiaryRequest.objects.get(pk=beneficiary_request_pk)
+        except BeneficiaryRequest.DoesNotExist:
+            return Response({"error": "BeneficiaryRequest not found."}, status=status.HTTP_404_NOT_FOUND)
+        if BeneficiaryRequestDurationOnetime.objects.filter(beneficiary_request=beneficiary_request).exists():
+            return Response({"error": "This request already has a onetime duration."}, status=status.HTTP_400_BAD_REQUEST)
+        # Initialize the serializer with the request data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Save the object while associating the BeneficiaryRequest
+        serializer.save(beneficiary_request=beneficiary_request)
+
+        # Customize the response
+        return Response(
+            {
+                "message": "Beneficiary request onetime created successfully!",
+                "data": serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiarySingleRequestRecurringSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Extract the 'pk' from the URL
+        beneficiary_request_pk = self.kwargs.get('pk')
+        try:
+            # Get the parent BeneficiaryRequest object
+            beneficiary_request = BeneficiaryRequest.objects.get(pk=beneficiary_request_pk)
+        except BeneficiaryRequest.DoesNotExist:
+            return Response({"error": "BeneficiaryRequest not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if BeneficiaryRequestDurationRecurring.objects.filter(beneficiary_request=beneficiary_request).exists():
+            return Response({"error": "This request already has a recurring duration."}, status=status.HTTP_400_BAD_REQUEST)
+        # Initialize the serializer with the request data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Save the object while associating the BeneficiaryRequest
+        serializer.save(beneficiary_request=beneficiary_request)
+
+        # Customize the response
+        return Response(
+            {
+                "message": "Beneficiary request recurring created successfully!",
+                "data": serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
