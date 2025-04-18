@@ -214,3 +214,15 @@ class BeneficiaryUpdateRequestView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BeneficiaryUpdateRequestSerializer
     queryset = BeneficiaryRequest.objects.all()
     lookup_field = 'pk' 
+
+class SingleHistoryUpdateView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = SingleRequestHistorySerializer
+    queryset = BeneficiaryRequestHistory.objects.all()
+    lookup_field = 'pk'
+
+class SingleChildUpdateView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = SingleRequestChildSerializer
+    queryset = BeneficiaryRequestChild.objects.all()
+    lookup_field = 'pk'
