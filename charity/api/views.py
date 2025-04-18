@@ -15,7 +15,9 @@ from .serializers import (BeneficiaryListSerializer,
                           BeneficiaryGetRequestSerializer,
                           BeneficiarySingleRequestOneTimeSerializer,
                           BeneficiarySingleRequestRecurringSerializer,
-                          BeneficiaryUpdateRequestSerializer)
+                          BeneficiaryUpdateRequestSerializer,
+                          BeneficiaryRequestUpdateOneTimeSerializer,
+                          BeneficiaryRequestUpdateRecurringSerializer,)
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
@@ -225,4 +227,17 @@ class SingleChildUpdateView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = SingleRequestChildSerializer
     queryset = BeneficiaryRequestChild.objects.all()
+    lookup_field = 'pk'
+
+
+class SingleOnetimeUpdateView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryRequestUpdateOneTimeSerializer
+    queryset = BeneficiaryRequestDurationOnetime.objects.all()
+    lookup_field = 'pk'
+
+class SingleRecurringUpdateView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryRequestUpdateRecurringSerializer
+    queryset = BeneficiaryRequestDurationRecurring.objects.all()
     lookup_field = 'pk'

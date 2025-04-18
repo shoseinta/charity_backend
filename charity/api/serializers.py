@@ -92,6 +92,16 @@ class BeneficiaryRequestRecurringSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequestDurationRecurring
         fields = '__all__'
 
+class BeneficiaryRequestUpdateOneTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationOnetime
+        fields = ['beneficiary_request_duration_onetime_deadline']
+
+class BeneficiaryRequestUpdateRecurringSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationRecurring
+        fields = ['beneficiary_request_duration_recurring_limit']
+
 class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
     beneficiary_request_history = BeneficiaryRequestHistorySerializer(many=True)
     beneficiary_request_child = BeneficiaryChildRequestSerializer(many=True)
