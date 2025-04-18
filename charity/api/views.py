@@ -201,3 +201,9 @@ class BeneficiaryOldRequestOngoingGetView(generics.ListAPIView):
         BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name = 'permanent')
     ]
 )
+    
+class SingleRequestGetView(generics.RetrieveAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryGetRequestSerializer
+    queryset = BeneficiaryRequest.objects.all()
+    lookup_field = 'pk'
