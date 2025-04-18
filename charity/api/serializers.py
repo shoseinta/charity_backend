@@ -127,7 +127,7 @@ class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequestDurationOnetime
         exclude = ['beneficiary_request']
     def validate(self,data):
-        if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(pk=1):
+        if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time'):
             raise serializers.ValidationError("This request must be a onetime request.")
         return data
 
@@ -137,6 +137,6 @@ class BeneficiarySingleRequestRecurringSerializer(serializers.ModelSerializer):
         exclude = ['beneficiary_request']
 
     def validate(self,data):
-        if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(pk=2):
+        if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'):
             raise serializers.ValidationError("This request must be a recurring request.")
         return data

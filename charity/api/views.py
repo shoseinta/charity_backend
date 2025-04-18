@@ -4,7 +4,9 @@ from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestHistory,
                             BeneficiaryRequestChild,
                             BeneficiaryRequestDurationOnetime,
-                            BeneficiaryRequestDurationRecurring,)
+                            BeneficiaryRequestDurationRecurring,
+                            BeneficiaryRequestProcessingStage,
+                            BeneficiaryRequestDuration)
 from .serializers import (BeneficiaryListSerializer,
                           RequestCreationSerializer,
                           BeneficiaryListSingleSerializer,
@@ -161,3 +163,41 @@ class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED
         )
+
+class BeneficiaryNewRequestGetView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryGetRequestSerializer
+    queryset = BeneficiaryRequest.objects.filter(
+    beneficiary_request_processing_stage__in=[
+        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'submitted'),
+        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'pending_review'),
+        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'under_evaluation'),
+    ]
+)
+    
+class BeneficiaryOldRequestOnetimeGetView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryGetRequestSerializer
+    queryset = BeneficiaryRequest.objects.filter(
+    beneficiary_request_processing_stage__in=[
+        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'approved'),
+        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'in_progress'),
+    ],
+    beneficiary_request_duration__in=[
+        BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name = 'one_time')
+    ]
+)
+    
+class BeneficiaryOldRequestOngoingGetView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryGetRequestSerializer
+    queryset = BeneficiaryRequest.objects.filter(
+    beneficiary_request_processing_stage__in=[
+        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'approved'),
+        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'in_progress'),
+    ],
+    beneficiary_request_duration__in=[
+        BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name = 'recurring'),
+        BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name = 'permanent')
+    ]
+)
