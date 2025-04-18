@@ -101,7 +101,21 @@ class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequest
         fields = '__all__'
 
+class BeneficiaryUpdateRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequest
+        fields = '__all__'
+    def validate(self, data):
+        layer1 = data.get('beneficiary_request_type_layer1')
+        layer2 = data.get('beneficiary_request_type_layer2')
 
+        # Check if Layer 2 is associated with Layer 1
+        if layer2.beneficiary_request_type_layer1 != layer1:
+            raise serializers.ValidationError(
+                "The selected request type Layer 2 is not associated with the selected request type Layer 1."
+            )
+
+        return data
 class BeneficiaryListSingleSerializer(serializers.ModelSerializer):
     beneficiary_user_information = BeneficiaryInformationAllSerializer()
     beneficiary_user_address = BeneficiaryAddressAllSerializer()
