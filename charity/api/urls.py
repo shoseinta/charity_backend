@@ -15,7 +15,8 @@ from .views import (BeneficiaryListView,
                     SingleHistoryUpdateView,
                     SingleChildUpdateView,
                     SingleOnetimeUpdateView,
-                    SingleRecurringUpdateView,)
+                    SingleRecurringUpdateView,
+                    ChangeRequestProcessingStageView,)
 
 urlpatterns = [
     path('beneficiaries/list/', BeneficiaryListView.as_view(), name='beneficiary-list'),
@@ -35,4 +36,5 @@ urlpatterns = [
     path('requests/child/<int:pk>/update/', SingleChildUpdateView.as_view(), name='beneficiary-request-child-update'),
     path('requests/recurring/<int:pk>/update/', SingleRecurringUpdateView.as_view(), name='beneficiary-request-recurring-update'),
     path('requests/onetime/<int:pk>/update/', SingleOnetimeUpdateView.as_view(), name='beneficiary-request-onetime-update'),
+    path('requests/<int:pk>/change-processing-stage/', ChangeRequestProcessingStageView.as_view(), name='beneficiary-request-change-processing-stage'),
 ]

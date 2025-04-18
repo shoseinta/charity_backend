@@ -110,6 +110,11 @@ class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequest
         fields = '__all__'
+        
+class BeneficiaryRequestChangeProcessingStageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequest
+        fields = ['beneficiary_request_processing_stage']
 
 class BeneficiaryUpdateRequestSerializer(serializers.ModelSerializer):
     class Meta:
