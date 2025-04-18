@@ -16,12 +16,18 @@ from .views import (BeneficiaryListView,
                     SingleChildUpdateView,
                     SingleOnetimeUpdateView,
                     SingleRecurringUpdateView,
-                    ChangeRequestProcessingStageView,)
+                    ChangeRequestProcessingStageView,
+                    UpdateBeneficiaryAdditionalInfoView,
+                    UpdateBeneficiaryAddressView,
+                    UpdateBeneficiaryInformationView,)
 
 urlpatterns = [
     path('beneficiaries/list/', BeneficiaryListView.as_view(), name='beneficiary-list'),
     path('beneficiaries/request-create/', BeneficiaryRequestCreateView.as_view(), name='beneficiary-request-create'),
     path('beneficiaries/<int:pk>/get/', BeneficiaryDetailView.as_view(), name='beneficiary-detail'),
+    path('beneficiaries/<int:pk>/update-information/', UpdateBeneficiaryInformationView.as_view(), name='beneficiary-update-information'),
+    path('beneficiaries/<int:pk>/update-address/', UpdateBeneficiaryAddressView.as_view(), name='beneficiary-update-address'),
+    path('beneficiaries/<int:pk>/update-additional-info/', UpdateBeneficiaryAdditionalInfoView.as_view(), name='beneficiary-update-additional-info'),
     path('requests/<int:pk>/get/', SingleRequestGetView.as_view(), name='beneficiary-request-get'),
     path('requests/<int:pk>/update/', BeneficiaryUpdateRequestView.as_view(), name='beneficiary-request-update'),
     path('requests/<int:pk>/create-history/', BeneficiaryRequestHistoryCreate.as_view(), name='beneficiary-request-history-create'),

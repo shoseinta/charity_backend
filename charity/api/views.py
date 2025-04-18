@@ -1,5 +1,8 @@
 from rest_framework import generics
-from beneficiary.models import BeneficiaryUserRegistration
+from beneficiary.models import (BeneficiaryUserRegistration,
+                                BeneficiaryUserInformation,
+                                BeneficiaryUserAddress,
+                                BeneficiaryUserAdditionalInfo,)
 from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestHistory,
                             BeneficiaryRequestChild,
@@ -18,10 +21,14 @@ from .serializers import (BeneficiaryListSerializer,
                           BeneficiaryUpdateRequestSerializer,
                           BeneficiaryRequestUpdateOneTimeSerializer,
                           BeneficiaryRequestUpdateRecurringSerializer,
-                          BeneficiaryRequestChangeProcessingStageSerializer)
+                          BeneficiaryRequestChangeProcessingStageSerializer,
+                          BeneficiaryAdditionalInfoUpdateSerializer,
+                          BeneficiaryAddressUpdateSerializer,
+                          BeneficiaryInformationUpdateSerializer,)
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
+from django.http import Http404
 
 
 class BeneficiaryListView(generics.ListAPIView):
@@ -248,3 +255,75 @@ class ChangeRequestProcessingStageView(generics.UpdateAPIView):
     serializer_class = BeneficiaryRequestChangeProcessingStageSerializer
     queryset = BeneficiaryRequest.objects.all()
     lookup_field = 'pk'
+
+class UpdateBeneficiaryAddressView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryAddressUpdateSerializer
+    queryset = BeneficiaryUserAddress.objects.all()
+    #i want to find user_register = userregistration(pk=pk) and then find userinformation(beneficiary_user_registration=user_register) and then update it based on input or retreive or delete it
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        try:
+            user_register = BeneficiaryUserRegistration.objects.get(pk=pk)
+            user_information = BeneficiaryUserAddress.objects.get(beneficiary_user_registration=user_register)
+            return user_information
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise Http404("BeneficiaryUserRegistration does not exist")
+        except BeneficiaryUserAddress.DoesNotExist:
+            raise Http404("BeneficiaryUserAddress does not exist")
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+class UpdateBeneficiaryInformationView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryInformationUpdateSerializer
+    queryset = BeneficiaryUserInformation.objects.all()
+    #i want to find user_register = userregistration(pk=pk) and then find userinformation(beneficiary_user_registration=user_register) and then update it based on input or retreive or delete it
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        try:
+            user_register = BeneficiaryUserRegistration.objects.get(pk=pk)
+            user_information = BeneficiaryUserInformation.objects.get(beneficiary_user_registration=user_register)
+            return user_information
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise Http404("BeneficiaryUserRegistration does not exist")
+        except BeneficiaryUserInformation.DoesNotExist:
+            raise Http404("BeneficiaryUserInformation does not exist")
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+class UpdateBeneficiaryAdditionalInfoView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryAdditionalInfoUpdateSerializer
+    queryset = BeneficiaryUserAdditionalInfo.objects.all()
+    #i want to find user_register = userregistration(pk=pk) and then find userinformation(beneficiary_user_registration=user_register) and then update it based on input or retreive or delete it
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        try:
+            user_register = BeneficiaryUserRegistration.objects.get(pk=pk)
+            user_information = BeneficiaryUserAdditionalInfo.objects.get(beneficiary_user_registration=user_register)
+            return user_information
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise Http404("BeneficiaryUserRegistration does not exist")
+        except BeneficiaryUserAdditionalInfo.DoesNotExist:
+            raise Http404("BeneficiaryUserInformation does not exist")
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
