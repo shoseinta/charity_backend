@@ -19,7 +19,10 @@ from .views import (BeneficiaryListView,
                     ChangeRequestProcessingStageView,
                     UpdateBeneficiaryAdditionalInfoView,
                     UpdateBeneficiaryAddressView,
-                    UpdateBeneficiaryInformationView,)
+                    UpdateBeneficiaryInformationView,
+                    BeneficiaryRequestAnnouncementListView,
+                    BeneficiaryRequestAnnouncementCreateView,
+                    BeneficiaryRequestAnnouncementUpdateView)
 
 urlpatterns = [
     path('beneficiaries/list/', BeneficiaryListView.as_view(), name='beneficiary-list'),
@@ -43,4 +46,7 @@ urlpatterns = [
     path('requests/recurring/<int:pk>/update/', SingleRecurringUpdateView.as_view(), name='beneficiary-request-recurring-update'),
     path('requests/onetime/<int:pk>/update/', SingleOnetimeUpdateView.as_view(), name='beneficiary-request-onetime-update'),
     path('requests/<int:pk>/change-processing-stage/', ChangeRequestProcessingStageView.as_view(), name='beneficiary-request-change-processing-stage'),
+    path('requests/<int:pk>/announcement/list/', BeneficiaryRequestAnnouncementListView.as_view(), name='beneficiary-request-announcement-list'),
+    path('requests/<int:pk>/announcement/create/', BeneficiaryRequestAnnouncementCreateView.as_view(), name='beneficiary-request-announcement-create'),
+    path('request-announcement/<int:pk>/update/', BeneficiaryRequestAnnouncementUpdateView.as_view(), name='beneficiary-request-announcement-update'),
 ]

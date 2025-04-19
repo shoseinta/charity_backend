@@ -5,7 +5,8 @@ from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestChild,
                             BeneficiaryRequestDurationOnetime,
                             BeneficiaryRequestDurationRecurring,
-                            BeneficiaryRequestDuration)
+                            BeneficiaryRequestDuration,
+                            CharityAnnouncementForRequest,)
 import re
 
 class BeneficiaryInformationSerializer(serializers.ModelSerializer):
@@ -158,11 +159,22 @@ class BeneficiaryRequestUpdateRecurringSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequestDurationRecurring
         fields = ['beneficiary_request_duration_recurring_limit']
 
+class BeneficiaryRequestAnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityAnnouncementForRequest
+        fields = '__all__'
+
+class BeneficiaryRequestAnnouncementUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityAnnouncementForRequest
+        exclude = ['beneficiary_request']
+
 class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
     beneficiary_request_history = BeneficiaryRequestHistorySerializer(many=True)
     beneficiary_request_child = BeneficiaryChildRequestSerializer(many=True)
     beneficiary_request_duration_onetime = BeneficiaryRequestOneTimeSerializer()
     beneficiary_request_duration_recurring = BeneficiaryRequestRecurringSerializer()
+    beneficiary_request_announcement = BeneficiaryRequestAnnouncementSerializer(many=True)
     class Meta:
         model = BeneficiaryRequest
         fields = '__all__'

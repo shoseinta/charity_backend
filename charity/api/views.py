@@ -9,7 +9,8 @@ from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
                             BeneficiaryRequestDurationRecurring,
                             BeneficiaryRequestProcessingStage,
-                            BeneficiaryRequestDuration)
+                            BeneficiaryRequestDuration,
+                            CharityAnnouncementForRequest)
 from .serializers import (BeneficiaryListSerializer,
                           RequestCreationSerializer,
                           BeneficiaryListSingleSerializer,
@@ -24,7 +25,8 @@ from .serializers import (BeneficiaryListSerializer,
                           BeneficiaryRequestChangeProcessingStageSerializer,
                           BeneficiaryAdditionalInfoUpdateSerializer,
                           BeneficiaryAddressUpdateSerializer,
-                          BeneficiaryInformationUpdateSerializer,)
+                          BeneficiaryInformationUpdateSerializer,
+                          BeneficiaryRequestAnnouncementUpdateSerializer,)
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
@@ -327,3 +329,33 @@ class UpdateBeneficiaryAdditionalInfoView(generics.RetrieveUpdateDestroyAPIView)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+    
+class BeneficiaryRequestAnnouncementListView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryRequestAnnouncementUpdateSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        try:
+            single_request = BeneficiaryRequest.objects.get(pk=pk)
+            return CharityAnnouncementForRequest.objects.filter(beneficiary_request=single_request)
+        except BeneficiaryRequest.DoesNotExist:
+            raise Http404("BeneficiaryRequest does not exist")
+
+class BeneficiaryRequestAnnouncementCreateView(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryRequestAnnouncementUpdateSerializer
+
+    def perform_create(self, serializer):
+        pk = self.kwargs.get('pk')
+        try:
+            single_request = BeneficiaryRequest.objects.get(pk=pk)
+            serializer.save(beneficiary_request=single_request)
+        except BeneficiaryRequest.DoesNotExist:
+            raise Http404("BeneficiaryRequest does not exist")
+        
+class BeneficiaryRequestAnnouncementUpdateView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryRequestAnnouncementUpdateSerializer
+    queryset = CharityAnnouncementForRequest.objects.all()
+    lookup_field = 'pk'
