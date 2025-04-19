@@ -4,8 +4,6 @@ from beneficiary.models import (
     BeneficiaryUserRegistration,
     BeneficiaryUserInformation,
     BeneficiaryUserAddress,
-    Province,
-    City,
 )
 from request.models import (
     BeneficiaryRequest,
@@ -33,3 +31,20 @@ class BeneficiaryUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryUserRegistration
         exclude = ['password']
+
+class BeneficiaryRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequest
+        exclude = ['beneficiary_user_registration','beneficiary_request_processing_stage']
+    
+    def validate(self, data):
+        layer1 = data.get('beneficiary_request_type_layer1')
+        layer2 = data.get('beneficiary_request_type_layer2')
+
+        # Check if Layer 2 is associated with Layer 1
+        if layer2 and layer2.beneficiary_request_type_layer1 != layer1:
+            raise serializers.ValidationError(
+                "The selected request type Layer 2 is not associated with the selected request type Layer 1."
+            )
+
+        return data

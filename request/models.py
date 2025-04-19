@@ -86,7 +86,6 @@ class BeneficiaryRequest(models.Model):
     beneficiary_request_time = models.TimeField(blank=True, null=True)
     beneficiary_request_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_updated_at = models.DateTimeField(auto_now=True)
-    charity = models.ForeignKey(Charity, on_delete=models.CASCADE)
     beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name='beneficiary_requests')
 
     def __str__(self):
