@@ -22,4 +22,5 @@ urlpatterns = [
     path('user-api/', include('user.api.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('charity-platform/', include('charity.api.urls')),
+    path('beneficiary-platform/', include('beneficiary.api.urls')),
 ]

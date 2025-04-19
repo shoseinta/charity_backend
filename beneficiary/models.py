@@ -30,7 +30,6 @@ class BeneficiaryUserRegistration(models.Model):
     password = models.CharField(max_length=255, blank=True, null=True)  # default: identification_number
     beneficiary_user_registration_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_user_registration_updated_at = models.DateTimeField(auto_now=True)
-    charity = models.ForeignKey(Charity, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.beneficiary_id}"
