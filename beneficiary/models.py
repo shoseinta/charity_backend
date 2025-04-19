@@ -92,7 +92,6 @@ class CharityAnnouncementToBeneficiary(models.Model):
     charity_announcement_to_beneficiary_description = models.TextField(blank=True, null=True)
     charity_announcement_to_beneficiary_created_at = models.DateTimeField(auto_now_add=True)
     charity_announcement_to_beneficiary_updated_at = models.DateTimeField(auto_now=True)
-    charity = models.ForeignKey(Charity, on_delete=models.CASCADE)
     beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE)
 
     def __str__(self):

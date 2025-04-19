@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from beneficiary.models import BeneficiaryUserRegistration,BeneficiaryUserInformation,BeneficiaryUserAddress,BeneficiaryUserAdditionalInfo
+from beneficiary.models import (BeneficiaryUserRegistration,
+                                BeneficiaryUserInformation,
+                                BeneficiaryUserAddress,
+                                BeneficiaryUserAdditionalInfo,
+                                CharityAnnouncementToBeneficiary,)
 from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestHistory,
                             BeneficiaryRequestChild,
@@ -237,3 +241,8 @@ class BeneficiarySingleRequestRecurringSerializer(serializers.ModelSerializer):
         if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'):
             raise serializers.ValidationError("This request must be a recurring request.")
         return data
+    
+class CharityAnnouncementToBeneficiarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityAnnouncementToBeneficiary
+        exclude = ['beneficiary_user_registration']

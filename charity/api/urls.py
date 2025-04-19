@@ -22,7 +22,10 @@ from .views import (BeneficiaryListView,
                     UpdateBeneficiaryInformationView,
                     BeneficiaryRequestAnnouncementListView,
                     BeneficiaryRequestAnnouncementCreateView,
-                    BeneficiaryRequestAnnouncementUpdateView)
+                    BeneficiaryRequestAnnouncementUpdateView,
+                    BeneficiaryAnnouncementListView,
+                    BeneficiaryAnnouncementCreateView,
+                    BeneficiaryAnnouncementUpdateView,)
 
 urlpatterns = [
     path('beneficiaries/list/', BeneficiaryListView.as_view(), name='beneficiary-list'),
@@ -31,6 +34,8 @@ urlpatterns = [
     path('beneficiaries/<int:pk>/update-information/', UpdateBeneficiaryInformationView.as_view(), name='beneficiary-update-information'),
     path('beneficiaries/<int:pk>/update-address/', UpdateBeneficiaryAddressView.as_view(), name='beneficiary-update-address'),
     path('beneficiaries/<int:pk>/update-additional-info/', UpdateBeneficiaryAdditionalInfoView.as_view(), name='beneficiary-update-additional-info'),
+    path('beneficiaries/<int:pk>/announcement/list/', BeneficiaryAnnouncementListView.as_view(), name='beneficiary-announcement-list'),
+    path('beneficiaries/<int:pk>/announcement/create/', BeneficiaryAnnouncementCreateView.as_view(), name='beneficiary-announcement-create'),
     path('requests/<int:pk>/get/', SingleRequestGetView.as_view(), name='beneficiary-request-get'),
     path('requests/<int:pk>/update/', BeneficiaryUpdateRequestView.as_view(), name='beneficiary-request-update'),
     path('requests/<int:pk>/create-history/', BeneficiaryRequestHistoryCreate.as_view(), name='beneficiary-request-history-create'),
@@ -49,4 +54,5 @@ urlpatterns = [
     path('requests/<int:pk>/announcement/list/', BeneficiaryRequestAnnouncementListView.as_view(), name='beneficiary-request-announcement-list'),
     path('requests/<int:pk>/announcement/create/', BeneficiaryRequestAnnouncementCreateView.as_view(), name='beneficiary-request-announcement-create'),
     path('request-announcement/<int:pk>/update/', BeneficiaryRequestAnnouncementUpdateView.as_view(), name='beneficiary-request-announcement-update'),
+    path('announcement/<int:pk>/update/', BeneficiaryAnnouncementUpdateView.as_view(), name='beneficiary-announcement-update'),
 ]
