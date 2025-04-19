@@ -12,6 +12,7 @@ from request.models import (
     BeneficiaryRequestHistory,
     BeneficiaryRequestChild,
     BeneficiaryRequestDuration,
+    CharityAnnouncementForRequest,
 )
 
 
@@ -68,3 +69,39 @@ class BeneficiarySingleRequestRecurringSerializer(serializers.ModelSerializer):
         if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'):
             raise serializers.ValidationError("This request must be a recurring request.")
         return data
+    
+class BeneficiaryRequestHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestHistory
+        exclude = ['beneficiary_request']
+
+class BeneficiaryRequestChildSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestChild
+        exclude = ['beneficiary_request']
+
+class BeneficiaryRequestOnetimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationOnetime
+        fields = '__all__'
+
+class BeneficiaryRequestRecurringSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationRecurring
+        fields = '__all__'
+
+class BeneficiaryRequestAnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityAnnouncementForRequest
+        fields = '__all__'
+
+class BeneficiaryRequestGetSerializer(serializers.ModelSerializer):
+    beneficiary_request_duration_onetime = BeneficiaryRequestOnetimeSerializer()
+    beneficiary_request_duration_recurring = BeneficiaryRequestRecurringSerializer()
+    beneficiary_request_history = BeneficiaryRequestHistorySerializer(many=True)
+    beneficiary_request_child = BeneficiaryRequestChildSerializer(many=True, required=False)
+    beneficiary_request_announcement = BeneficiaryRequestAnnouncementSerializer(many=True)
+
+    class Meta:
+        model = BeneficiaryRequest
+        fields = '__all__'

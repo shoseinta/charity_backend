@@ -9,7 +9,8 @@ from beneficiary.models import BeneficiaryUserRegistration
 from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestSerializer,
                           BeneficiarySingleRequestOneTimeSerializer,
-                          BeneficiarySingleRequestRecurringSerializer,)
+                          BeneficiarySingleRequestRecurringSerializer,
+                          BeneficiaryRequestGetSerializer,)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
@@ -108,3 +109,73 @@ class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED
         )
+    
+class BeneficiaryRequestInitialStagesGetView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestGetSerializer
+
+    def get_queryset(self):
+        # Get the 'pk' from the URL
+        beneficiary = self.kwargs.get('pk')
+
+        # Define the target processing stage names
+        target_stages = ['submitted', 'pending_review', 'under_evaluation']
+
+        # Filter requests based on beneficiary and target processing stages
+        return BeneficiaryRequest.objects.filter(
+            beneficiary_user_registration__pk=beneficiary,
+            beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
+        )
+    
+class BeneficiaryRequestInProgressGetView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestGetSerializer
+
+    def get_queryset(self):
+        # Get the 'pk' from the URL
+        beneficiary = self.kwargs.get('pk')
+
+        # Define the target processing stage names
+        target_stages = ['approved', 'in_progress']
+
+        # Filter requests based on beneficiary and target processing stages
+        return BeneficiaryRequest.objects.filter(
+            beneficiary_user_registration__pk=beneficiary,
+            beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
+        )
+    
+class BeneficiaryRequestCompletedGetView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestGetSerializer
+
+    def get_queryset(self):
+        # Get the 'pk' from the URL
+        beneficiary = self.kwargs.get('pk')
+
+        # Define the target processing stage names
+        target_stages = ['completed']
+
+        # Filter requests based on beneficiary and target processing stages
+        return BeneficiaryRequest.objects.filter(
+            beneficiary_user_registration__pk=beneficiary,
+            beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
+        )
+    
+class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestGetSerializer
+
+    def get_queryset(self):
+        # Get the 'pk' from the URL
+        beneficiary = self.kwargs.get('pk')
+
+        # Define the target processing stage names
+        target_stages = ['rejected']
+
+        # Filter requests based on beneficiary and target processing stages
+        return BeneficiaryRequest.objects.filter(
+            beneficiary_user_registration__pk=beneficiary,
+            beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
+        )
+
+
