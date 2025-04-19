@@ -11,6 +11,7 @@ from request.models import (
     BeneficiaryRequestDurationRecurring,
     BeneficiaryRequestHistory,
     BeneficiaryRequestChild,
+    BeneficiaryRequestDuration,
 )
 
 
@@ -47,4 +48,23 @@ class BeneficiaryRequestSerializer(serializers.ModelSerializer):
                 "The selected request type Layer 2 is not associated with the selected request type Layer 1."
             )
 
+        return data
+    
+class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationOnetime
+        exclude = ['beneficiary_request']
+    def validate(self,data):
+        if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time'):
+            raise serializers.ValidationError("This request must be a onetime request.")
+        return data
+
+class BeneficiarySingleRequestRecurringSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationRecurring
+        exclude = ['beneficiary_request']
+
+    def validate(self,data):
+        if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'):
+            raise serializers.ValidationError("This request must be a recurring request.")
         return data

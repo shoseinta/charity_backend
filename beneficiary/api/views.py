@@ -7,8 +7,13 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from beneficiary.models import BeneficiaryUserRegistration
 from .serializers import (BeneficiaryUserSerializer,
-                          BeneficiaryRequestSerializer)
-from request.models import BeneficiaryRequestProcessingStage
+                          BeneficiaryRequestSerializer,
+                          BeneficiarySingleRequestOneTimeSerializer,
+                          BeneficiarySingleRequestRecurringSerializer,)
+from request.models import (BeneficiaryRequestProcessingStage,
+                            BeneficiaryRequest,
+                            BeneficiaryRequestDurationOnetime,
+                            BeneficiaryRequestDurationRecurring,)
 from user.api.permissions import IsCertainBeneficiary
 
 class BeneficiaryUserView(APIView):
@@ -35,3 +40,71 @@ class BeneficiaryRequestView(generics.CreateAPIView):
         # Save the BeneficiaryRequest with the associated beneficiary and processing stage
         serializer.save(beneficiary_user_registration=beneficiary, beneficiary_request_processing_stage=processing_stage)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class BeneficiaryRequestOnetimeCreationView(generics.CreateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiarySingleRequestOneTimeSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Extract the 'pk' from the URL
+        beneficiary = self.kwargs.get('pk')
+        beneficiary_request_pk = self.kwargs.get('request_pk')
+        try:
+            # Get the parent BeneficiaryRequest object
+            beneficiary_request = BeneficiaryRequest.objects.get(pk=beneficiary_request_pk)
+            if beneficiary_request.beneficiary_user_registration != BeneficiaryUserRegistration.objects.get(pk=beneficiary):
+                return Response({"error": "This request does not belong to the specified beneficiary."}, status=status.HTTP_400_BAD_REQUEST)
+
+        except BeneficiaryRequest.DoesNotExist:
+            return Response({"error": "BeneficiaryRequest not found."}, status=status.HTTP_404_NOT_FOUND)
+        if BeneficiaryRequestDurationOnetime.objects.filter(beneficiary_request=beneficiary_request).exists():
+            return Response({"error": "This request already has a onetime duration."}, status=status.HTTP_400_BAD_REQUEST)
+        # Initialize the serializer with the request data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Save the object while associating the BeneficiaryRequest
+        serializer.save(beneficiary_request=beneficiary_request)
+
+        # Customize the response
+        return Response(
+            {
+                "message": "Beneficiary request onetime created successfully!",
+                "data": serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiarySingleRequestRecurringSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Extract the 'pk' from the URL
+        beneficiary = self.kwargs.get('pk')
+        beneficiary_request_pk = self.kwargs.get('request_pk')
+        try:
+            # Get the parent BeneficiaryRequest object
+            beneficiary_request = BeneficiaryRequest.objects.get(pk=beneficiary_request_pk)
+            if beneficiary_request.beneficiary_user_registration != BeneficiaryUserRegistration.objects.get(pk=beneficiary):
+                return Response({"error": "This request does not belong to the specified beneficiary."}, status=status.HTTP_400_BAD_REQUEST)
+        except BeneficiaryRequest.DoesNotExist:
+            return Response({"error": "BeneficiaryRequest not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if BeneficiaryRequestDurationRecurring.objects.filter(beneficiary_request=beneficiary_request).exists():
+            return Response({"error": "This request already has a recurring duration."}, status=status.HTTP_400_BAD_REQUEST)
+        # Initialize the serializer with the request data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Save the object while associating the BeneficiaryRequest
+        serializer.save(beneficiary_request=beneficiary_request)
+
+        # Customize the response
+        return Response(
+            {
+                "message": "Beneficiary request recurring created successfully!",
+                "data": serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
