@@ -13,11 +13,13 @@ from .serializers import (BeneficiaryUserSerializer,
                           BeneficiarySingleRequestRecurringSerializer,
                           BeneficiaryRequestGetSerializer,
                           UpdateOnetimeSerializer,
-                          UpdateRecurringSerializer,)
+                          UpdateRecurringSerializer,
+                          BeneficiaryRequestChildGetSerializer,)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
-                            BeneficiaryRequestDurationRecurring,)
+                            BeneficiaryRequestDurationRecurring,
+                            BeneficiaryRequestChild,)
 from user.api.permissions import IsCertainBeneficiary
 
 class BeneficiaryUserView(APIView):
@@ -235,5 +237,26 @@ class BeneficiaryUpdateRecurringView(generics.UpdateAPIView):
 
         # Save with validated data + beneficiary_request relation
         serializer.save(beneficiary_request=beneficiary_request)
+
+class BeneficiarySingleRequestChildsGetView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestChildGetSerializer
+
+    def get_queryset(self):
+        # Get the 'pk' from the URL
+        beneficiary_request = self.kwargs.get('request_pk')
+
+        # Filter requests based on beneficiary
+        return BeneficiaryRequestChild.objects.filter(
+            beneficiary_request=beneficiary_request
+        )
+    
+class BeneficiarySingleChildGetView(generics.RetrieveAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestChildGetSerializer
+
+    def get_object(self):
+        request_pk = self.kwargs.get('request_pk')
+        return get_object_or_404(BeneficiaryRequestChild, pk=request_pk)
 
 

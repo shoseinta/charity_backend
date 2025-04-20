@@ -80,6 +80,11 @@ class BeneficiaryRequestChildSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequestChild
         exclude = ['beneficiary_request']
 
+class BeneficiaryRequestChildGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestChild
+        fields = '__all__'
+
 class BeneficiaryRequestOnetimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestDurationOnetime
