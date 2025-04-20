@@ -6,6 +6,7 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from beneficiary.models import BeneficiaryUserRegistration
 from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestSerializer,
@@ -205,9 +206,7 @@ class BeneficiaryUpdateSingleRequestView(generics.UpdateAPIView, generics.Destro
 
         self.check_object_permissions(self.request, obj)
         return obj
-    
-from rest_framework.exceptions import PermissionDenied
-from django.http import Http404
+
 
 class BeneficiaryUpdateOnetimeView(generics.UpdateAPIView):
     permission_classes = [IsCertainBeneficiary]
@@ -272,3 +271,16 @@ class BeneficiaryChildCreateView(generics.CreateAPIView):
         # Save the BeneficiaryRequest with the associated beneficiary and processing stage
         serializer.save(beneficiary_request=beneficiary_request, beneficiary_request_child_processing_stage=submitted)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class BeneficiarySingleChildUpdateView(generics.UpdateAPIView, generics.DestroyAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestChildCreateSerializer
+
+    def get_object(self):
+        obj = get_object_or_404(BeneficiaryRequestChild, pk=self.kwargs.get('request_pk'))
+
+        if obj.beneficiary_request_child_processing_stage.beneficiary_request_processing_stage_name.lower() != "submitted":
+            raise PermissionDenied("You can only update or delete a request in the 'submitted' stage.")
+
+        self.check_object_permissions(self.request, obj)
+        return obj
