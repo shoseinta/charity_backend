@@ -80,6 +80,11 @@ class BeneficiaryRequestChildSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequestChild
         exclude = ['beneficiary_request']
 
+class BeneficiaryRequestChildCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestChild
+        exclude = ['beneficiary_request', 'beneficiary_request_child_processing_stage']
+
 class BeneficiaryRequestChildGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestChild

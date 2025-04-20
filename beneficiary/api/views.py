@@ -14,7 +14,8 @@ from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestGetSerializer,
                           UpdateOnetimeSerializer,
                           UpdateRecurringSerializer,
-                          BeneficiaryRequestChildGetSerializer,)
+                          BeneficiaryRequestChildGetSerializer,
+                          BeneficiaryRequestChildCreateSerializer)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
@@ -259,4 +260,15 @@ class BeneficiarySingleChildGetView(generics.RetrieveAPIView):
         request_pk = self.kwargs.get('request_pk')
         return get_object_or_404(BeneficiaryRequestChild, pk=request_pk)
 
+class BeneficiaryChildCreateView(generics.CreateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestChildCreateSerializer
 
+    def perform_create(self, serializer):
+        # Get the BeneficiaryRequest object or raise 404
+        pk = self.kwargs.get('request_pk')
+        beneficiary_request = get_object_or_404(BeneficiaryRequest, pk=pk)
+        submitted = BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted')
+        # Save the BeneficiaryRequest with the associated beneficiary and processing stage
+        serializer.save(beneficiary_request=beneficiary_request, beneficiary_request_child_processing_stage=submitted)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
