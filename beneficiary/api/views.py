@@ -179,3 +179,10 @@ class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
         )
 
 
+class BenefeciarySingleRequestGetView(generics.RetrieveAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestGetSerializer
+
+    def get_object(self):
+        request_pk = self.kwargs.get('request_pk')
+        return get_object_or_404(BeneficiaryRequest, pk=request_pk)
