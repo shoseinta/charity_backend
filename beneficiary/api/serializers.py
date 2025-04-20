@@ -4,6 +4,7 @@ from beneficiary.models import (
     BeneficiaryUserRegistration,
     BeneficiaryUserInformation,
     BeneficiaryUserAddress,
+    CharityAnnouncementToBeneficiary,
 )
 from request.models import (
     BeneficiaryRequest,
@@ -125,3 +126,8 @@ class UpdateRecurringSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestDurationRecurring
         fields = ['beneficiary_request_duration_recurring_limit']
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityAnnouncementToBeneficiary
+        exclude = ['beneficiary_user_registration']

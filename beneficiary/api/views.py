@@ -1,6 +1,5 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework import generics
 from rest_framework import status
@@ -17,13 +16,17 @@ from .serializers import (BeneficiaryUserSerializer,
                           UpdateRecurringSerializer,
                           BeneficiaryRequestChildGetSerializer,
                           BeneficiaryRequestChildCreateSerializer,
-                          BeneficiaryRequestHistorySerializer,)
+                          BeneficiaryRequestHistorySerializer,
+                          AnnouncementSerializer,
+                          BeneficiaryRequestAnnouncementSerializer,)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
                             BeneficiaryRequestDurationRecurring,
                             BeneficiaryRequestChild,
-                            BeneficiaryRequestHistory)
+                            BeneficiaryRequestHistory,
+                            CharityAnnouncementForRequest,)
+from beneficiary.models import CharityAnnouncementToBeneficiary
 from user.api.permissions import IsCertainBeneficiary
 
 class BeneficiaryUserView(APIView):
@@ -39,7 +42,7 @@ class BeneficiaryUserView(APIView):
         return Response(serializer.data)
 
 class BeneficiaryRequestView(generics.CreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestSerializer
 
     def perform_create(self, serializer):
@@ -307,3 +310,26 @@ class BeneficiarySingleHistoryGetView(generics.RetrieveAPIView):
     def get_object(self):
         request_pk = self.kwargs.get('request_pk')
         return get_object_or_404(BeneficiaryRequestHistory, pk=request_pk)
+
+class AnnouncementView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = AnnouncementSerializer
+    def get_queryset(self):
+        # Get the 'pk' from the URL
+        beneficiary = self.kwargs.get('pk')
+
+        # Filter requests based on beneficiary
+        return CharityAnnouncementToBeneficiary.objects.filter(
+            beneficiary_user_registration=beneficiary
+        )
+
+class AnnouncementRequestView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestAnnouncementSerializer
+
+    def get_queryset(self):
+        request_pk = self.kwargs.get('request_pk')
+
+        return CharityAnnouncementForRequest.objects.filter(
+            beneficiary_request=BeneficiaryRequest.objects.get(pk=request_pk)
+        )

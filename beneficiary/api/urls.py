@@ -15,7 +15,9 @@ from .views import (BeneficiaryUserView,
                     BeneficiaryChildCreateView,
                     BeneficiarySingleChildUpdateView,
                     BeneficiaryRequestHistoriesGetView,
-                    BeneficiarySingleHistoryGetView,)
+                    BeneficiarySingleHistoryGetView,
+                    AnnouncementView,
+                    AnnouncementRequestView,)
 from django.urls import path
 
 urlpatterns = [
@@ -37,5 +39,8 @@ urlpatterns = [
     path('beneficiary/<int:pk>/request-single-child-update/<int:request_pk>/', BeneficiarySingleChildUpdateView.as_view(), name='beneficiary_single_child_update'),
     path('beneficiary/<int:pk>/request-histories-get/<int:request_pk>/', BeneficiaryRequestHistoriesGetView.as_view(), name='beneficiary_request_histories_get'),
     path('beneficiary/<int:pk>/request-single-history-get/<int:request_pk>/', BeneficiarySingleHistoryGetView.as_view(), name='beneficiary_single_history_get'),
+    path('beneficiary/<int:pk>/announcement-get/', AnnouncementView.as_view(), name='beneficiary_request_announcement_get'),
+    path('beneficiary/<int:pk>/request-announcement-get/<int:request_pk>/', AnnouncementRequestView.as_view(), name='beneficiary_request_announcement_request_get'),
+
     
 ]
