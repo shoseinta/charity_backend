@@ -11,7 +11,9 @@ from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestSerializer,
                           BeneficiarySingleRequestOneTimeSerializer,
                           BeneficiarySingleRequestRecurringSerializer,
-                          BeneficiaryRequestGetSerializer,)
+                          BeneficiaryRequestGetSerializer,
+                          UpdateOnetimeSerializer,
+                          UpdateRecurringSerializer,)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
@@ -200,4 +202,38 @@ class BeneficiaryUpdateSingleRequestView(generics.UpdateAPIView, generics.Destro
 
         self.check_object_permissions(self.request, obj)
         return obj
+    
+from rest_framework.exceptions import PermissionDenied
+from django.http import Http404
+
+class BeneficiaryUpdateOnetimeView(generics.UpdateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = UpdateOnetimeSerializer
+    queryset = BeneficiaryRequestDurationOnetime.objects.all()
+    def perform_update(self, serializer):
+        request_pk = self.kwargs.get('request_pk')
+
+        try:
+            beneficiary_request = BeneficiaryRequestDurationOnetime.objects.get(pk=request_pk).beneficiary_request
+        except BeneficiaryRequestDurationOnetime.DoesNotExist:
+            raise Http404("BeneficiaryRequestDurationOnetime not found.")
+
+        # Save with validated data + beneficiary_request relation
+        serializer.save(beneficiary_request=beneficiary_request)
+
+class BeneficiaryUpdateRecurringView(generics.UpdateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = UpdateRecurringSerializer
+    queryset = BeneficiaryRequestDurationRecurring.objects.all()
+    def perform_update(self, serializer):
+        request_pk = self.kwargs.get('request_pk')
+
+        try:
+            beneficiary_request = BeneficiaryRequestDurationRecurring.objects.get(pk=request_pk).beneficiary_request
+        except BeneficiaryRequestDurationRecurring.DoesNotExist:
+            raise Http404("BeneficiaryRequestDurationRecurring not found.")
+
+        # Save with validated data + beneficiary_request relation
+        serializer.save(beneficiary_request=beneficiary_request)
+
 

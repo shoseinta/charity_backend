@@ -7,7 +7,9 @@ from .views import (BeneficiaryUserView,
                     BeneficiaryRequestCompletedGetView,
                     BeneficiaryRequestRejectedGetView,
                     BenefeciarySingleRequestGetView,
-                    BeneficiaryUpdateSingleRequestView,)
+                    BeneficiaryUpdateSingleRequestView,
+                    BeneficiaryUpdateOnetimeView,
+                    BeneficiaryUpdateRecurringView,)
 from django.urls import path
 
 urlpatterns = [
@@ -21,4 +23,6 @@ urlpatterns = [
     path('beneficiary/<int:pk>/request-rejected-get/', BeneficiaryRequestRejectedGetView.as_view(), name='beneficiary_request_rejected_get'),
     path('beneficiary/<int:pk>/request-single-get/<int:request_pk>/', BenefeciarySingleRequestGetView.as_view(), name='beneficiary_single_request_get'),
     path('beneficiary/<int:pk>/request-single-update/<int:request_pk>/', BeneficiaryUpdateSingleRequestView.as_view(), name='beneficiary_single_request_update'),
+    path('beneficiary/<int:pk>/request-single-update-onetime/<int:request_pk>/', BeneficiaryUpdateOnetimeView.as_view(), name='beneficiary_single_request_update_onetime'),
+    path('beneficiary/<int:pk>/request-single-update-recurring/<int:request_pk>/', BeneficiaryUpdateRecurringView.as_view(), name='beneficiary_single_request_update_recurring'),
 ]
