@@ -90,6 +90,21 @@ class BeneficiaryRequest(models.Model):
 
     def __str__(self):
         return f"Request #{self.beneficiary_request_id} - {self.beneficiary_request_title}"
+    
+    def save(self, *args, **kwargs):
+        # Check if the object already exists
+        if self.pk:
+            previous = BeneficiaryRequest.objects.get(pk=self.pk)
+            # If the duration object has changed
+            if previous.beneficiary_request_duration != self.beneficiary_request_duration:
+                # Delete associated one-time duration if exists
+                if hasattr(previous, 'beneficiary_request_duration_onetime'):
+                    previous.beneficiary_request_duration_onetime.delete()
+                # Delete associated recurring duration if exists
+                if hasattr(previous, 'beneficiary_request_duration_recurring'):
+                    previous.beneficiary_request_duration_recurring.delete()
+
+        super().save(*args, **kwargs)
 
 class BeneficiaryRequestDurationOnetime(models.Model):
     beneficiary_request_duration_onetime_id = models.AutoField(primary_key=True)

@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework import generics
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from beneficiary.models import BeneficiaryUserRegistration
 from .serializers import (BeneficiaryUserSerializer,
@@ -186,3 +187,17 @@ class BenefeciarySingleRequestGetView(generics.RetrieveAPIView):
     def get_object(self):
         request_pk = self.kwargs.get('request_pk')
         return get_object_or_404(BeneficiaryRequest, pk=request_pk)
+
+class BeneficiaryUpdateSingleRequestView(generics.UpdateAPIView, generics.DestroyAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestSerializer
+
+    def get_object(self):
+        obj = get_object_or_404(BeneficiaryRequest, pk=self.kwargs.get('request_pk'))
+
+        if obj.beneficiary_request_processing_stage.beneficiary_request_processing_stage_name.lower() != "submitted":
+            raise PermissionDenied("You can only update or delete a request in the 'submitted' stage.")
+
+        self.check_object_permissions(self.request, obj)
+        return obj
+
