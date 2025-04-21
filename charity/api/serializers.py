@@ -20,7 +20,8 @@ class BeneficiaryInformationSerializer(serializers.ModelSerializer):
                    "under_charity_support",
                    "first_name",
                    "last_name",
-                   "gender"]
+                   "gender",
+                   "birth_date"]
         
 class BeneficiaryAddressSerializer(serializers.ModelSerializer):
     class Meta:

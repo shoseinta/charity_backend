@@ -33,12 +33,99 @@ from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import Http404
+from rest_framework.filters import OrderingFilter
+
+from django.db.models import Q
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
+from rest_framework import generics
+from django.db.models import Q
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 
 class BeneficiaryListView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
-    queryset = BeneficiaryUserRegistration.objects.all()
     serializer_class = BeneficiaryListSerializer
+    queryset = BeneficiaryUserRegistration.objects.all()
+    
+    ordering_fields = [
+        'beneficiary_user_information__last_name',
+        'beneficiary_user_information__first_name'
+    ]
+    ordering = [
+        'beneficiary_user_information__last_name',
+        'beneficiary_user_information__first_name'
+    ]
+
+    def get_filtered_list(self, param_name):
+        """Extracts and cleans list parameters from query string (comma-separated or repeated)."""
+        raw_values = self.request.query_params.getlist(param_name)
+        combined = ','.join(raw_values)
+        return [val.strip() for val in combined.split(',') if val.strip()]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # --- Filtering parameters ---
+        genders = self.get_filtered_list('gender')
+        provinces = self.get_filtered_list('province')
+        tags = self.get_filtered_list('tag')
+        min_age = self.request.query_params.get('min_age')
+        max_age = self.request.query_params.get('max_age')
+
+        # --- Apply gender filter ---
+        if genders:
+            queryset = queryset.filter(
+                beneficiary_user_information__gender__in=genders
+            )
+
+        # --- Apply province filter ---
+        if provinces:
+            queryset = queryset.filter(
+                beneficiary_user_address__province_id__in=provinces
+            )
+
+        # --- Apply tag filter with OR condition ---
+        if tags:
+            tag_filter = Q()
+            for tag in tags:
+                tag_filter |= Q(
+                    beneficiary_user_additional_info__beneficiary_user_additional_info_title__icontains=tag
+                )
+            queryset = queryset.filter(tag_filter).distinct()
+
+        # --- Apply age filters ---
+        today = date.today()
+        if min_age:
+            try:
+                min_age = int(min_age)
+                max_birth_date = today - relativedelta(years=min_age)
+                queryset = queryset.filter(
+                    beneficiary_user_information__birth_date__lte=max_birth_date
+                )
+            except (ValueError, TypeError):
+                pass
+
+        if max_age:
+            try:
+                max_age = int(max_age)
+                min_birth_date = today - relativedelta(years=max_age)
+                queryset = queryset.filter(
+                    beneficiary_user_information__birth_date__gte=min_birth_date
+                )
+            except (ValueError, TypeError):
+                pass
+
+        # --- Optimize related queries ---
+        return queryset.select_related(
+            'beneficiary_user_information',
+            'beneficiary_user_address'
+        ).prefetch_related(
+            'beneficiary_user_additional_info'
+        )
+
 
 class BeneficiaryRequestCreateView(generics.CreateAPIView):
     permission_classes = [IsAdminOrCharity]
