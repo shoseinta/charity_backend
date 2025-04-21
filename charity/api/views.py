@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import generics,filters
 from beneficiary.models import (BeneficiaryUserRegistration,
                                 BeneficiaryUserInformation,
                                 BeneficiaryUserAddress,
@@ -43,12 +43,16 @@ from rest_framework import generics
 from django.db.models import Q
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from django.db.models import F, Case, When, Value, DateTimeField
+from django.db.models.functions import Coalesce
+from datetime import datetime
 
 
 class BeneficiaryListView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryListSerializer
     queryset = BeneficiaryUserRegistration.objects.all()
+    filter_backends = [filters.OrderingFilter]
     
     ordering_fields = [
         'beneficiary_user_information__last_name',
@@ -200,10 +204,85 @@ class BeneficiaryRequestChildCreate(generics.CreateAPIView):
             status=status.HTTP_201_CREATED
         )
     
+
 class BeneficiaryAllRequestsView(generics.ListAPIView):
-    permission_classes = [IsCertainBeneficiary]
+    permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
-    queryset = BeneficiaryRequest.objects.all()
+    filter_backends = [filters.OrderingFilter]
+
+    ordering_fields = [
+        'effective_date',
+        'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id'
+    ]
+    ordering = ['effective_date']
+
+    def get_queryset(self):
+        qs = BeneficiaryRequest.objects.all()
+
+        # Annotate effective date
+        qs = qs.annotate(
+            effective_date=Coalesce(
+                'beneficiary_request_date',
+                'beneficiary_request_created_at',
+                output_field=DateTimeField()
+            )
+        )
+
+        request = self.request
+        params = request.query_params
+
+        def get_list(param):
+            return [p.strip() for p in params.get(param, '').split(',') if p.strip()]
+
+        # Filtering
+        layer1_ids = get_list('layer1_id')
+        if layer1_ids:
+            qs = qs.filter(beneficiary_request_type_layer1__beneficiary_request_type_layer1_id__in=layer1_ids)
+
+        layer2_ids = get_list('layer2_id')
+        if layer2_ids:
+            qs = qs.filter(beneficiary_request_type_layer2__beneficiary_request_type_layer2_id__in=layer2_ids)
+
+        duration_ids = get_list('duration_id')
+        if duration_ids:
+            qs = qs.filter(beneficiary_request_duration__beneficiary_request_duration_id__in=duration_ids)
+
+        processing_stage_ids = get_list('processing_stage_id')
+        if processing_stage_ids:
+            qs = qs.filter(beneficiary_request_processing_stage__beneficiary_request_processing_stage_id__in=processing_stage_ids)
+
+        limits = get_list('limit')
+        if limits:
+            qs = qs.filter(beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__in=limits)
+
+        deadlines = get_list('deadline')
+        if deadlines:
+            try:
+                deadlines = [datetime.strptime(d, '%Y-%m-%d').date() for d in deadlines]
+                qs = qs.filter(beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__in=deadlines)
+            except ValueError:
+                pass  # ignore invalid date formats
+
+        # Effective date range
+        min_effective_date = params.get('min_effective_date')
+        max_effective_date = params.get('max_effective_date')
+
+        if min_effective_date:
+            try:
+                min_date = datetime.strptime(min_effective_date, '%Y-%m-%d')
+                qs = qs.filter(effective_date__gte=min_date)
+            except ValueError:
+                pass
+
+        if max_effective_date:
+            try:
+                max_date = datetime.strptime(max_effective_date, '%Y-%m-%d')
+                qs = qs.filter(effective_date__lte=max_date)
+            except ValueError:
+                pass
+
+        return qs
+
 
 class BeneficiaryRequestOnetimeCreationView(generics.CreateAPIView):
     permission_classes = [IsAdminOrCharity]
@@ -266,43 +345,127 @@ class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED
         )
 
-class BeneficiaryNewRequestGetView(generics.ListAPIView):
+class BeneficiaryRequestFilterMixin:
+    def apply_filters(self, queryset):
+        params = self.request.query_params
+
+        def get_list(param):
+            return [p.strip() for p in params.get(param, '').split(',') if p.strip()]
+
+        # Filtering
+        layer1_ids = get_list('layer1_id')
+        if layer1_ids:
+            queryset = queryset.filter(beneficiary_request_type_layer1__beneficiary_request_type_layer1_id__in=layer1_ids)
+
+        layer2_ids = get_list('layer2_id')
+        if layer2_ids:
+            queryset = queryset.filter(beneficiary_request_type_layer2__beneficiary_request_type_layer2_id__in=layer2_ids)
+
+        duration_ids = get_list('duration_id')
+        if duration_ids:
+            queryset = queryset.filter(beneficiary_request_duration__beneficiary_request_duration_id__in=duration_ids)
+
+        processing_stage_ids = get_list('processing_stage_id')
+        if processing_stage_ids:
+            queryset = queryset.filter(beneficiary_request_processing_stage__beneficiary_request_processing_stage_id__in=processing_stage_ids)
+
+        limits = get_list('limit')
+        if limits:
+            queryset = queryset.filter(beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__in=limits)
+
+        deadlines = get_list('deadline')
+        if deadlines:
+            try:
+                from datetime import datetime
+                deadlines = [datetime.strptime(d, '%Y-%m-%d').date() for d in deadlines]
+                queryset = queryset.filter(beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__in=deadlines)
+            except ValueError:
+                pass
+
+        # Effective date range
+        min_effective_date = params.get('min_effective_date')
+        max_effective_date = params.get('max_effective_date')
+
+        if min_effective_date:
+            try:
+                min_date = datetime.strptime(min_effective_date, '%Y-%m-%d')
+                queryset = queryset.filter(effective_date__gte=min_date)
+            except ValueError:
+                pass
+
+        if max_effective_date:
+            try:
+                max_date = datetime.strptime(max_effective_date, '%Y-%m-%d')
+                queryset = queryset.filter(effective_date__lte=max_date)
+            except ValueError:
+                pass
+
+        return queryset
+
+class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
-    queryset = BeneficiaryRequest.objects.filter(
-    beneficiary_request_processing_stage__in=[
-        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'submitted'),
-        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'pending_review'),
-        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'under_evaluation'),
-    ]
-)
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
+    ordering = ['effective_date']
+
+    def get_queryset(self):
+        base_qs = BeneficiaryRequest.objects.annotate(
+            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+        ).filter(
+            beneficiary_request_processing_stage__in=[
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted'),
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='pending_review'),
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='under_evaluation'),
+            ]
+        )
+        return self.apply_filters(base_qs)
+
     
-class BeneficiaryOldRequestOnetimeGetView(generics.ListAPIView):
+class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
-    queryset = BeneficiaryRequest.objects.filter(
-    beneficiary_request_processing_stage__in=[
-        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'approved'),
-        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'in_progress'),
-    ],
-    beneficiary_request_duration__in=[
-        BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name = 'one_time')
-    ]
-)
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
+    ordering = ['effective_date']
+
+    def get_queryset(self):
+        base_qs = BeneficiaryRequest.objects.annotate(
+            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+        ).filter(
+            beneficiary_request_processing_stage__in=[
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
+            ],
+            beneficiary_request_duration__in=[
+                BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time')
+            ]
+        )
+        return self.apply_filters(base_qs)
+
     
-class BeneficiaryOldRequestOngoingGetView(generics.ListAPIView):
+class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
-    queryset = BeneficiaryRequest.objects.filter(
-    beneficiary_request_processing_stage__in=[
-        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'approved'),
-        BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name = 'in_progress'),
-    ],
-    beneficiary_request_duration__in=[
-        BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name = 'recurring'),
-        BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name = 'permanent')
-    ]
-)
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
+    ordering = ['effective_date']
+
+    def get_queryset(self):
+        base_qs = BeneficiaryRequest.objects.annotate(
+            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+        ).filter(
+            beneficiary_request_processing_stage__in=[
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
+            ],
+            beneficiary_request_duration__in=[
+                BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'),
+                BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='permanent'),
+            ]
+        )
+        return self.apply_filters(base_qs)
+
     
 class SingleRequestGetView(generics.RetrieveAPIView):
     permission_classes = [IsAdminOrCharity]
