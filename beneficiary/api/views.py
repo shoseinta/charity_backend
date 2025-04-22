@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from rest_framework import generics
+from rest_framework import generics, filters
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
@@ -28,19 +28,24 @@ from request.models import (BeneficiaryRequestProcessingStage,
                             CharityAnnouncementForRequest,)
 from beneficiary.models import CharityAnnouncementToBeneficiary
 from user.api.permissions import IsCertainBeneficiary
+from django.db.models.functions import Coalesce
+from django.db.models import F, Case, When, Value, DateTimeField
 
 class BeneficiaryAllRequestsGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestGetSerializer
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
+    ordering = ['effective_date']
 
     def get_queryset(self):
-        # Get the 'pk' from the URL
-        beneficiary = self.kwargs.get('pk')
-
-        # Filter requests based on beneficiary
-        return BeneficiaryRequest.objects.filter(
-            beneficiary_user_registration=beneficiary
+        base_qs = BeneficiaryRequest.objects.annotate(
+            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+        ).filter(
+            beneficiary_user_registration=self.kwargs.get('pk')
         )
+        return self.apply_filters(base_qs)
+
 
 class BeneficiaryUserView(APIView):
     permission_classes = [IsCertainBeneficiary]
@@ -138,70 +143,72 @@ class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
 class BeneficiaryRequestInitialStagesGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestGetSerializer
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date']
+    ordering = ['effective_date']
 
     def get_queryset(self):
-        # Get the 'pk' from the URL
-        beneficiary = self.kwargs.get('pk')
-
-        # Define the target processing stage names
         target_stages = ['submitted', 'pending_review', 'under_evaluation']
-
-        # Filter requests based on beneficiary and target processing stages
-        return BeneficiaryRequest.objects.filter(
-            beneficiary_user_registration__pk=beneficiary,
+        base_qs = BeneficiaryRequest.objects.annotate(
+            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+        ).filter(
+            beneficiary_user_registration=self.kwargs.get('pk'),
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
+        return self.apply_filters(base_qs)
     
 class BeneficiaryRequestInProgressGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestGetSerializer
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date']
+    ordering = ['effective_date']
 
     def get_queryset(self):
-        # Get the 'pk' from the URL
-        beneficiary = self.kwargs.get('pk')
-
-        # Define the target processing stage names
         target_stages = ['approved', 'in_progress']
-
-        # Filter requests based on beneficiary and target processing stages
-        return BeneficiaryRequest.objects.filter(
-            beneficiary_user_registration__pk=beneficiary,
+        base_qs = BeneficiaryRequest.objects.annotate(
+            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+        ).filter(
+            beneficiary_user_registration=self.kwargs.get('pk'),
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
+        return self.apply_filters(base_qs)
     
 class BeneficiaryRequestCompletedGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestGetSerializer
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date']
+    ordering = ['effective_date']
 
     def get_queryset(self):
-        # Get the 'pk' from the URL
-        beneficiary = self.kwargs.get('pk')
-
-        # Define the target processing stage names
         target_stages = ['completed']
-
-        # Filter requests based on beneficiary and target processing stages
-        return BeneficiaryRequest.objects.filter(
-            beneficiary_user_registration__pk=beneficiary,
+        base_qs = BeneficiaryRequest.objects.annotate(
+            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+        ).filter(
+            beneficiary_user_registration=self.kwargs.get('pk'),
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
+        return self.apply_filters(base_qs)
+
     
 class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestGetSerializer
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date']
+    ordering = ['effective_date']
 
     def get_queryset(self):
-        # Get the 'pk' from the URL
-        beneficiary = self.kwargs.get('pk')
-
-        # Define the target processing stage names
         target_stages = ['rejected']
-
-        # Filter requests based on beneficiary and target processing stages
-        return BeneficiaryRequest.objects.filter(
-            beneficiary_user_registration__pk=beneficiary,
+        base_qs = BeneficiaryRequest.objects.annotate(
+            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+        ).filter(
+            beneficiary_user_registration=self.kwargs.get('pk'),
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
+        return self.apply_filters(base_qs)
+
 
 
 class BenefeciarySingleRequestGetView(generics.RetrieveAPIView):
