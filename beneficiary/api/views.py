@@ -29,6 +29,19 @@ from request.models import (BeneficiaryRequestProcessingStage,
 from beneficiary.models import CharityAnnouncementToBeneficiary
 from user.api.permissions import IsCertainBeneficiary
 
+class BeneficiaryAllRequestsGetView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestGetSerializer
+
+    def get_queryset(self):
+        # Get the 'pk' from the URL
+        beneficiary = self.kwargs.get('pk')
+
+        # Filter requests based on beneficiary
+        return BeneficiaryRequest.objects.filter(
+            beneficiary_user_registration=beneficiary
+        )
+
 class BeneficiaryUserView(APIView):
     permission_classes = [IsCertainBeneficiary]
 

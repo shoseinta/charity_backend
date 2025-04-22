@@ -17,7 +17,8 @@ from .views import (BeneficiaryUserView,
                     BeneficiaryRequestHistoriesGetView,
                     BeneficiarySingleHistoryGetView,
                     AnnouncementView,
-                    AnnouncementRequestView,)
+                    AnnouncementRequestView,
+                    BeneficiaryAllRequestsGetView,)
 from django.urls import path
 
 urlpatterns = [
@@ -25,6 +26,7 @@ urlpatterns = [
     path('beneficiary/<int:pk>/request-create/', BeneficiaryRequestView.as_view(), name='beneficiary_request_create'),
     path('beneficiary/<int:pk>/request-create-onetime/<int:request_pk>/', BeneficiaryRequestOnetimeCreationView.as_view(), name='beneficiary_request_create_onetime'),
     path('beneficiary/<int:pk>/request-create-recurring/<int:request_pk>/', BeneficiaryRequestRecurringCreationView.as_view(), name='beneficiary_request_create_recurring'),
+    path('beneficiary/<int:pk>/request-all-get/', BeneficiaryAllRequestsGetView.as_view(), name='beneficiary_request_all_get'),
     path('beneficiary/<int:pk>/request-initial-stages-get/', BeneficiaryRequestInitialStagesGetView.as_view(), name='beneficiary_request_initial_stages_get'),
     path('beneficiary/<int:pk>/request-in-progress-get/', BeneficiaryRequestInProgressGetView.as_view(), name='beneficiary_request_in_progress_get'),
     path('beneficiary/<int:pk>/request-completed-get/', BeneficiaryRequestCompletedGetView.as_view(), name='beneficiary_request_completed_get'),
