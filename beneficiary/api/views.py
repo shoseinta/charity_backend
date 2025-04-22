@@ -44,7 +44,7 @@ class BeneficiaryAllRequestsGetView(generics.ListAPIView):
         ).filter(
             beneficiary_user_registration=self.kwargs.get('pk')
         )
-        return self.apply_filters(base_qs)
+        return base_qs
 
 
 class BeneficiaryUserView(APIView):
@@ -155,7 +155,7 @@ class BeneficiaryRequestInitialStagesGetView(generics.ListAPIView):
             beneficiary_user_registration=self.kwargs.get('pk'),
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
-        return self.apply_filters(base_qs)
+        return base_qs
     
 class BeneficiaryRequestInProgressGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
@@ -172,7 +172,7 @@ class BeneficiaryRequestInProgressGetView(generics.ListAPIView):
             beneficiary_user_registration=self.kwargs.get('pk'),
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
-        return self.apply_filters(base_qs)
+        return base_qs
     
 class BeneficiaryRequestCompletedGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
@@ -189,7 +189,7 @@ class BeneficiaryRequestCompletedGetView(generics.ListAPIView):
             beneficiary_user_registration=self.kwargs.get('pk'),
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
-        return self.apply_filters(base_qs)
+        return base_qs
 
     
 class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
@@ -207,7 +207,7 @@ class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
             beneficiary_user_registration=self.kwargs.get('pk'),
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
-        return self.apply_filters(base_qs)
+        return base_qs
 
 
 
