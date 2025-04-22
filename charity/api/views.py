@@ -352,40 +352,75 @@ class BeneficiaryRequestFilterMixin:
         def get_list(param):
             return [p.strip() for p in params.get(param, '').split(',') if p.strip()]
 
-        # Filtering
+        from datetime import datetime
+
+        # Filtering for ID fields
         layer1_ids = get_list('layer1_id')
         if layer1_ids:
-            queryset = queryset.filter(beneficiary_request_type_layer1__beneficiary_request_type_layer1_id__in=layer1_ids)
+            queryset = queryset.filter(
+                beneficiary_request_type_layer1__beneficiary_request_type_layer1_id__in=layer1_ids
+            )
 
         layer2_ids = get_list('layer2_id')
         if layer2_ids:
-            queryset = queryset.filter(beneficiary_request_type_layer2__beneficiary_request_type_layer2_id__in=layer2_ids)
+            queryset = queryset.filter(
+                beneficiary_request_type_layer2__beneficiary_request_type_layer2_id__in=layer2_ids
+            )
 
         duration_ids = get_list('duration_id')
         if duration_ids:
-            queryset = queryset.filter(beneficiary_request_duration__beneficiary_request_duration_id__in=duration_ids)
+            queryset = queryset.filter(
+                beneficiary_request_duration__beneficiary_request_duration_id__in=duration_ids
+            )
 
         processing_stage_ids = get_list('processing_stage_id')
         if processing_stage_ids:
-            queryset = queryset.filter(beneficiary_request_processing_stage__beneficiary_request_processing_stage_id__in=processing_stage_ids)
+            queryset = queryset.filter(
+                beneficiary_request_processing_stage__beneficiary_request_processing_stage_id__in=processing_stage_ids
+            )
 
-        limits = get_list('limit')
-        if limits:
-            queryset = queryset.filter(beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__in=limits)
-
-        deadlines = get_list('deadline')
-        if deadlines:
+        # Range filtering for recurring limit
+        limit_min = params.get('limit_min')
+        limit_max = params.get('limit_max')
+        if limit_min:
             try:
-                from datetime import datetime
-                deadlines = [datetime.strptime(d, '%Y-%m-%d').date() for d in deadlines]
-                queryset = queryset.filter(beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__in=deadlines)
+                queryset = queryset.filter(
+                    beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__gte=int(limit_min)
+                )
+            except ValueError:
+                pass
+        if limit_max:
+            try:
+                queryset = queryset.filter(
+                    beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__lte=int(limit_max)
+                )
             except ValueError:
                 pass
 
-        # Effective date range
+        # Range filtering for onetime deadline
+        deadline_min = params.get('deadline_min')
+        deadline_max = params.get('deadline_max')
+        if deadline_min:
+            try:
+                min_date = datetime.strptime(deadline_min, '%Y-%m-%d').date()
+                queryset = queryset.filter(
+                    beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__gte=min_date
+                )
+            except ValueError:
+                pass
+
+        if deadline_max:
+            try:
+                max_date = datetime.strptime(deadline_max, '%Y-%m-%d').date()
+                queryset = queryset.filter(
+                    beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__lte=max_date
+                )
+            except ValueError:
+                pass
+
+        # Range filtering for effective date
         min_effective_date = params.get('min_effective_date')
         max_effective_date = params.get('max_effective_date')
-
         if min_effective_date:
             try:
                 min_date = datetime.strptime(min_effective_date, '%Y-%m-%d')
@@ -401,6 +436,7 @@ class BeneficiaryRequestFilterMixin:
                 pass
 
         return queryset
+
 
 class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
