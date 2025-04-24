@@ -154,4 +154,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
+# settings.py
+
+MEILISEARCH_URL = "http://127.0.0.1:7700"
+MEILISEARCH_MASTER_KEY = "search-master-key"
+
  

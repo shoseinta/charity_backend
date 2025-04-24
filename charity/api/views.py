@@ -46,14 +46,15 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import F, Case, When, Value, DateTimeField
 from django.db.models.functions import Coalesce
 from datetime import datetime
+import meilisearch
 
+client = meilisearch.Client("http://127.0.0.1:7700", 'search-master-key')
 
 class BeneficiaryListView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryListSerializer
-    queryset = BeneficiaryUserRegistration.objects.all()
     filter_backends = [filters.OrderingFilter]
-    
+
     ordering_fields = [
         'beneficiary_user_information__last_name',
         'beneficiary_user_information__first_name'
@@ -64,34 +65,40 @@ class BeneficiaryListView(generics.ListAPIView):
     ]
 
     def get_filtered_list(self, param_name):
-        """Extracts and cleans list parameters from query string (comma-separated or repeated)."""
         raw_values = self.request.query_params.getlist(param_name)
         combined = ','.join(raw_values)
         return [val.strip() for val in combined.split(',') if val.strip()]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        search_query = self.request.query_params.get("search")
+        queryset = BeneficiaryUserRegistration.objects.all()
 
-        # --- Filtering parameters ---
+        # If there's a search term, use MeiliSearch first
+        if search_query:
+            try:
+                results = client.index("beneficiaries").search(search_query)
+                matching_ids = [int(hit["id"]) for hit in results["hits"]]
+                queryset = queryset.filter(beneficiary_user_registration_id__in=matching_ids)
+            except Exception as e:
+                pass  # Fallback to regular query on error
+
+        # Filtering logic
         genders = self.get_filtered_list('gender')
         provinces = self.get_filtered_list('province')
         tags = self.get_filtered_list('tag')
         min_age = self.request.query_params.get('min_age')
         max_age = self.request.query_params.get('max_age')
 
-        # --- Apply gender filter ---
         if genders:
             queryset = queryset.filter(
                 beneficiary_user_information__gender__in=genders
             )
 
-        # --- Apply province filter ---
         if provinces:
             queryset = queryset.filter(
                 beneficiary_user_address__province_id__in=provinces
             )
 
-        # --- Apply tag filter with OR condition ---
         if tags:
             tag_filter = Q()
             for tag in tags:
@@ -100,7 +107,6 @@ class BeneficiaryListView(generics.ListAPIView):
                 )
             queryset = queryset.filter(tag_filter).distinct()
 
-        # --- Apply age filters ---
         today = date.today()
         if min_age:
             try:
@@ -122,7 +128,6 @@ class BeneficiaryListView(generics.ListAPIView):
             except (ValueError, TypeError):
                 pass
 
-        # --- Optimize related queries ---
         return queryset.select_related(
             'beneficiary_user_information',
             'beneficiary_user_address'
