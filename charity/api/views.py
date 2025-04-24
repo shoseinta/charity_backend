@@ -50,6 +50,20 @@ import meilisearch
 
 client = meilisearch.Client("http://127.0.0.1:7700", 'search-master-key')
 
+class MeiliSearchRequestMixin:
+    def meili_filtered_queryset(self, base_queryset):
+        search_query = self.request.query_params.get("search")
+        if not search_query:
+            return base_queryset
+
+        try:
+            results = client.index("requests").search(search_query)
+            ids = [int(hit["id"]) for hit in results.get("hits", [])]
+            return base_queryset.filter(pk__in=ids)
+        except Exception:
+            return base_queryset  # fallback on failure
+
+
 class BeneficiaryListView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryListSerializer
@@ -210,7 +224,7 @@ class BeneficiaryRequestChildCreate(generics.CreateAPIView):
         )
     
 
-class BeneficiaryAllRequestsView(generics.ListAPIView):
+class BeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
     filter_backends = [filters.OrderingFilter]
@@ -285,7 +299,8 @@ class BeneficiaryAllRequestsView(generics.ListAPIView):
                 qs = qs.filter(effective_date__lte=max_date)
             except ValueError:
                 pass
-
+        
+        qs = self.meili_filtered_queryset(qs)
         return qs
 
 
@@ -443,7 +458,7 @@ class BeneficiaryRequestFilterMixin:
         return queryset
 
 
-class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, generics.ListAPIView):
+class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, MeiliSearchRequestMixin, generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
     filter_backends = [filters.OrderingFilter]
@@ -460,10 +475,11 @@ class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, generics.ListA
                 BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='under_evaluation'),
             ]
         )
+        base_qs = self.meili_filtered_queryset(base_qs)
         return self.apply_filters(base_qs)
 
     
-class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, generics.ListAPIView):
+class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, MeiliSearchRequestMixin, generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
     filter_backends = [filters.OrderingFilter]
@@ -482,10 +498,11 @@ class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, generic
                 BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time')
             ]
         )
+        base_qs = self.meili_filtered_queryset(base_qs)
         return self.apply_filters(base_qs)
 
     
-class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, generics.ListAPIView):
+class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, MeiliSearchRequestMixin, generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
     filter_backends = [filters.OrderingFilter]
@@ -505,6 +522,7 @@ class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, generic
                 BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='permanent'),
             ]
         )
+        base_qs = self.meili_filtered_queryset(base_qs)
         return self.apply_filters(base_qs)
 
     
