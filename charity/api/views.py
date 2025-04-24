@@ -677,3 +677,27 @@ class BeneficiaryAnnouncementUpdateView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CharityAnnouncementToBeneficiarySerializer
     queryset = CharityAnnouncementToBeneficiary.objects.all()
     lookup_field = 'pk'
+
+class SingleRequestHistoriesView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = SingleRequestHistorySerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        try:
+            single_request = BeneficiaryRequest.objects.get(pk=pk)
+            return BeneficiaryRequestHistory.objects.filter(beneficiary_request=single_request)
+        except BeneficiaryRequest.DoesNotExist:
+            raise Http404("BeneficiaryRequest does not exist")
+        
+class SingleRequestChildsView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = SingleRequestChildSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        try:
+            single_request = BeneficiaryRequest.objects.get(pk=pk)
+            return BeneficiaryRequestChild.objects.filter(beneficiary_request=single_request)
+        except BeneficiaryRequest.DoesNotExist:
+            raise Http404("BeneficiaryRequest does not exist")
