@@ -3,7 +3,9 @@ from beneficiary.models import (BeneficiaryUserRegistration,
                                 BeneficiaryUserInformation,
                                 BeneficiaryUserAddress,
                                 BeneficiaryUserAdditionalInfo,
-                                CharityAnnouncementToBeneficiary,)
+                                CharityAnnouncementToBeneficiary,
+                                Province,
+                                City,)
 from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestHistory,
                             BeneficiaryRequestChild,
@@ -12,6 +14,16 @@ from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestDuration,
                             CharityAnnouncementForRequest,)
 import re
+
+class BenefciaryProvinceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Province
+        fields = ['province_name']
+
+class BeneficiaryCitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ['city_name', 'province']
 
 class BeneficiaryInformationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,6 +36,9 @@ class BeneficiaryInformationSerializer(serializers.ModelSerializer):
                    "birth_date"]
         
 class BeneficiaryAddressSerializer(serializers.ModelSerializer):
+    province = BenefciaryProvinceSerializer()
+    city = BeneficiaryCitySerializer()
+    
     class Meta:
         model = BeneficiaryUserAddress
         fields = ["beneficiary_user_address_id",
@@ -169,12 +184,8 @@ class BeneficiaryRequestAnnouncementSerializer(serializers.ModelSerializer):
         model = CharityAnnouncementForRequest
         fields = '__all__'
 
-class BeneficiaryRequestAnnouncementUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CharityAnnouncementForRequest
-        exclude = ['beneficiary_request']
-
 class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
+    beneficiary_user_registration = BeneficiaryListSerializer()
     beneficiary_request_history = BeneficiaryRequestHistorySerializer(many=True)
     beneficiary_request_child = BeneficiaryChildRequestSerializer(many=True)
     beneficiary_request_duration_onetime = BeneficiaryRequestOneTimeSerializer()
@@ -183,6 +194,12 @@ class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequest
         fields = '__all__'
+
+class BeneficiaryRequestAnnouncementUpdateSerializer(serializers.ModelSerializer):
+    beneficiary_request = BeneficiaryGetRequestSerializer()
+    class Meta:
+        model = CharityAnnouncementForRequest
+        fields = '__all__'
         
 class BeneficiaryRequestChangeProcessingStageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -190,6 +207,7 @@ class BeneficiaryRequestChangeProcessingStageSerializer(serializers.ModelSeriali
         fields = ['beneficiary_request_processing_stage']
 
 class BeneficiaryUpdateRequestSerializer(serializers.ModelSerializer):
+    beneficiary_user_registration = BeneficiaryListSerializer()
     class Meta:
         model = BeneficiaryRequest
         fields = '__all__'
@@ -214,14 +232,16 @@ class BeneficiaryListSingleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SingleRequestHistorySerializer(serializers.ModelSerializer):
+    beneficiary_request = BeneficiaryGetRequestSerializer()
     class Meta:
         model = BeneficiaryRequestHistory
-        exclude = ['beneficiary_request']
+        fields = '__all__'
 
 class SingleRequestChildSerializer(serializers.ModelSerializer):
+    beneficiary_request = BeneficiaryGetRequestSerializer()
     class Meta:
         model = BeneficiaryRequestChild
-        exclude = ['beneficiary_request']
+        fields = '__all__'
 
 
 class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):

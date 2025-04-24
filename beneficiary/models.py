@@ -56,8 +56,8 @@ class BeneficiaryUserInformation(models.Model):
 
 class BeneficiaryUserAddress(models.Model):
     beneficiary_user_address_id = models.AutoField(primary_key=True)
-    province = models.ForeignKey(Province, on_delete=models.SET_NULL, blank=True, null=True)
-    city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True)
+    province = models.ForeignKey(Province, on_delete=models.SET_NULL, blank=True, null=True, related_name='beneficiary_province')
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True, related_name='beneficiary_city')
     neighborhood = models.CharField(max_length=255, blank=True, null=True)
     street = models.CharField(max_length=255, blank=True, null=True)
     alley = models.CharField(max_length=255, blank=True, null=True)

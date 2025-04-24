@@ -96,7 +96,7 @@ class BeneficiaryListView(generics.ListAPIView):
 
         if provinces:
             queryset = queryset.filter(
-                beneficiary_user_address__province_id__in=provinces
+                beneficiary_user_address__province__province_name__in=provinces
             )
 
         if tags:
