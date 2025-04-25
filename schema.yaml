@@ -3916,8 +3916,6 @@ components:
         charity_announcement_for_request_id:
           type: integer
           readOnly: true
-        beneficiary_request:
-          $ref: '#/components/schemas/BeneficiaryGetRequest'
         charity_announcement_for_request_title:
           type: string
           maxLength: 255
@@ -3933,7 +3931,6 @@ components:
           format: date-time
           readOnly: true
       required:
-      - beneficiary_request
       - charity_announcement_for_request_created_at
       - charity_announcement_for_request_id
       - charity_announcement_for_request_title
@@ -5056,8 +5053,6 @@ components:
         charity_announcement_for_request_id:
           type: integer
           readOnly: true
-        beneficiary_request:
-          $ref: '#/components/schemas/BeneficiaryGetRequest'
         charity_announcement_for_request_title:
           type: string
           maxLength: 255
@@ -5211,8 +5206,6 @@ components:
         beneficiary_request_child_id:
           type: integer
           readOnly: true
-        beneficiary_request:
-          $ref: '#/components/schemas/BeneficiaryGetRequest'
         beneficiary_request_child_description:
           type: string
         beneficiary_request_child_document:
@@ -5243,8 +5236,6 @@ components:
         beneficiary_request_history_id:
           type: integer
           readOnly: true
-        beneficiary_request:
-          $ref: '#/components/schemas/BeneficiaryGetRequest'
         beneficiary_request_history_title:
           type: string
           maxLength: 255
@@ -5341,8 +5332,6 @@ components:
         beneficiary_request_child_id:
           type: integer
           readOnly: true
-        beneficiary_request:
-          $ref: '#/components/schemas/BeneficiaryGetRequest'
         beneficiary_request_child_description:
           type: string
         beneficiary_request_child_document:
@@ -5368,7 +5357,6 @@ components:
         beneficiary_request_child_processing_stage:
           type: integer
       required:
-      - beneficiary_request
       - beneficiary_request_child_created_at
       - beneficiary_request_child_description
       - beneficiary_request_child_id
@@ -5380,8 +5368,6 @@ components:
         beneficiary_request_history_id:
           type: integer
           readOnly: true
-        beneficiary_request:
-          $ref: '#/components/schemas/BeneficiaryGetRequest'
         beneficiary_request_history_title:
           type: string
           maxLength: 255
@@ -5408,7 +5394,6 @@ components:
           format: date-time
           readOnly: true
       required:
-      - beneficiary_request
       - beneficiary_request_history_created_at
       - beneficiary_request_history_description
       - beneficiary_request_history_id

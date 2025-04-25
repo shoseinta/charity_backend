@@ -206,10 +206,9 @@ class BeneficiaryRequestChangeProcessingStageSerializer(serializers.ModelSeriali
         fields = ['beneficiary_request_processing_stage']
 
 class BeneficiaryUpdateRequestSerializer(serializers.ModelSerializer):
-    beneficiary_user_registration = BeneficiaryListSerializer()
     class Meta:
         model = BeneficiaryRequest
-        fields = '__all__'
+        exclude = ['beneficiary_user_registration']
     def validate(self, data):
         layer1 = data.get('beneficiary_request_type_layer1')
         layer2 = data.get('beneficiary_request_type_layer2')
