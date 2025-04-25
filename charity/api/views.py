@@ -47,6 +47,8 @@ from django.db.models import F, Case, When, Value, DateTimeField
 from django.db.models.functions import Coalesce
 from datetime import datetime
 import meilisearch
+from core.cache_manager import GlobalCacheManager
+
 
 client = meilisearch.Client("http://127.0.0.1:7700", 'search-master-key')
 
@@ -63,20 +65,14 @@ class MeiliSearchRequestMixin:
         except Exception:
             return base_queryset  # fallback on failure
 
+client = meilisearch.Client("http://127.0.0.1:7700", "search-master-key")
 
 class BeneficiaryListView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryListSerializer
     filter_backends = [filters.OrderingFilter]
-
-    ordering_fields = [
-        'beneficiary_user_information__last_name',
-        'beneficiary_user_information__first_name'
-    ]
-    ordering = [
-        'beneficiary_user_information__last_name',
-        'beneficiary_user_information__first_name'
-    ]
+    ordering_fields = ['beneficiary_user_information__last_name', 'beneficiary_user_information__first_name']
+    ordering = ['beneficiary_user_information__last_name', 'beneficiary_user_information__first_name']
 
     def get_filtered_list(self, param_name):
         raw_values = self.request.query_params.getlist(param_name)
@@ -85,18 +81,42 @@ class BeneficiaryListView(generics.ListAPIView):
 
     def get_queryset(self):
         search_query = self.request.query_params.get("search")
-        queryset = BeneficiaryUserRegistration.objects.all()
+        page = self.request.query_params.get("page", 1)
+        filters_dict = {
+            'gender': ",".join(self.get_filtered_list('gender')),
+            'province': ",".join(self.get_filtered_list('province')),
+            'tag': ",".join(self.get_filtered_list('tag')),
+            'min_age': self.request.query_params.get('min_age', ''),
+            'max_age': self.request.query_params.get('max_age', ''),
+        }
 
-        # If there's a search term, use MeiliSearch first
+        # If search exists, do not cache (or optionally cache search separately)
         if search_query:
+            queryset = BeneficiaryUserRegistration.objects.all()
             try:
                 results = client.index("beneficiaries").search(search_query)
                 matching_ids = [int(hit["id"]) for hit in results["hits"]]
                 queryset = queryset.filter(beneficiary_user_registration_id__in=matching_ids)
-            except Exception as e:
-                pass  # Fallback to regular query on error
+            except Exception:
+                pass
 
-        # Filtering logic
+            return queryset.select_related(
+                'beneficiary_user_information',
+                'beneficiary_user_address'
+            ).prefetch_related(
+                'beneficiary_user_additional_info'
+            )
+
+        # No search = normal listing, use caching
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary:list", page, **filters_dict)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
+        queryset = BeneficiaryUserRegistration.objects.all()
+
+        # Apply filters
         genders = self.get_filtered_list('gender')
         provinces = self.get_filtered_list('province')
         tags = self.get_filtered_list('tag')
@@ -104,14 +124,10 @@ class BeneficiaryListView(generics.ListAPIView):
         max_age = self.request.query_params.get('max_age')
 
         if genders:
-            queryset = queryset.filter(
-                beneficiary_user_information__gender__in=genders
-            )
+            queryset = queryset.filter(beneficiary_user_information__gender__in=genders)
 
         if provinces:
-            queryset = queryset.filter(
-                beneficiary_user_address__province__province_name__in=provinces
-            )
+            queryset = queryset.filter(beneficiary_user_address__province__province_name__in=provinces)
 
         if tags:
             tag_filter = Q()
@@ -126,9 +142,7 @@ class BeneficiaryListView(generics.ListAPIView):
             try:
                 min_age = int(min_age)
                 max_birth_date = today - relativedelta(years=min_age)
-                queryset = queryset.filter(
-                    beneficiary_user_information__birth_date__lte=max_birth_date
-                )
+                queryset = queryset.filter(beneficiary_user_information__birth_date__lte=max_birth_date)
             except (ValueError, TypeError):
                 pass
 
@@ -136,18 +150,19 @@ class BeneficiaryListView(generics.ListAPIView):
             try:
                 max_age = int(max_age)
                 min_birth_date = today - relativedelta(years=max_age)
-                queryset = queryset.filter(
-                    beneficiary_user_information__birth_date__gte=min_birth_date
-                )
+                queryset = queryset.filter(beneficiary_user_information__birth_date__gte=min_birth_date)
             except (ValueError, TypeError):
                 pass
 
-        return queryset.select_related(
+        queryset = queryset.select_related(
             'beneficiary_user_information',
             'beneficiary_user_address'
         ).prefetch_related(
             'beneficiary_user_additional_info'
         )
+
+        GlobalCacheManager.set(cache_key, queryset)
+        return queryset
 
 
 class BeneficiaryRequestCreateView(generics.CreateAPIView):
@@ -458,6 +473,7 @@ class BeneficiaryRequestFilterMixin:
         return queryset
 
 
+
 class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, MeiliSearchRequestMixin, generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
@@ -466,6 +482,34 @@ class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, MeiliSearchReq
     ordering = ['effective_date']
 
     def get_queryset(self):
+        search_query = self.request.query_params.get("search")
+        page = self.request.query_params.get("page", 1)
+
+        if search_query:
+            # If search is active, do not cache, return real-time queryset
+            base_qs = BeneficiaryRequest.objects.annotate(
+                effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+            ).filter(
+                beneficiary_request_processing_stage__in=[
+                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted'),
+                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='pending_review'),
+                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='under_evaluation'),
+                ]
+            )
+            base_qs = self.meili_filtered_queryset(base_qs)
+            return self.apply_filters(base_qs)
+
+        # No search → apply caching
+        filters_dict = {
+            'stage': 'new'
+        }
+        cache_key = GlobalCacheManager.make_paginated_key("request:list:new", page, **filters_dict)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
+        # Generate queryset
         base_qs = BeneficiaryRequest.objects.annotate(
             effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
         ).filter(
@@ -475,8 +519,13 @@ class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, MeiliSearchReq
                 BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='under_evaluation'),
             ]
         )
+
         base_qs = self.meili_filtered_queryset(base_qs)
-        return self.apply_filters(base_qs)
+        filtered_qs = self.apply_filters(base_qs)
+
+        GlobalCacheManager.set(cache_key, filtered_qs)
+
+        return filtered_qs
 
     
 class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, MeiliSearchRequestMixin, generics.ListAPIView):
@@ -487,6 +536,35 @@ class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, MeiliSe
     ordering = ['effective_date']
 
     def get_queryset(self):
+        search_query = self.request.query_params.get("search")
+        page = self.request.query_params.get("page", 1)
+
+        if search_query:
+            # If searching, don't cache
+            base_qs = BeneficiaryRequest.objects.annotate(
+                effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+            ).filter(
+                beneficiary_request_processing_stage__in=[
+                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
+                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
+                ],
+                beneficiary_request_duration__in=[
+                    BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time')
+                ]
+            )
+            base_qs = self.meili_filtered_queryset(base_qs)
+            return self.apply_filters(base_qs)
+
+        # No search: use cache
+        filters_dict = {
+            'stage': 'old_onetime'
+        }
+        cache_key = GlobalCacheManager.make_paginated_key("request:list:old_onetime", page, **filters_dict)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
         base_qs = BeneficiaryRequest.objects.annotate(
             effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
         ).filter(
@@ -498,8 +576,14 @@ class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, MeiliSe
                 BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time')
             ]
         )
+
         base_qs = self.meili_filtered_queryset(base_qs)
-        return self.apply_filters(base_qs)
+        filtered_qs = self.apply_filters(base_qs)
+
+        GlobalCacheManager.set(cache_key, filtered_qs)
+
+        return filtered_qs
+
 
     
 class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, MeiliSearchRequestMixin, generics.ListAPIView):
@@ -510,6 +594,36 @@ class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, MeiliSe
     ordering = ['effective_date']
 
     def get_queryset(self):
+        search_query = self.request.query_params.get("search")
+        page = self.request.query_params.get("page", 1)
+
+        if search_query:
+            # If searching, no cache
+            base_qs = BeneficiaryRequest.objects.annotate(
+                effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
+            ).filter(
+                beneficiary_request_processing_stage__in=[
+                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
+                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
+                ],
+                beneficiary_request_duration__in=[
+                    BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'),
+                    BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='permanent'),
+                ]
+            )
+            base_qs = self.meili_filtered_queryset(base_qs)
+            return self.apply_filters(base_qs)
+
+        # No search: cache based on page
+        filters_dict = {
+            'stage': 'old_ongoing'
+        }
+        cache_key = GlobalCacheManager.make_paginated_key("request:list:old_ongoing", page, **filters_dict)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
         base_qs = BeneficiaryRequest.objects.annotate(
             effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
         ).filter(
@@ -522,8 +636,14 @@ class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, MeiliSe
                 BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='permanent'),
             ]
         )
+
         base_qs = self.meili_filtered_queryset(base_qs)
-        return self.apply_filters(base_qs)
+        filtered_qs = self.apply_filters(base_qs)
+
+        GlobalCacheManager.set(cache_key, filtered_qs)
+
+        return filtered_qs
+
 
     
 class SingleRequestGetView(generics.RetrieveAPIView):
@@ -677,11 +797,23 @@ class BeneficiaryAnnouncementListView(generics.ListAPIView):
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
+        cache_key = GlobalCacheManager.make_key("beneficiary", "announcement:list", pk)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
         try:
             single_user = BeneficiaryUserRegistration.objects.get(pk=pk)
-            return CharityAnnouncementToBeneficiary.objects.filter(beneficiary_user_registration=single_user)
+            queryset = CharityAnnouncementToBeneficiary.objects.filter(
+                beneficiary_user_registration=single_user
+            )
+            GlobalCacheManager.set(cache_key, queryset)
+            return queryset
+
         except BeneficiaryUserRegistration.DoesNotExist:
             raise Http404("BeneficiaryUserRegistration does not exist")
+
 
 class BeneficiaryAnnouncementCreateView(generics.CreateAPIView):
     permission_classes = [IsAdminOrCharity]

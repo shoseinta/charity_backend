@@ -159,4 +159,17 @@ REST_FRAMEWORK = {
 MEILISEARCH_URL = "http://127.0.0.1:7700"
 MEILISEARCH_MASTER_KEY = "search-master-key"
 
- 
+# settings.py
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",  # database 1 in Redis
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+# Optional: Global cache timeout
+CACHE_TTL = 60 * 60  # 1 hour

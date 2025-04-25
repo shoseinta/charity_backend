@@ -30,6 +30,7 @@ from beneficiary.models import CharityAnnouncementToBeneficiary
 from user.api.permissions import IsCertainBeneficiary
 from django.db.models.functions import Coalesce
 from django.db.models import F, Case, When, Value, DateTimeField
+from core.cache_manager import GlobalCacheManager
 
 class BeneficiaryAllRequestsGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
@@ -39,12 +40,24 @@ class BeneficiaryAllRequestsGetView(generics.ListAPIView):
     ordering = ['effective_date']
 
     def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        page = self.request.query_params.get('page', 1)
+
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:list", page, user_id=pk)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
         base_qs = BeneficiaryRequest.objects.annotate(
             effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
         ).filter(
-            beneficiary_user_registration=self.kwargs.get('pk')
+            beneficiary_user_registration=pk
         )
+
+        GlobalCacheManager.set(cache_key, base_qs)
         return base_qs
+
 
 
 class BeneficiaryUserView(APIView):
@@ -148,14 +161,26 @@ class BeneficiaryRequestInitialStagesGetView(generics.ListAPIView):
     ordering = ['effective_date']
 
     def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        page = self.request.query_params.get('page', 1)
+
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:initial_stages", page, user_id=pk)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
         target_stages = ['submitted', 'pending_review', 'under_evaluation']
         base_qs = BeneficiaryRequest.objects.annotate(
             effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
         ).filter(
-            beneficiary_user_registration=self.kwargs.get('pk'),
+            beneficiary_user_registration=pk,
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
+
+        GlobalCacheManager.set(cache_key, base_qs)
         return base_qs
+
     
 class BeneficiaryRequestInProgressGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
@@ -165,14 +190,26 @@ class BeneficiaryRequestInProgressGetView(generics.ListAPIView):
     ordering = ['effective_date']
 
     def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        page = self.request.query_params.get('page', 1)
+
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:in_progress", page, user_id=pk)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
         target_stages = ['approved', 'in_progress']
         base_qs = BeneficiaryRequest.objects.annotate(
             effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
         ).filter(
-            beneficiary_user_registration=self.kwargs.get('pk'),
+            beneficiary_user_registration=pk,
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
+
+        GlobalCacheManager.set(cache_key, base_qs)
         return base_qs
+
     
 class BeneficiaryRequestCompletedGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
@@ -182,13 +219,24 @@ class BeneficiaryRequestCompletedGetView(generics.ListAPIView):
     ordering = ['effective_date']
 
     def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        page = self.request.query_params.get('page', 1)
+
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:completed", page, user_id=pk)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
         target_stages = ['completed']
         base_qs = BeneficiaryRequest.objects.annotate(
             effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
         ).filter(
-            beneficiary_user_registration=self.kwargs.get('pk'),
+            beneficiary_user_registration=pk,
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
+
+        GlobalCacheManager.set(cache_key, base_qs)
         return base_qs
 
     
@@ -200,14 +248,26 @@ class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
     ordering = ['effective_date']
 
     def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        page = self.request.query_params.get('page', 1)
+
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:rejected", page, user_id=pk)
+
+        queryset = GlobalCacheManager.get(cache_key)
+        if queryset:
+            return queryset
+
         target_stages = ['rejected']
         base_qs = BeneficiaryRequest.objects.annotate(
             effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
         ).filter(
-            beneficiary_user_registration=self.kwargs.get('pk'),
+            beneficiary_user_registration=pk,
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
+
+        GlobalCacheManager.set(cache_key, base_qs)
         return base_qs
+
 
 
 
