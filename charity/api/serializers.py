@@ -196,10 +196,9 @@ class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BeneficiaryRequestAnnouncementUpdateSerializer(serializers.ModelSerializer):
-    beneficiary_request = BeneficiaryGetRequestSerializer()
     class Meta:
         model = CharityAnnouncementForRequest
-        fields = '__all__'
+        exclude = ['beneficiary_request']
         
 class BeneficiaryRequestChangeProcessingStageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -232,16 +231,14 @@ class BeneficiaryListSingleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SingleRequestHistorySerializer(serializers.ModelSerializer):
-    beneficiary_request = BeneficiaryGetRequestSerializer()
     class Meta:
         model = BeneficiaryRequestHistory
-        fields = '__all__'
+        exclude = ['beneficiary_request']
 
 class SingleRequestChildSerializer(serializers.ModelSerializer):
-    beneficiary_request = BeneficiaryGetRequestSerializer()
     class Meta:
         model = BeneficiaryRequestChild
-        fields = '__all__'
+        exclude = ['beneficiary_request']
 
 
 class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
