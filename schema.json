@@ -1,0 +1,5149 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/announcement-get/:
+    get:
+      operationId: beneficiary_platform_beneficiary_announcement_get_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAnnouncementList'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/information/:
+    get:
+      operationId: beneficiary_platform_beneficiary_information_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /beneficiary-platform/beneficiary/{id}/request-all-get/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_all_get_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryRequestGetList'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-announcement-get/{request_pk}/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_announcement_get_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryRequestAnnouncementList'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-child-create/{request_pk}/:
+    post:
+      operationId: beneficiary_platform_beneficiary_request_child_create_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestChildCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestChildCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestChildCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestChildCreate'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-childs-get/{request_pk}/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_childs_get_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryRequestChildGetList'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-completed-get/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_completed_get_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryRequestGetList'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-create/:
+    post:
+      operationId: beneficiary_platform_beneficiary_request_create_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequest'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-create-onetime/{request_pk}/:
+    post:
+      operationId: beneficiary_platform_beneficiary_request_create_onetime_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestOneTime'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestOneTime'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestOneTime'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiarySingleRequestOneTime'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-create-recurring/{request_pk}/:
+    post:
+      operationId: beneficiary_platform_beneficiary_request_create_recurring_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestRecurring'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestRecurring'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestRecurring'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiarySingleRequestRecurring'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-histories-get/{request_pk}/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_histories_get_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryRequestHistoryList'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-in-progress-get/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_in_progress_get_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryRequestGetList'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-initial-stages-get/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_initial_stages_get_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryRequestGetList'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-rejected-get/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_rejected_get_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryRequestGetList'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-single-child-get/{request_pk}/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_single_child_get_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestChildGet'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-single-child-update/{request_pk}/:
+    put:
+      operationId: beneficiary_platform_beneficiary_request_single_child_update_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestChildCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestChildCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestChildCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestChildCreate'
+          description: ''
+    patch:
+      operationId: beneficiary_platform_beneficiary_request_single_child_update_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestChildCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestChildCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestChildCreate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestChildCreate'
+          description: ''
+    delete:
+      operationId: beneficiary_platform_beneficiary_request_single_child_update_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /beneficiary-platform/beneficiary/{id}/request-single-get/{request_pk}/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_single_get_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestGet'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-single-history-get/{request_pk}/:
+    get:
+      operationId: beneficiary_platform_beneficiary_request_single_history_get_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestHistory'
+          description: ''
+  /beneficiary-platform/beneficiary/{beneficiary_request_duration_onetime_id}/request-single-update-onetime/{request_pk}/:
+    put:
+      operationId: beneficiary_platform_beneficiary_request_single_update_onetime_update
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_onetime_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          onetime.
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOnetime'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateOnetime'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateOnetime'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateOnetime'
+          description: ''
+    patch:
+      operationId: beneficiary_platform_beneficiary_request_single_update_onetime_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_onetime_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          onetime.
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateOnetime'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateOnetime'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateOnetime'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateOnetime'
+          description: ''
+  ? /beneficiary-platform/beneficiary/{beneficiary_request_duration_recurring_id}/request-single-update-recurring/{request_pk}/
+  : put:
+      operationId: beneficiary_platform_beneficiary_request_single_update_recurring_update
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_recurring_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          recurring.
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecurring'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateRecurring'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateRecurring'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateRecurring'
+          description: ''
+    patch:
+      operationId: beneficiary_platform_beneficiary_request_single_update_recurring_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_recurring_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          recurring.
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateRecurring'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateRecurring'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateRecurring'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateRecurring'
+          description: ''
+  /beneficiary-platform/beneficiary/{id}/request-single-update/{request_pk}/:
+    put:
+      operationId: beneficiary_platform_beneficiary_request_single_update_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequest'
+          description: ''
+    patch:
+      operationId: beneficiary_platform_beneficiary_request_single_update_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequest'
+          description: ''
+    delete:
+      operationId: beneficiary_platform_beneficiary_request_single_update_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: request_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - beneficiary-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/announcement/{charity_announcement_to_beneficiary_id}/update/:
+    get:
+      operationId: charity_platform_announcement_update_retrieve
+      parameters:
+      - in: path
+        name: charity_announcement_to_beneficiary_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this charity announcement
+          to beneficiary.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+          description: ''
+    put:
+      operationId: charity_platform_announcement_update_update
+      parameters:
+      - in: path
+        name: charity_announcement_to_beneficiary_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this charity announcement
+          to beneficiary.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+          description: ''
+    patch:
+      operationId: charity_platform_announcement_update_partial_update
+      parameters:
+      - in: path
+        name: charity_announcement_to_beneficiary_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this charity announcement
+          to beneficiary.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCharityAnnouncementToBeneficiary'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCharityAnnouncementToBeneficiary'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCharityAnnouncementToBeneficiary'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+          description: ''
+    delete:
+      operationId: charity_platform_announcement_update_destroy
+      parameters:
+      - in: path
+        name: charity_announcement_to_beneficiary_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this charity announcement
+          to beneficiary.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/beneficiaries/{id}/announcement/create/:
+    post:
+      operationId: charity_platform_beneficiaries_announcement_create_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+          description: ''
+  /charity-platform/beneficiaries/{id}/announcement/list/:
+    get:
+      operationId: charity_platform_beneficiaries_announcement_list_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCharityAnnouncementToBeneficiaryList'
+          description: ''
+  /charity-platform/beneficiaries/{beneficiary_user_registration_id}/get/:
+    get:
+      operationId: charity_platform_beneficiaries_get_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_user_registration_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user registration.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryListSingle'
+          description: ''
+  /charity-platform/beneficiaries/{beneficiary_user_additional_info_id}/update-additional-info/:
+    get:
+      operationId: charity_platform_beneficiaries_update_additional_info_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_user_additional_info_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user additional
+          info.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryAdditionalInfoUpdate'
+          description: ''
+    put:
+      operationId: charity_platform_beneficiaries_update_additional_info_update
+      parameters:
+      - in: path
+        name: beneficiary_user_additional_info_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user additional
+          info.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAdditionalInfoUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAdditionalInfoUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAdditionalInfoUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryAdditionalInfoUpdate'
+          description: ''
+    patch:
+      operationId: charity_platform_beneficiaries_update_additional_info_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_user_additional_info_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user additional
+          info.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryAdditionalInfoUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryAdditionalInfoUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryAdditionalInfoUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryAdditionalInfoUpdate'
+          description: ''
+    delete:
+      operationId: charity_platform_beneficiaries_update_additional_info_destroy
+      parameters:
+      - in: path
+        name: beneficiary_user_additional_info_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user additional
+          info.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/beneficiaries/{beneficiary_user_address_id}/update-address/:
+    get:
+      operationId: charity_platform_beneficiaries_update_address_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_user_address_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user address.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryAddressUpdate'
+          description: ''
+    put:
+      operationId: charity_platform_beneficiaries_update_address_update
+      parameters:
+      - in: path
+        name: beneficiary_user_address_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user address.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAddressUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAddressUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAddressUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryAddressUpdate'
+          description: ''
+    patch:
+      operationId: charity_platform_beneficiaries_update_address_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_user_address_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user address.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryAddressUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryAddressUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryAddressUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryAddressUpdate'
+          description: ''
+    delete:
+      operationId: charity_platform_beneficiaries_update_address_destroy
+      parameters:
+      - in: path
+        name: beneficiary_user_address_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user address.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/beneficiaries/{beneficiary_user_information_id}/update-information/:
+    get:
+      operationId: charity_platform_beneficiaries_update_information_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_user_information_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user information.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryInformationUpdate'
+          description: ''
+    put:
+      operationId: charity_platform_beneficiaries_update_information_update
+      parameters:
+      - in: path
+        name: beneficiary_user_information_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user information.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInformationUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInformationUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInformationUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryInformationUpdate'
+          description: ''
+    patch:
+      operationId: charity_platform_beneficiaries_update_information_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_user_information_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user information.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryInformationUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryInformationUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryInformationUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryInformationUpdate'
+          description: ''
+    delete:
+      operationId: charity_platform_beneficiaries_update_information_destroy
+      parameters:
+      - in: path
+        name: beneficiary_user_information_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary user information.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/beneficiaries/list/:
+    get:
+      operationId: charity_platform_beneficiaries_list_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryListList'
+          description: ''
+  /charity-platform/beneficiaries/request-create/:
+    post:
+      operationId: charity_platform_beneficiaries_request_create_create
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestCreation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RequestCreation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RequestCreation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestCreation'
+          description: ''
+  /charity-platform/request-announcement/{charity_announcement_for_request_id}/update/:
+    get:
+      operationId: charity_platform_request_announcement_update_retrieve
+      parameters:
+      - in: path
+        name: charity_announcement_for_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this charity announcement
+          for request.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+          description: ''
+    put:
+      operationId: charity_platform_request_announcement_update_update
+      parameters:
+      - in: path
+        name: charity_announcement_for_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this charity announcement
+          for request.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+          description: ''
+    patch:
+      operationId: charity_platform_request_announcement_update_partial_update
+      parameters:
+      - in: path
+        name: charity_announcement_for_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this charity announcement
+          for request.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestAnnouncementUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestAnnouncementUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestAnnouncementUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+          description: ''
+    delete:
+      operationId: charity_platform_request_announcement_update_destroy
+      parameters:
+      - in: path
+        name: charity_announcement_for_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this charity announcement
+          for request.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/requests/{id}/announcement/create/:
+    post:
+      operationId: charity_platform_requests_announcement_create_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+          description: ''
+  /charity-platform/requests/{id}/announcement/list/:
+    get:
+      operationId: charity_platform_requests_announcement_list_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryRequestAnnouncementUpdateList'
+          description: ''
+  /charity-platform/requests/{beneficiary_request_id}/change-processing-stage/:
+    put:
+      operationId: charity_platform_requests_change_processing_stage_update
+      parameters:
+      - in: path
+        name: beneficiary_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestChangeProcessingStage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestChangeProcessingStage'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestChangeProcessingStage'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestChangeProcessingStage'
+          description: ''
+    patch:
+      operationId: charity_platform_requests_change_processing_stage_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestChangeProcessingStage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestChangeProcessingStage'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestChangeProcessingStage'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestChangeProcessingStage'
+          description: ''
+  /charity-platform/requests/{id}/childs/:
+    get:
+      operationId: charity_platform_requests_childs_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSingleRequestChildList'
+          description: ''
+  /charity-platform/requests/{id}/create-child/:
+    post:
+      operationId: charity_platform_requests_create_child_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SingleRequestChild'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SingleRequestChild'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SingleRequestChild'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleRequestChild'
+          description: ''
+  /charity-platform/requests/{id}/create-history/:
+    post:
+      operationId: charity_platform_requests_create_history_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SingleRequestHistory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SingleRequestHistory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SingleRequestHistory'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleRequestHistory'
+          description: ''
+  /charity-platform/requests/{id}/create-onetime/:
+    post:
+      operationId: charity_platform_requests_create_onetime_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestOneTime'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestOneTime'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestOneTime'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiarySingleRequestOneTime'
+          description: ''
+  /charity-platform/requests/{id}/create-recurring/:
+    post:
+      operationId: charity_platform_requests_create_recurring_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestRecurring'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestRecurring'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiarySingleRequestRecurring'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiarySingleRequestRecurring'
+          description: ''
+  /charity-platform/requests/{beneficiary_request_id}/get/:
+    get:
+      operationId: charity_platform_requests_get_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryGetRequest'
+          description: ''
+  /charity-platform/requests/{id}/histories/:
+    get:
+      operationId: charity_platform_requests_histories_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSingleRequestHistoryList'
+          description: ''
+  /charity-platform/requests/{beneficiary_request_id}/update/:
+    get:
+      operationId: charity_platform_requests_update_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryUpdateRequest'
+          description: ''
+    put:
+      operationId: charity_platform_requests_update_update
+      parameters:
+      - in: path
+        name: beneficiary_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryUpdateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryUpdateRequest'
+          description: ''
+    patch:
+      operationId: charity_platform_requests_update_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryUpdateRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryUpdateRequest'
+          description: ''
+    delete:
+      operationId: charity_platform_requests_update_destroy
+      parameters:
+      - in: path
+        name: beneficiary_request_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/requests/child/{beneficiary_request_child_id}/update/:
+    get:
+      operationId: charity_platform_requests_child_update_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_request_child_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request child.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleRequestChild'
+          description: ''
+    put:
+      operationId: charity_platform_requests_child_update_update
+      parameters:
+      - in: path
+        name: beneficiary_request_child_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request child.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SingleRequestChild'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SingleRequestChild'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SingleRequestChild'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleRequestChild'
+          description: ''
+    patch:
+      operationId: charity_platform_requests_child_update_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_request_child_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request child.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSingleRequestChild'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSingleRequestChild'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSingleRequestChild'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleRequestChild'
+          description: ''
+    delete:
+      operationId: charity_platform_requests_child_update_destroy
+      parameters:
+      - in: path
+        name: beneficiary_request_child_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request child.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/requests/history/{beneficiary_request_history_id}/update/:
+    get:
+      operationId: charity_platform_requests_history_update_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_request_history_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request history.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleRequestHistory'
+          description: ''
+    put:
+      operationId: charity_platform_requests_history_update_update
+      parameters:
+      - in: path
+        name: beneficiary_request_history_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request history.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SingleRequestHistory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SingleRequestHistory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SingleRequestHistory'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleRequestHistory'
+          description: ''
+    patch:
+      operationId: charity_platform_requests_history_update_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_request_history_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request history.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSingleRequestHistory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSingleRequestHistory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSingleRequestHistory'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleRequestHistory'
+          description: ''
+    delete:
+      operationId: charity_platform_requests_history_update_destroy
+      parameters:
+      - in: path
+        name: beneficiary_request_history_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request history.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/requests/list/:
+    get:
+      operationId: charity_platform_requests_list_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryGetRequestList'
+          description: ''
+  /charity-platform/requests/new-requests/:
+    get:
+      operationId: charity_platform_requests_new_requests_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryGetRequestList'
+          description: ''
+  /charity-platform/requests/old-onetime-requests/:
+    get:
+      operationId: charity_platform_requests_old_onetime_requests_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryGetRequestList'
+          description: ''
+  /charity-platform/requests/old-ongoing-requests/:
+    get:
+      operationId: charity_platform_requests_old_ongoing_requests_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBeneficiaryGetRequestList'
+          description: ''
+  /charity-platform/requests/onetime/{beneficiary_request_duration_onetime_id}/update/:
+    get:
+      operationId: charity_platform_requests_onetime_update_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_onetime_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          onetime.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestUpdateOneTime'
+          description: ''
+    put:
+      operationId: charity_platform_requests_onetime_update_update
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_onetime_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          onetime.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestUpdateOneTime'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestUpdateOneTime'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestUpdateOneTime'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestUpdateOneTime'
+          description: ''
+    patch:
+      operationId: charity_platform_requests_onetime_update_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_onetime_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          onetime.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestUpdateOneTime'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestUpdateOneTime'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestUpdateOneTime'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestUpdateOneTime'
+          description: ''
+    delete:
+      operationId: charity_platform_requests_onetime_update_destroy
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_onetime_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          onetime.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /charity-platform/requests/recurring/{beneficiary_request_duration_recurring_id}/update/:
+    get:
+      operationId: charity_platform_requests_recurring_update_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_recurring_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          recurring.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestUpdateRecurring'
+          description: ''
+    put:
+      operationId: charity_platform_requests_recurring_update_update
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_recurring_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          recurring.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestUpdateRecurring'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestUpdateRecurring'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRequestUpdateRecurring'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestUpdateRecurring'
+          description: ''
+    patch:
+      operationId: charity_platform_requests_recurring_update_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_recurring_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          recurring.
+        required: true
+      tags:
+      - charity-platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestUpdateRecurring'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestUpdateRecurring'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryRequestUpdateRecurring'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRequestUpdateRecurring'
+          description: ''
+    delete:
+      operationId: charity_platform_requests_recurring_update_destroy
+      parameters:
+      - in: path
+        name: beneficiary_request_duration_recurring_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this beneficiary request duration
+          recurring.
+        required: true
+      tags:
+      - charity-platform
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /user-api/beneficiary/{beneficiary_user_registration_id}/information/:
+    post:
+      operationId: user_api_beneficiary_information_create_2
+      parameters:
+      - in: path
+        name: beneficiary_user_registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInformationSingle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInformationSingle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInformationSingle'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryInformationSingle'
+          description: ''
+  /user-api/beneficiary/{beneficiary_user_registration_id}/register-info/:
+    get:
+      operationId: user_api_beneficiary_register_info_retrieve
+      parameters:
+      - in: path
+        name: beneficiary_user_registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryUserRegistrationInfo'
+          description: ''
+    put:
+      operationId: user_api_beneficiary_register_info_update
+      parameters:
+      - in: path
+        name: beneficiary_user_registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryUserRegistrationInfo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryUserRegistrationInfo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryUserRegistrationInfo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryUserRegistrationInfo'
+          description: ''
+    patch:
+      operationId: user_api_beneficiary_register_info_partial_update
+      parameters:
+      - in: path
+        name: beneficiary_user_registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryUserRegistrationInfo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryUserRegistrationInfo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBeneficiaryUserRegistrationInfo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryUserRegistrationInfo'
+          description: ''
+    delete:
+      operationId: user_api_beneficiary_register_info_destroy
+      parameters:
+      - in: path
+        name: beneficiary_user_registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /user-api/beneficiary/{id}/additional-info/:
+    post:
+      operationId: user_api_beneficiary_additional_info_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAdditionalInfo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAdditionalInfo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAdditionalInfo'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryAdditionalInfo'
+          description: ''
+  /user-api/beneficiary/{id}/address-info/:
+    post:
+      operationId: user_api_beneficiary_address_info_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAddressInfo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAddressInfo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryAddressInfo'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryAddressInfo'
+          description: ''
+  /user-api/beneficiary/{id}/password-update/:
+    patch:
+      operationId: user_api_beneficiary_password_update_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /user-api/beneficiary/information/:
+    post:
+      operationId: user_api_beneficiary_information_create
+      tags:
+      - user-api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInformation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInformation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInformation'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryInformation'
+          description: ''
+  /user-api/beneficiary/login/:
+    post:
+      operationId: user_api_beneficiary_login_create
+      tags:
+      - user-api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /user-api/beneficiary/register/:
+    post:
+      operationId: user_api_beneficiary_register_create
+      tags:
+      - user-api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryRegistration'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiaryRegistration'
+          description: ''
+  /user-api/charity/{id}/password-update/:
+    patch:
+      operationId: user_api_charity_password_update_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /user-api/charity/{id}/username-update/:
+    patch:
+      operationId: user_api_charity_username_update_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /user-api/charity/{id}/work-field/:
+    post:
+      operationId: user_api_charity_work_field_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - user-api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CharityWorkField'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CharityWorkField'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CharityWorkField'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharityWorkField'
+          description: ''
+  /user-api/charity/login/:
+    post:
+      operationId: user_api_charity_login_create
+      tags:
+      - user-api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /user-api/charity/register/:
+    post:
+      operationId: user_api_charity_register_create
+      tags:
+      - user-api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CharityRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CharityRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CharityRegistration'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharityRegistration'
+          description: ''
+  /user-api/logout/:
+    post:
+      operationId: user_api_logout_create
+      tags:
+      - user-api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    Announcement:
+      type: object
+      properties:
+        charity_announcement_to_beneficiary_id:
+          type: integer
+          readOnly: true
+        charity_announcement_to_beneficiary_title:
+          type: string
+          maxLength: 255
+        charity_announcement_to_beneficiary_description:
+          type: string
+          nullable: true
+        charity_announcement_to_beneficiary_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        charity_announcement_to_beneficiary_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - charity_announcement_to_beneficiary_created_at
+      - charity_announcement_to_beneficiary_id
+      - charity_announcement_to_beneficiary_title
+      - charity_announcement_to_beneficiary_updated_at
+    BenefciaryProvince:
+      type: object
+      properties:
+        province_name:
+          type: string
+          maxLength: 255
+      required:
+      - province_name
+    BeneficiaryAdditionalInfo:
+      type: object
+      properties:
+        beneficiary_user_additional_info_id:
+          type: integer
+          readOnly: true
+        beneficiary_user_additional_info_title:
+          type: string
+          maxLength: 255
+        beneficiary_user_additional_info_description:
+          type: string
+          nullable: true
+        beneficiary_user_additional_info_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_user_additional_info_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_additional_info_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_registration:
+          type: integer
+      required:
+      - beneficiary_user_additional_info_created_at
+      - beneficiary_user_additional_info_id
+      - beneficiary_user_additional_info_title
+      - beneficiary_user_additional_info_updated_at
+      - beneficiary_user_registration
+    BeneficiaryAdditionalInfoUpdate:
+      type: object
+      properties:
+        beneficiary_user_additional_info_id:
+          type: integer
+          readOnly: true
+        beneficiary_user_additional_info_title:
+          type: string
+          maxLength: 255
+        beneficiary_user_additional_info_description:
+          type: string
+          nullable: true
+        beneficiary_user_additional_info_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_user_additional_info_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_additional_info_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - beneficiary_user_additional_info_created_at
+      - beneficiary_user_additional_info_id
+      - beneficiary_user_additional_info_title
+      - beneficiary_user_additional_info_updated_at
+    BeneficiaryAddress:
+      type: object
+      properties:
+        beneficiary_user_address_id:
+          type: integer
+          readOnly: true
+        province:
+          $ref: '#/components/schemas/BenefciaryProvince'
+        city:
+          $ref: '#/components/schemas/BeneficiaryCity'
+      required:
+      - beneficiary_user_address_id
+      - city
+      - province
+    BeneficiaryAddressAll:
+      type: object
+      properties:
+        beneficiary_user_address_id:
+          type: integer
+          readOnly: true
+        neighborhood:
+          type: string
+          nullable: true
+          maxLength: 255
+        street:
+          type: string
+          nullable: true
+          maxLength: 255
+        alley:
+          type: string
+          nullable: true
+          maxLength: 255
+        building_number:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+        unit:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+        postal_code:
+          type: string
+          nullable: true
+          maxLength: 10
+        longitude:
+          type: number
+          format: double
+          nullable: true
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        beneficiary_user_address_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_address_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        province:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+        beneficiary_user_registration:
+          type: integer
+      required:
+      - beneficiary_user_address_created_at
+      - beneficiary_user_address_id
+      - beneficiary_user_address_updated_at
+      - beneficiary_user_registration
+    BeneficiaryAddressInfo:
+      type: object
+      properties:
+        beneficiary_user_address_id:
+          type: integer
+          readOnly: true
+        neighborhood:
+          type: string
+          nullable: true
+          maxLength: 255
+        street:
+          type: string
+          nullable: true
+          maxLength: 255
+        alley:
+          type: string
+          nullable: true
+          maxLength: 255
+        building_number:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+        unit:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+        postal_code:
+          type: string
+          nullable: true
+          maxLength: 10
+        longitude:
+          type: number
+          format: double
+          nullable: true
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        beneficiary_user_address_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_address_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        province:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+      required:
+      - beneficiary_user_address_created_at
+      - beneficiary_user_address_id
+      - beneficiary_user_address_updated_at
+    BeneficiaryAddressUpdate:
+      type: object
+      properties:
+        beneficiary_user_address_id:
+          type: integer
+          readOnly: true
+        neighborhood:
+          type: string
+          nullable: true
+          maxLength: 255
+        street:
+          type: string
+          nullable: true
+          maxLength: 255
+        alley:
+          type: string
+          nullable: true
+          maxLength: 255
+        building_number:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+        unit:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+        postal_code:
+          type: string
+          nullable: true
+          maxLength: 10
+        longitude:
+          type: number
+          format: double
+          nullable: true
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        beneficiary_user_address_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_address_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        province:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+      required:
+      - beneficiary_user_address_created_at
+      - beneficiary_user_address_id
+      - beneficiary_user_address_updated_at
+    BeneficiaryChildRequest:
+      type: object
+      properties:
+        beneficiary_request_child_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_child_description:
+          type: string
+        beneficiary_request_child_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_child_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_child_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_child_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_processing_stage:
+          type: integer
+        beneficiary_request:
+          type: integer
+      required:
+      - beneficiary_request
+      - beneficiary_request_child_created_at
+      - beneficiary_request_child_description
+      - beneficiary_request_child_id
+      - beneficiary_request_child_processing_stage
+      - beneficiary_request_child_updated_at
+    BeneficiaryCity:
+      type: object
+      properties:
+        city_name:
+          type: string
+          maxLength: 255
+        province:
+          type: integer
+      required:
+      - city_name
+      - province
+    BeneficiaryGetRequest:
+      type: object
+      properties:
+        beneficiary_request_id:
+          type: integer
+          readOnly: true
+        beneficiary_user_registration:
+          $ref: '#/components/schemas/BeneficiaryList'
+        beneficiary_request_history:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestHistory'
+        beneficiary_request_child:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryChildRequest'
+        beneficiary_request_duration_onetime:
+          $ref: '#/components/schemas/BeneficiaryRequestOneTime'
+        beneficiary_request_duration_recurring:
+          $ref: '#/components/schemas/BeneficiaryRequestRecurring'
+        beneficiary_request_announcement:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestAnnouncement'
+        beneficiary_request_title:
+          type: string
+          nullable: true
+          maxLength: 255
+        beneficiary_request_description:
+          type: string
+          nullable: true
+        beneficiary_request_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_type_layer1:
+          type: integer
+        beneficiary_request_type_layer2:
+          type: integer
+        beneficiary_request_duration:
+          type: integer
+          nullable: true
+        beneficiary_request_processing_stage:
+          type: integer
+      required:
+      - beneficiary_request_announcement
+      - beneficiary_request_child
+      - beneficiary_request_created_at
+      - beneficiary_request_duration_onetime
+      - beneficiary_request_duration_recurring
+      - beneficiary_request_history
+      - beneficiary_request_id
+      - beneficiary_request_processing_stage
+      - beneficiary_request_type_layer1
+      - beneficiary_request_type_layer2
+      - beneficiary_request_updated_at
+      - beneficiary_user_registration
+    BeneficiaryInformation:
+      type: object
+      properties:
+        beneficiary_user_information_id:
+          type: integer
+          readOnly: true
+        under_charity_support:
+          type: boolean
+          nullable: true
+        first_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        last_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - beneficiary_user_information_id
+    BeneficiaryInformationAll:
+      type: object
+      properties:
+        beneficiary_user_information_id:
+          type: integer
+          readOnly: true
+        under_charity_support:
+          type: boolean
+          nullable: true
+        first_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        last_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_user_information_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_information_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_registration:
+          type: integer
+      required:
+      - beneficiary_user_information_created_at
+      - beneficiary_user_information_id
+      - beneficiary_user_information_updated_at
+      - beneficiary_user_registration
+    BeneficiaryInformationSingle:
+      type: object
+      properties:
+        beneficiary_user_information_id:
+          type: integer
+          readOnly: true
+        under_charity_support:
+          type: boolean
+          nullable: true
+        first_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        last_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_user_information_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_information_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - beneficiary_user_information_created_at
+      - beneficiary_user_information_id
+      - beneficiary_user_information_updated_at
+    BeneficiaryInformationUpdate:
+      type: object
+      properties:
+        beneficiary_user_information_id:
+          type: integer
+          readOnly: true
+        under_charity_support:
+          type: boolean
+          nullable: true
+        first_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        last_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_user_information_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_information_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - beneficiary_user_information_created_at
+      - beneficiary_user_information_id
+      - beneficiary_user_information_updated_at
+    BeneficiaryList:
+      type: object
+      properties:
+        beneficiary_user_registration_id:
+          type: integer
+          readOnly: true
+        identification_number:
+          type: string
+          maxLength: 10
+        beneficiary_id:
+          type: string
+          maxLength: 10
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 11
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        beneficiary_user_information:
+          $ref: '#/components/schemas/BeneficiaryInformation'
+        beneficiary_user_address:
+          $ref: '#/components/schemas/BeneficiaryAddress'
+        beneficiary_user_additional_info:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryAdditionalInfo'
+      required:
+      - beneficiary_id
+      - beneficiary_user_additional_info
+      - beneficiary_user_address
+      - beneficiary_user_information
+      - beneficiary_user_registration_id
+      - identification_number
+    BeneficiaryListSingle:
+      type: object
+      properties:
+        beneficiary_user_registration_id:
+          type: integer
+          readOnly: true
+        beneficiary_user_information:
+          $ref: '#/components/schemas/BeneficiaryInformationAll'
+        beneficiary_user_address:
+          $ref: '#/components/schemas/BeneficiaryAddressAll'
+        beneficiary_user_additional_info:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryAdditionalInfo'
+        beneficiary_requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryGetRequest'
+        identification_number:
+          type: string
+          maxLength: 10
+        beneficiary_id:
+          type: string
+          maxLength: 10
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 11
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        password:
+          type: string
+          nullable: true
+          maxLength: 255
+        beneficiary_user_registration_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_registration_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        benficiary_user_id:
+          type: integer
+      required:
+      - beneficiary_id
+      - beneficiary_requests
+      - beneficiary_user_additional_info
+      - beneficiary_user_address
+      - beneficiary_user_information
+      - beneficiary_user_registration_created_at
+      - beneficiary_user_registration_id
+      - beneficiary_user_registration_updated_at
+      - benficiary_user_id
+      - identification_number
+    BeneficiaryRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        charity_id:
+          type: integer
+          writeOnly: true
+      required:
+      - charity_id
+      - username
+    BeneficiaryRequest:
+      type: object
+      properties:
+        beneficiary_request_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_title:
+          type: string
+          nullable: true
+          maxLength: 255
+        beneficiary_request_description:
+          type: string
+          nullable: true
+        beneficiary_request_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_type_layer1:
+          type: integer
+        beneficiary_request_type_layer2:
+          type: integer
+        beneficiary_request_duration:
+          type: integer
+          nullable: true
+      required:
+      - beneficiary_request_created_at
+      - beneficiary_request_id
+      - beneficiary_request_type_layer1
+      - beneficiary_request_type_layer2
+      - beneficiary_request_updated_at
+    BeneficiaryRequestAnnouncement:
+      type: object
+      properties:
+        charity_announcement_for_request_id:
+          type: integer
+          readOnly: true
+        charity_announcement_for_request_title:
+          type: string
+          maxLength: 255
+        charity_announcement_for_request_description:
+          type: string
+          nullable: true
+        charity_announcement_for_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        charity_announcement_for_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request:
+          type: integer
+      required:
+      - beneficiary_request
+      - charity_announcement_for_request_created_at
+      - charity_announcement_for_request_id
+      - charity_announcement_for_request_title
+      - charity_announcement_for_request_updated_at
+    BeneficiaryRequestAnnouncementUpdate:
+      type: object
+      properties:
+        charity_announcement_for_request_id:
+          type: integer
+          readOnly: true
+        beneficiary_request:
+          $ref: '#/components/schemas/BeneficiaryGetRequest'
+        charity_announcement_for_request_title:
+          type: string
+          maxLength: 255
+        charity_announcement_for_request_description:
+          type: string
+          nullable: true
+        charity_announcement_for_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        charity_announcement_for_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - beneficiary_request
+      - charity_announcement_for_request_created_at
+      - charity_announcement_for_request_id
+      - charity_announcement_for_request_title
+      - charity_announcement_for_request_updated_at
+    BeneficiaryRequestChangeProcessingStage:
+      type: object
+      properties:
+        beneficiary_request_processing_stage:
+          type: integer
+      required:
+      - beneficiary_request_processing_stage
+    BeneficiaryRequestChild:
+      type: object
+      properties:
+        beneficiary_request_child_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_child_description:
+          type: string
+        beneficiary_request_child_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_child_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_child_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_child_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_processing_stage:
+          type: integer
+      required:
+      - beneficiary_request_child_created_at
+      - beneficiary_request_child_description
+      - beneficiary_request_child_id
+      - beneficiary_request_child_processing_stage
+      - beneficiary_request_child_updated_at
+    BeneficiaryRequestChildCreate:
+      type: object
+      properties:
+        beneficiary_request_child_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_child_description:
+          type: string
+        beneficiary_request_child_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_child_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_child_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_child_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - beneficiary_request_child_created_at
+      - beneficiary_request_child_description
+      - beneficiary_request_child_id
+      - beneficiary_request_child_updated_at
+    BeneficiaryRequestChildGet:
+      type: object
+      properties:
+        beneficiary_request_child_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_child_description:
+          type: string
+        beneficiary_request_child_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_child_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_child_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_child_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_processing_stage:
+          type: integer
+        beneficiary_request:
+          type: integer
+      required:
+      - beneficiary_request
+      - beneficiary_request_child_created_at
+      - beneficiary_request_child_description
+      - beneficiary_request_child_id
+      - beneficiary_request_child_processing_stage
+      - beneficiary_request_child_updated_at
+    BeneficiaryRequestGet:
+      type: object
+      properties:
+        beneficiary_request_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_duration_onetime:
+          $ref: '#/components/schemas/BeneficiaryRequestOnetime'
+        beneficiary_request_duration_recurring:
+          $ref: '#/components/schemas/BeneficiaryRequestRecurring'
+        beneficiary_request_history:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestHistory'
+        beneficiary_request_child:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestChild'
+        beneficiary_request_announcement:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestAnnouncement'
+        beneficiary_request_title:
+          type: string
+          nullable: true
+          maxLength: 255
+        beneficiary_request_description:
+          type: string
+          nullable: true
+        beneficiary_request_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_type_layer1:
+          type: integer
+        beneficiary_request_type_layer2:
+          type: integer
+        beneficiary_request_duration:
+          type: integer
+          nullable: true
+        beneficiary_request_processing_stage:
+          type: integer
+        beneficiary_user_registration:
+          type: integer
+      required:
+      - beneficiary_request_announcement
+      - beneficiary_request_created_at
+      - beneficiary_request_duration_onetime
+      - beneficiary_request_duration_recurring
+      - beneficiary_request_history
+      - beneficiary_request_id
+      - beneficiary_request_processing_stage
+      - beneficiary_request_type_layer1
+      - beneficiary_request_type_layer2
+      - beneficiary_request_updated_at
+      - beneficiary_user_registration
+    BeneficiaryRequestHistory:
+      type: object
+      properties:
+        beneficiary_request_history_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_history_title:
+          type: string
+          maxLength: 255
+        beneficiary_request_history_description:
+          type: string
+        beneficiary_request_history_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_history_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_history_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_history_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_history_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - beneficiary_request_history_created_at
+      - beneficiary_request_history_description
+      - beneficiary_request_history_id
+      - beneficiary_request_history_title
+      - beneficiary_request_history_updated_at
+    BeneficiaryRequestOneTime:
+      type: object
+      properties:
+        beneficiary_request_duration_onetime_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_duration_onetime_deadline:
+          type: string
+          format: date
+        beneficiary_request_duration_onetime_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration_onetime_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration:
+          type: integer
+        beneficiary_request:
+          type: integer
+      required:
+      - beneficiary_request
+      - beneficiary_request_duration
+      - beneficiary_request_duration_onetime_created_at
+      - beneficiary_request_duration_onetime_deadline
+      - beneficiary_request_duration_onetime_id
+      - beneficiary_request_duration_onetime_updated_at
+    BeneficiaryRequestOnetime:
+      type: object
+      properties:
+        beneficiary_request_duration_onetime_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_duration_onetime_deadline:
+          type: string
+          format: date
+        beneficiary_request_duration_onetime_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration_onetime_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration:
+          type: integer
+        beneficiary_request:
+          type: integer
+      required:
+      - beneficiary_request
+      - beneficiary_request_duration
+      - beneficiary_request_duration_onetime_created_at
+      - beneficiary_request_duration_onetime_deadline
+      - beneficiary_request_duration_onetime_id
+      - beneficiary_request_duration_onetime_updated_at
+    BeneficiaryRequestRecurring:
+      type: object
+      properties:
+        beneficiary_request_duration_recurring_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_duration_recurring_limit:
+          type: integer
+          maximum: 12
+          minimum: 1
+        beneficiary_request_duration_recurring_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration_recurring_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration:
+          type: integer
+        beneficiary_request:
+          type: integer
+      required:
+      - beneficiary_request
+      - beneficiary_request_duration
+      - beneficiary_request_duration_recurring_created_at
+      - beneficiary_request_duration_recurring_id
+      - beneficiary_request_duration_recurring_limit
+      - beneficiary_request_duration_recurring_updated_at
+    BeneficiaryRequestUpdateOneTime:
+      type: object
+      properties:
+        beneficiary_request_duration_onetime_deadline:
+          type: string
+          format: date
+      required:
+      - beneficiary_request_duration_onetime_deadline
+    BeneficiaryRequestUpdateRecurring:
+      type: object
+      properties:
+        beneficiary_request_duration_recurring_limit:
+          type: integer
+          maximum: 12
+          minimum: 1
+      required:
+      - beneficiary_request_duration_recurring_limit
+    BeneficiarySingleRequestOneTime:
+      type: object
+      properties:
+        beneficiary_request_duration_onetime_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_duration_onetime_deadline:
+          type: string
+          format: date
+        beneficiary_request_duration_onetime_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration_onetime_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration:
+          type: integer
+      required:
+      - beneficiary_request_duration
+      - beneficiary_request_duration_onetime_created_at
+      - beneficiary_request_duration_onetime_deadline
+      - beneficiary_request_duration_onetime_id
+      - beneficiary_request_duration_onetime_updated_at
+    BeneficiarySingleRequestRecurring:
+      type: object
+      properties:
+        beneficiary_request_duration_recurring_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_duration_recurring_limit:
+          type: integer
+          maximum: 12
+          minimum: 1
+        beneficiary_request_duration_recurring_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration_recurring_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_duration:
+          type: integer
+      required:
+      - beneficiary_request_duration
+      - beneficiary_request_duration_recurring_created_at
+      - beneficiary_request_duration_recurring_id
+      - beneficiary_request_duration_recurring_limit
+      - beneficiary_request_duration_recurring_updated_at
+    BeneficiaryUpdateRequest:
+      type: object
+      properties:
+        beneficiary_request_id:
+          type: integer
+          readOnly: true
+        beneficiary_user_registration:
+          $ref: '#/components/schemas/BeneficiaryList'
+        beneficiary_request_title:
+          type: string
+          nullable: true
+          maxLength: 255
+        beneficiary_request_description:
+          type: string
+          nullable: true
+        beneficiary_request_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_type_layer1:
+          type: integer
+        beneficiary_request_type_layer2:
+          type: integer
+        beneficiary_request_duration:
+          type: integer
+          nullable: true
+        beneficiary_request_processing_stage:
+          type: integer
+      required:
+      - beneficiary_request_created_at
+      - beneficiary_request_id
+      - beneficiary_request_processing_stage
+      - beneficiary_request_type_layer1
+      - beneficiary_request_type_layer2
+      - beneficiary_request_updated_at
+      - beneficiary_user_registration
+    BeneficiaryUserRegistrationInfo:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          nullable: true
+          pattern: ^09\d{9}$
+        email:
+          type: string
+          format: email
+          nullable: true
+    BlankEnum:
+      enum:
+      - ''
+    CharityAnnouncementToBeneficiary:
+      type: object
+      properties:
+        charity_announcement_to_beneficiary_id:
+          type: integer
+          readOnly: true
+        charity_announcement_to_beneficiary_title:
+          type: string
+          maxLength: 255
+        charity_announcement_to_beneficiary_description:
+          type: string
+          nullable: true
+        charity_announcement_to_beneficiary_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        charity_announcement_to_beneficiary_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - charity_announcement_to_beneficiary_created_at
+      - charity_announcement_to_beneficiary_id
+      - charity_announcement_to_beneficiary_title
+      - charity_announcement_to_beneficiary_updated_at
+    CharityRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+        password2:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - password2
+      - username
+    CharityWorkField:
+      type: object
+      properties:
+        charity_workfield_id:
+          type: integer
+          readOnly: true
+        charity_workfield_title:
+          type: string
+          maxLength: 255
+        charity_workfield_description:
+          type: string
+          nullable: true
+        charity_workfield_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        charity_workfield_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - charity_workfield_created_at
+      - charity_workfield_id
+      - charity_workfield_title
+      - charity_workfield_updated_at
+    GenderEnum:
+      enum:
+      - male
+      - female
+      type: string
+      description: |-
+        * `male` - Male
+        * `female` - Female
+    NullEnum:
+      enum:
+      - null
+    PaginatedAnnouncementList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Announcement'
+    PaginatedBeneficiaryGetRequestList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryGetRequest'
+    PaginatedBeneficiaryListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryList'
+    PaginatedBeneficiaryRequestAnnouncementList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestAnnouncement'
+    PaginatedBeneficiaryRequestAnnouncementUpdateList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestAnnouncementUpdate'
+    PaginatedBeneficiaryRequestChildGetList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestChildGet'
+    PaginatedBeneficiaryRequestGetList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestGet'
+    PaginatedBeneficiaryRequestHistoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRequestHistory'
+    PaginatedCharityAnnouncementToBeneficiaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CharityAnnouncementToBeneficiary'
+    PaginatedSingleRequestChildList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SingleRequestChild'
+    PaginatedSingleRequestHistoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SingleRequestHistory'
+    PatchedBeneficiaryAdditionalInfoUpdate:
+      type: object
+      properties:
+        beneficiary_user_additional_info_id:
+          type: integer
+          readOnly: true
+        beneficiary_user_additional_info_title:
+          type: string
+          maxLength: 255
+        beneficiary_user_additional_info_description:
+          type: string
+          nullable: true
+        beneficiary_user_additional_info_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_user_additional_info_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_additional_info_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedBeneficiaryAddressUpdate:
+      type: object
+      properties:
+        beneficiary_user_address_id:
+          type: integer
+          readOnly: true
+        neighborhood:
+          type: string
+          nullable: true
+          maxLength: 255
+        street:
+          type: string
+          nullable: true
+          maxLength: 255
+        alley:
+          type: string
+          nullable: true
+          maxLength: 255
+        building_number:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+        unit:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+        postal_code:
+          type: string
+          nullable: true
+          maxLength: 10
+        longitude:
+          type: number
+          format: double
+          nullable: true
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        beneficiary_user_address_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_address_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        province:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+    PatchedBeneficiaryInformationUpdate:
+      type: object
+      properties:
+        beneficiary_user_information_id:
+          type: integer
+          readOnly: true
+        under_charity_support:
+          type: boolean
+          nullable: true
+        first_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        last_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_user_information_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_user_information_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedBeneficiaryRequest:
+      type: object
+      properties:
+        beneficiary_request_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_title:
+          type: string
+          nullable: true
+          maxLength: 255
+        beneficiary_request_description:
+          type: string
+          nullable: true
+        beneficiary_request_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_type_layer1:
+          type: integer
+        beneficiary_request_type_layer2:
+          type: integer
+        beneficiary_request_duration:
+          type: integer
+          nullable: true
+    PatchedBeneficiaryRequestAnnouncementUpdate:
+      type: object
+      properties:
+        charity_announcement_for_request_id:
+          type: integer
+          readOnly: true
+        beneficiary_request:
+          $ref: '#/components/schemas/BeneficiaryGetRequest'
+        charity_announcement_for_request_title:
+          type: string
+          maxLength: 255
+        charity_announcement_for_request_description:
+          type: string
+          nullable: true
+        charity_announcement_for_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        charity_announcement_for_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedBeneficiaryRequestChangeProcessingStage:
+      type: object
+      properties:
+        beneficiary_request_processing_stage:
+          type: integer
+    PatchedBeneficiaryRequestChildCreate:
+      type: object
+      properties:
+        beneficiary_request_child_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_child_description:
+          type: string
+        beneficiary_request_child_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_child_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_child_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_child_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedBeneficiaryRequestUpdateOneTime:
+      type: object
+      properties:
+        beneficiary_request_duration_onetime_deadline:
+          type: string
+          format: date
+    PatchedBeneficiaryRequestUpdateRecurring:
+      type: object
+      properties:
+        beneficiary_request_duration_recurring_limit:
+          type: integer
+          maximum: 12
+          minimum: 1
+    PatchedBeneficiaryUpdateRequest:
+      type: object
+      properties:
+        beneficiary_request_id:
+          type: integer
+          readOnly: true
+        beneficiary_user_registration:
+          $ref: '#/components/schemas/BeneficiaryList'
+        beneficiary_request_title:
+          type: string
+          nullable: true
+          maxLength: 255
+        beneficiary_request_description:
+          type: string
+          nullable: true
+        beneficiary_request_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_type_layer1:
+          type: integer
+        beneficiary_request_type_layer2:
+          type: integer
+        beneficiary_request_duration:
+          type: integer
+          nullable: true
+        beneficiary_request_processing_stage:
+          type: integer
+    PatchedBeneficiaryUserRegistrationInfo:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          nullable: true
+          pattern: ^09\d{9}$
+        email:
+          type: string
+          format: email
+          nullable: true
+    PatchedCharityAnnouncementToBeneficiary:
+      type: object
+      properties:
+        charity_announcement_to_beneficiary_id:
+          type: integer
+          readOnly: true
+        charity_announcement_to_beneficiary_title:
+          type: string
+          maxLength: 255
+        charity_announcement_to_beneficiary_description:
+          type: string
+          nullable: true
+        charity_announcement_to_beneficiary_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        charity_announcement_to_beneficiary_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedSingleRequestChild:
+      type: object
+      properties:
+        beneficiary_request_child_id:
+          type: integer
+          readOnly: true
+        beneficiary_request:
+          $ref: '#/components/schemas/BeneficiaryGetRequest'
+        beneficiary_request_child_description:
+          type: string
+        beneficiary_request_child_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_child_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_child_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_child_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_processing_stage:
+          type: integer
+    PatchedSingleRequestHistory:
+      type: object
+      properties:
+        beneficiary_request_history_id:
+          type: integer
+          readOnly: true
+        beneficiary_request:
+          $ref: '#/components/schemas/BeneficiaryGetRequest'
+        beneficiary_request_history_title:
+          type: string
+          maxLength: 255
+        beneficiary_request_history_description:
+          type: string
+        beneficiary_request_history_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_history_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_history_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_history_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_history_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedUpdateOnetime:
+      type: object
+      properties:
+        beneficiary_request_duration_onetime_deadline:
+          type: string
+          format: date
+    PatchedUpdateRecurring:
+      type: object
+      properties:
+        beneficiary_request_duration_recurring_limit:
+          type: integer
+          maximum: 12
+          minimum: 1
+    RequestCreation:
+      type: object
+      properties:
+        beneficiary_request_id:
+          type: integer
+          readOnly: true
+        beneficiary_request_title:
+          type: string
+          nullable: true
+          maxLength: 255
+        beneficiary_request_description:
+          type: string
+          nullable: true
+        beneficiary_request_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_type_layer1:
+          type: integer
+        beneficiary_request_type_layer2:
+          type: integer
+        beneficiary_request_duration:
+          type: integer
+          nullable: true
+        beneficiary_request_processing_stage:
+          type: integer
+        beneficiary_user_registration:
+          type: integer
+      required:
+      - beneficiary_request_created_at
+      - beneficiary_request_id
+      - beneficiary_request_processing_stage
+      - beneficiary_request_type_layer1
+      - beneficiary_request_type_layer2
+      - beneficiary_request_updated_at
+      - beneficiary_user_registration
+    SingleRequestChild:
+      type: object
+      properties:
+        beneficiary_request_child_id:
+          type: integer
+          readOnly: true
+        beneficiary_request:
+          $ref: '#/components/schemas/BeneficiaryGetRequest'
+        beneficiary_request_child_description:
+          type: string
+        beneficiary_request_child_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_child_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_child_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_child_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_child_processing_stage:
+          type: integer
+      required:
+      - beneficiary_request
+      - beneficiary_request_child_created_at
+      - beneficiary_request_child_description
+      - beneficiary_request_child_id
+      - beneficiary_request_child_processing_stage
+      - beneficiary_request_child_updated_at
+    SingleRequestHistory:
+      type: object
+      properties:
+        beneficiary_request_history_id:
+          type: integer
+          readOnly: true
+        beneficiary_request:
+          $ref: '#/components/schemas/BeneficiaryGetRequest'
+        beneficiary_request_history_title:
+          type: string
+          maxLength: 255
+        beneficiary_request_history_description:
+          type: string
+        beneficiary_request_history_document:
+          type: string
+          format: uri
+          nullable: true
+        beneficiary_request_history_date:
+          type: string
+          format: date
+          nullable: true
+        beneficiary_request_history_time:
+          type: string
+          format: time
+          nullable: true
+        beneficiary_request_history_created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        beneficiary_request_history_updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - beneficiary_request
+      - beneficiary_request_history_created_at
+      - beneficiary_request_history_description
+      - beneficiary_request_history_id
+      - beneficiary_request_history_title
+      - beneficiary_request_history_updated_at
+    UpdateOnetime:
+      type: object
+      properties:
+        beneficiary_request_duration_onetime_deadline:
+          type: string
+          format: date
+      required:
+      - beneficiary_request_duration_onetime_deadline
+    UpdateRecurring:
+      type: object
+      properties:
+        beneficiary_request_duration_recurring_limit:
+          type: integer
+          maximum: 12
+          minimum: 1
+      required:
+      - beneficiary_request_duration_recurring_limit
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

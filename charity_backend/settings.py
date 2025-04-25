@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'user',
     'beneficiary',
     'request',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -152,6 +153,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # settings.py
@@ -168,8 +170,15 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
-    }
+    },
+    
 }
 
 # Optional: Global cache timeout
 CACHE_TTL = 60 * 60  # 1 hour
+
+INSTALLED_APPS += [
+    'drf_spectacular',
+]
+
+

@@ -59,18 +59,15 @@ class BeneficiaryAllRequestsGetView(generics.ListAPIView):
         return base_qs
 
 
-
 class BeneficiaryUserView(APIView):
+    serializer_class = BeneficiaryUserSerializer  # ✅ ADD THIS
     permission_classes = [IsCertainBeneficiary]
 
     def get(self, request, pk, *args, **kwargs):
-        try:
-            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
-        except BeneficiaryUserRegistration.DoesNotExist:
-            raise NotFound("Beneficiary not found.")
-        
-        serializer = BeneficiaryUserSerializer(beneficiary)
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=pk)
+        serializer = self.serializer_class(beneficiary)
         return Response(serializer.data)
+
 
 class BeneficiaryRequestView(generics.CreateAPIView):
     permission_classes = [IsCertainBeneficiary]
