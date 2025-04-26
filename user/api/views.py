@@ -252,7 +252,8 @@ from beneficiary.models import BeneficiaryUserRegistration
 from .permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.permissions import IsAuthenticated
 
-# --- CharityLoginView ---
+from rest_framework_simplejwt.tokens import RefreshToken
+
 class CharityLoginView(APIView):
     serializer_class = CharityLoginSerializer
     permission_classes = [permissions.AllowAny]
@@ -262,16 +263,16 @@ class CharityLoginView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
 
-        token, created = Token.objects.get_or_create(user=user)
+        refresh = RefreshToken.for_user(user)
 
         return Response({
-            'token': token.key,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
             'user_id': user.pk,
             'username': user.username,
         }, status=status.HTTP_200_OK)
 
 
-# --- BeneficiaryLoginView ---
 class BeneficiaryLoginView(APIView):
     serializer_class = BeneficiaryLoginSerializer
     permission_classes = [permissions.AllowAny]
@@ -281,23 +282,26 @@ class BeneficiaryLoginView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
 
-        token, created = Token.objects.get_or_create(user=user)
+        refresh = RefreshToken.for_user(user)
 
         return Response({
-            'token': token.key,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
             'user_id': user.pk,
             'username': user.username,
         }, status=status.HTTP_200_OK)
 
-
-# --- LogoutView ---
 class LogoutView(APIView):
-    serializer_class = None  # No input/output schema needed
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        request.user.auth_token.delete()
-        return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"message": "Logged out successfully"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # --- CharityUsernameUpdateView ---
