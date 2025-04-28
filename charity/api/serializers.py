@@ -208,12 +208,6 @@ class BeneficiaryRequestAnnouncementSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
-    beneficiary_user_registration = BeneficiaryListSerializer()
-    beneficiary_request_history = BeneficiaryRequestHistorySerializer(many=True)
-    beneficiary_request_child = BeneficiaryChildRequestSerializer(many=True)
-    beneficiary_request_duration_onetime = BeneficiaryRequestOneTimeSerializer()
-    beneficiary_request_duration_recurring = BeneficiaryRequestRecurringSerializer()
-    beneficiary_request_announcement = BeneficiaryRequestAnnouncementSerializer(many=True)
     class Meta:
         model = BeneficiaryRequest
         fields = '__all__'
@@ -247,7 +241,7 @@ class BeneficiaryListSingleSerializer(serializers.ModelSerializer):
     beneficiary_user_information = BeneficiaryInformationAllSerializer()
     beneficiary_user_address = BeneficiaryAddressAllSerializer()
     beneficiary_user_additional_info = BeneficiaryAdditionalInfo(many=True)
-    beneficiary_requests = BeneficiaryGetRequestSerializer(many=True)
+    #beneficiary_requests = BeneficiaryGetRequestSerializer(many=True)
     class Meta:
         model = BeneficiaryUserRegistration
         fields = '__all__'
