@@ -28,7 +28,8 @@ from .views import (BeneficiaryListView,
                     BeneficiaryAnnouncementUpdateView,
                     SingleRequestChildsView,
                     SingleRequestHistoriesView,
-                    SingleBeneficiaryAllRequestsView)
+                    SingleBeneficiaryAllRequestsView,
+                    AllRequestChildsView)
 
 urlpatterns = [
     path('beneficiaries/list/', BeneficiaryListView.as_view(), name='beneficiary-list'),
@@ -44,6 +45,7 @@ urlpatterns = [
     path('requests/<int:pk>/update/', BeneficiaryUpdateRequestView.as_view(), name='beneficiary-request-update'),
     path('requests/<int:pk>/create-history/', BeneficiaryRequestHistoryCreate.as_view(), name='beneficiary-request-history-create'),
     path('requests/<int:pk>/create-child/', BeneficiaryRequestChildCreate.as_view(), name='beneficiary-request-child-create'),
+    path('requests/childs/', AllRequestChildsView.as_view(), name='beneficiary-request-childs'),
     path('requests/<int:pk>/childs/', SingleRequestChildsView.as_view(), name='beneficiary-request-childs'),
     path('requests/<int:pk>/histories/', SingleRequestHistoriesView.as_view(), name='beneficiary-request-histories'),
     path('requests/list/', BeneficiaryAllRequestsView.as_view(), name='beneficiary-all-requests'),

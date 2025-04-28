@@ -942,3 +942,8 @@ class SingleRequestChildsView(generics.ListAPIView):
             return BeneficiaryRequestChild.objects.filter(beneficiary_request=single_request)
         except BeneficiaryRequest.DoesNotExist:
             raise Http404("BeneficiaryRequest does not exist")
+
+class AllRequestChildsView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = SingleRequestChildSerializer
+    queryset = BeneficiaryRequestChild.objects.all()
