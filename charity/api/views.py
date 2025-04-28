@@ -173,10 +173,14 @@ class BeneficiaryRequestCreateView(generics.CreateAPIView):
 
     def get_queryset(self):
         return BeneficiaryRequest.objects.select_related(
-            'beneficiary_user_registration',
             'beneficiary_request_type_layer1',
             'beneficiary_request_type_layer2'
         )
+
+    def perform_create(self, serializer):
+        beneficiary_pk = self.kwargs.get('pk')  # Get pk from URL
+        serializer.save(beneficiary_user_registration_id=beneficiary_pk)
+
 
 class BeneficiaryDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAdminOrCharity]

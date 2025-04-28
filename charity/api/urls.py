@@ -33,7 +33,7 @@ from .views import (BeneficiaryListView,
 
 urlpatterns = [
     path('beneficiaries/list/', BeneficiaryListView.as_view(), name='beneficiary-list'),
-    path('beneficiaries/request-create/', BeneficiaryRequestCreateView.as_view(), name='beneficiary-request-create'),
+    path('beneficiaries/<int:pk>/request-create/', BeneficiaryRequestCreateView.as_view(), name='beneficiary-request-create'),
     path('beneficiaries/<int:pk>/get/', BeneficiaryDetailView.as_view(), name='beneficiary-detail'),
     path('beneficiaries/<int:pk>/get-requests/', SingleBeneficiaryAllRequestsView.as_view(), name='beneficiary-get-requests'),
     path('beneficiaries/<int:pk>/update-information/', UpdateBeneficiaryInformationView.as_view(), name='beneficiary-update-information'),

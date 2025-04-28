@@ -147,7 +147,7 @@ class BeneficiaryListSerializer(serializers.ModelSerializer):
 class RequestCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequest
-        fields = '__all__'
+        exclude = ['beneficiary_user_registration']
 
     def validate(self, data):
         layer1 = data.get('beneficiary_request_type_layer1')
