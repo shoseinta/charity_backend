@@ -48,6 +48,7 @@ from django.db.models.functions import Coalesce
 from datetime import datetime
 import meilisearch
 from core.cache_manager import GlobalCacheManager
+from django.db.models import Prefetch
 
 
 client = meilisearch.Client("http://127.0.0.1:7700", 'search-master-key')
@@ -90,33 +91,40 @@ class BeneficiaryListView(generics.ListAPIView):
             'max_age': self.request.query_params.get('max_age', ''),
         }
 
-        # If search exists, do not cache (or optionally cache search separately)
+
+        base_queryset = BeneficiaryUserRegistration.objects.select_related(
+            'beneficiary_user_information',
+            'beneficiary_user_address__province',
+            'beneficiary_user_address__city'
+        ).prefetch_related(
+            Prefetch(
+                'beneficiary_user_additional_info',
+                queryset=BeneficiaryUserAdditionalInfo.objects.only(
+                    'beneficiary_user_registration',  # required for the relation
+                    'beneficiary_user_additional_info_title',
+                    'beneficiary_user_additional_info_value'
+                )
+            )
+        )
+
+
         if search_query:
-            queryset = BeneficiaryUserRegistration.objects.all()
             try:
                 results = client.index("beneficiaries").search(search_query)
                 matching_ids = [int(hit["id"]) for hit in results["hits"]]
-                queryset = queryset.filter(beneficiary_user_registration_id__in=matching_ids)
+                base_queryset = base_queryset.filter(beneficiary_user_registration_id__in=matching_ids)
             except Exception:
                 pass
 
-            return queryset.select_related(
-                'beneficiary_user_information',
-                'beneficiary_user_address'
-            ).prefetch_related(
-                'beneficiary_user_additional_info'
-            )
+            return base_queryset
 
-        # No search = normal listing, use caching
         cache_key = GlobalCacheManager.make_paginated_key("beneficiary:list", page, **filters_dict)
+        cached_queryset = GlobalCacheManager.get(cache_key)
+        if cached_queryset:
+            return cached_queryset
 
-        queryset = GlobalCacheManager.get(cache_key)
-        if queryset:
-            return queryset
+        queryset = base_queryset
 
-        queryset = BeneficiaryUserRegistration.objects.all()
-
-        # Apply filters
         genders = self.get_filtered_list('gender')
         provinces = self.get_filtered_list('province')
         tags = self.get_filtered_list('tag')
@@ -154,21 +162,21 @@ class BeneficiaryListView(generics.ListAPIView):
             except (ValueError, TypeError):
                 pass
 
-        queryset = queryset.select_related(
-            'beneficiary_user_information',
-            'beneficiary_user_address'
-        ).prefetch_related(
-            'beneficiary_user_additional_info'
-        )
-
         GlobalCacheManager.set(cache_key, queryset)
         return queryset
 
 
+
 class BeneficiaryRequestCreateView(generics.CreateAPIView):
     permission_classes = [IsAdminOrCharity]
-    queryset = BeneficiaryRequest.objects.all()
     serializer_class = RequestCreationSerializer
+
+    def get_queryset(self):
+        return BeneficiaryRequest.objects.select_related(
+            'beneficiary_user_registration',
+            'beneficiary_request_type_layer1',
+            'beneficiary_request_type_layer2'
+        )
 
 class BeneficiaryDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAdminOrCharity]

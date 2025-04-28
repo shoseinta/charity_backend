@@ -105,21 +105,44 @@ class BeneficiaryAdditionalInfoUpdateSerializer(serializers.ModelSerializer):
         model = BeneficiaryUserAdditionalInfo
         exclude = ['beneficiary_user_registration']
 
+class BeneficiaryAdditionalInfoSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserAdditionalInfo
+        fields = [
+            'beneficiary_user_additional_info_title',
+        ]
+
+
 class BeneficiaryListSerializer(serializers.ModelSerializer):
-    beneficiary_user_information = BeneficiaryInformationSerializer()
-    beneficiary_user_address = BeneficiaryAddressSerializer()
-    beneficiary_user_additional_info = BeneficiaryAdditionalInfo(many=True)
+    first_name = serializers.CharField(source='beneficiary_user_information.first_name')
+    last_name = serializers.CharField(source='beneficiary_user_information.last_name')
+    gender = serializers.CharField(source='beneficiary_user_information.gender')
+    birth_date = serializers.DateField(source='beneficiary_user_information.birth_date')
+
+    province_name = serializers.CharField(source='beneficiary_user_address.province.province_name')
+    city_name = serializers.CharField(source='beneficiary_user_address.city.city_name')
+
+    additional_info_list = BeneficiaryAdditionalInfoSimpleSerializer(
+        source='beneficiary_user_additional_info',
+        many=True
+    )
+
     class Meta:
         model = BeneficiaryUserRegistration
-        fields = ["beneficiary_user_registration_id",
-                  "identification_number",
-                  "beneficiary_id",
-                  "phone_number",
-                  "email",
-                  "beneficiary_user_information",
-                  "beneficiary_user_address",
-                  "beneficiary_user_additional_info"
-                  ]
+        fields = [
+            'beneficiary_user_registration_id',
+            'identification_number',
+            'beneficiary_id',
+            'phone_number',
+            'email',
+            'first_name',
+            'last_name',
+            'gender',
+            'birth_date',
+            'province_name',
+            'city_name',
+            'additional_info_list',
+        ]
 
 class RequestCreationSerializer(serializers.ModelSerializer):
     class Meta:
