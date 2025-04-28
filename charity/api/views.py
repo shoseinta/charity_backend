@@ -326,7 +326,85 @@ class BeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
         qs = self.meili_filtered_queryset(qs)
         return qs
 
+class SingleBeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryGetRequestSerializer
+    filter_backends = [filters.OrderingFilter]
 
+    ordering_fields = [
+        'effective_date',
+        'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id'
+    ]
+    ordering = ['effective_date']
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        qs = BeneficiaryRequest.objects.filter(beneficiary_user_registration = pk)
+
+        # Annotate effective date
+        qs = qs.annotate(
+            effective_date=Coalesce(
+                'beneficiary_request_date',
+                'beneficiary_request_created_at',
+                output_field=DateTimeField()
+            )
+        )
+
+        request = self.request
+        params = request.query_params
+
+        def get_list(param):
+            return [p.strip() for p in params.get(param, '').split(',') if p.strip()]
+
+        # Filtering
+        layer1_ids = get_list('layer1_id')
+        if layer1_ids:
+            qs = qs.filter(beneficiary_request_type_layer1__beneficiary_request_type_layer1_id__in=layer1_ids)
+
+        layer2_ids = get_list('layer2_id')
+        if layer2_ids:
+            qs = qs.filter(beneficiary_request_type_layer2__beneficiary_request_type_layer2_id__in=layer2_ids)
+
+        duration_ids = get_list('duration_id')
+        if duration_ids:
+            qs = qs.filter(beneficiary_request_duration__beneficiary_request_duration_id__in=duration_ids)
+
+        processing_stage_ids = get_list('processing_stage_id')
+        if processing_stage_ids:
+            qs = qs.filter(beneficiary_request_processing_stage__beneficiary_request_processing_stage_id__in=processing_stage_ids)
+
+        limits = get_list('limit')
+        if limits:
+            qs = qs.filter(beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__in=limits)
+
+        deadlines = get_list('deadline')
+        if deadlines:
+            try:
+                deadlines = [datetime.strptime(d, '%Y-%m-%d').date() for d in deadlines]
+                qs = qs.filter(beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__in=deadlines)
+            except ValueError:
+                pass  # ignore invalid date formats
+
+        # Effective date range
+        min_effective_date = params.get('min_effective_date')
+        max_effective_date = params.get('max_effective_date')
+
+        if min_effective_date:
+            try:
+                min_date = datetime.strptime(min_effective_date, '%Y-%m-%d')
+                qs = qs.filter(effective_date__gte=min_date)
+            except ValueError:
+                pass
+
+        if max_effective_date:
+            try:
+                max_date = datetime.strptime(max_effective_date, '%Y-%m-%d')
+                qs = qs.filter(effective_date__lte=max_date)
+            except ValueError:
+                pass
+        
+        qs = self.meili_filtered_queryset(qs)
+        return qs
 class BeneficiaryRequestOnetimeCreationView(generics.CreateAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiarySingleRequestOneTimeSerializer
