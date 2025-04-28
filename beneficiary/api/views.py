@@ -43,7 +43,7 @@ class BeneficiaryAllRequestsGetView(generics.ListAPIView):
         pk = self.kwargs.get('pk')
         page = self.request.query_params.get('page', 1)
 
-        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:list", page, user_id=pk)
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary:request:list", page, user_id=pk)
 
         queryset = GlobalCacheManager.get(cache_key)
         if queryset:
@@ -161,7 +161,7 @@ class BeneficiaryRequestInitialStagesGetView(generics.ListAPIView):
         pk = self.kwargs.get('pk')
         page = self.request.query_params.get('page', 1)
 
-        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:initial_stages", page, user_id=pk)
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary:request:initial_stages", page, user_id=pk)
 
         queryset = GlobalCacheManager.get(cache_key)
         if queryset:
@@ -190,7 +190,7 @@ class BeneficiaryRequestInProgressGetView(generics.ListAPIView):
         pk = self.kwargs.get('pk')
         page = self.request.query_params.get('page', 1)
 
-        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:in_progress", page, user_id=pk)
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary:request:in_progress", page, user_id=pk)
 
         queryset = GlobalCacheManager.get(cache_key)
         if queryset:
@@ -219,7 +219,7 @@ class BeneficiaryRequestCompletedGetView(generics.ListAPIView):
         pk = self.kwargs.get('pk')
         page = self.request.query_params.get('page', 1)
 
-        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:completed", page, user_id=pk)
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary:request:completed", page, user_id=pk)
 
         queryset = GlobalCacheManager.get(cache_key)
         if queryset:
@@ -248,7 +248,7 @@ class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
         pk = self.kwargs.get('pk')
         page = self.request.query_params.get('page', 1)
 
-        cache_key = GlobalCacheManager.make_paginated_key("beneficiary", "request:rejected", page, user_id=pk)
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary:request:rejected", page, user_id=pk)
 
         queryset = GlobalCacheManager.get(cache_key)
         if queryset:
