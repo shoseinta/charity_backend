@@ -280,3 +280,13 @@ class CharityAnnouncementToBeneficiarySerializer(serializers.ModelSerializer):
     class Meta:
         model = CharityAnnouncementToBeneficiary
         exclude = ['beneficiary_user_registration']
+
+class BeneficiaryRequestGetOnetimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationOnetime
+        fields = '__all__'
+
+class BeneficiaryRequestGetRecurringSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDurationRecurring
+        fields = '__all__'
