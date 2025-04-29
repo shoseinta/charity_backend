@@ -30,17 +30,13 @@ from .views import (BeneficiaryListView,
                     SingleRequestHistoriesView,
                     SingleBeneficiaryAllRequestsView,
                     AllRequestChildsView,
-                    AllOnetimeView,
-                    AllRecurringView)
+                    )
 
 urlpatterns = [
     path('beneficiaries/list/', BeneficiaryListView.as_view(), name='beneficiary-list'),
     path('beneficiaries/<int:pk>/request-create/', BeneficiaryRequestCreateView.as_view(), name='beneficiary-request-create'),
     path('beneficiaries/<int:pk>/get/', BeneficiaryDetailView.as_view(), name='beneficiary-detail'),
     path('beneficiaries/<int:pk>/get-requests/', SingleBeneficiaryAllRequestsView.as_view(), name='beneficiary-get-requests'),
-    path('beneficiaries/<int:pk>/get-onetime',AllOnetimeView.as_view(), name='beneficiary-get-onetime'),
-    path('beneficiaries/<int:pk>/get-recurring', AllRecurringView.as_view(), name='beneficiary-get-recurring'),
-    path('beneficiaries/<int:pk>/update-information/', UpdateBeneficiaryInformationView.as_view(), name='beneficiary-update-information'),
     path('beneficiaries/<int:pk>/update-address/', UpdateBeneficiaryAddressView.as_view(), name='beneficiary-update-address'),
     path('beneficiaries/<int:pk>/update-additional-info/', UpdateBeneficiaryAdditionalInfoView.as_view(), name='beneficiary-update-additional-info'),
     path('beneficiaries/<int:pk>/announcement/list/', BeneficiaryAnnouncementListView.as_view(), name='beneficiary-announcement-list'),

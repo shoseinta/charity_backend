@@ -953,13 +953,3 @@ class AllRequestChildsView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = SingleRequestChildSerializer
     queryset = BeneficiaryRequestChild.objects.all()
-
-class AllOnetimeView(generics.ListAPIView):
-    permission_classes = [IsAdminOrCharity]
-    serializer_class = BeneficiaryRequestGetOnetimeSerializer
-    queryset = BeneficiaryRequestDurationOnetime.objects.all()
-
-class AllRecurringView(generics.ListAPIView):
-    permission_classes = [IsAdminOrCharity]
-    serializer_class = BeneficiaryRequestGetRecurringSerializer
-    queryset = BeneficiaryRequestDurationRecurring.objects.all()

@@ -208,6 +208,8 @@ class BeneficiaryRequestAnnouncementSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
+    beneficiary_request_duration_onetime = BeneficiaryRequestOneTimeSerializer(read_only=True)
+    beneficiary_request_duration_recurring = BeneficiaryRequestRecurringSerializer(read_only=True)  # Updated to read_only=True
     class Meta:
         model = BeneficiaryRequest
         fields = '__all__'
@@ -254,7 +256,7 @@ class SingleRequestHistorySerializer(serializers.ModelSerializer):
 class SingleRequestChildSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestChild
-        exclude = ['beneficiary_request']
+        fields = '__all__'
 
 
 class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
