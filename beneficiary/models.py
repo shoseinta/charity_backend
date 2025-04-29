@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Province(models.Model):
-    province_name = models.CharField(max_length=255, unique=True)
+    province_name = models.CharField(max_length=255, unique=True, db_index=True)
     province_created_at = models.DateTimeField(auto_now_add=True)
     province_updated_at = models.DateTimeField(auto_now=True)
 
@@ -12,10 +12,10 @@ class Province(models.Model):
         return self.province_name
 
 class City(models.Model):
-    city_name = models.CharField(max_length=255)
+    city_name = models.CharField(max_length=255, db_index=True)
     city_created_at = models.DateTimeField(auto_now_add=True)
     city_updated_at = models.DateTimeField(auto_now=True)
-    province = models.ForeignKey(Province, on_delete=models.CASCADE)
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, db_index=True)
 
     def __str__(self):
         return f"{self.city_name}, {self.province.province_name}"
@@ -23,10 +23,10 @@ class City(models.Model):
 class BeneficiaryUserRegistration(models.Model):
     beneficiary_user_registration_id = models.AutoField(primary_key=True)
     benficiary_user_id = models.OneToOneField(User, on_delete=models.CASCADE)  # username
-    identification_number = models.CharField(max_length=10,unique=True)
-    beneficiary_id = models.CharField(unique=True, max_length=10)  # username
-    phone_number = models.CharField(unique=True, blank=True, null=True, max_length=11)
-    email = models.EmailField(unique=True, blank=True, null=True)
+    identification_number = models.CharField(max_length=10,unique=True,db_index=True)
+    beneficiary_id = models.CharField(unique=True, max_length=10, db_index=True)  # username
+    phone_number = models.CharField(unique=True, blank=True, null=True, max_length=11, db_index=True)
+    email = models.EmailField(unique=True, blank=True, null=True, db_index=True)  # username
     password = models.CharField(max_length=255, blank=True, null=True)  # default: identification_number
     beneficiary_user_registration_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_user_registration_updated_at = models.DateTimeField(auto_now=True)
@@ -43,10 +43,10 @@ class BeneficiaryUserInformation(models.Model):
 
     beneficiary_user_information_id = models.AutoField(primary_key=True)
     under_charity_support = models.BooleanField(blank=True, null=True)
-    first_name = models.CharField(max_length=255, blank=True, null=True)
-    last_name = models.CharField(max_length=255, blank=True, null=True)
-    gender = models.CharField(max_length=6, choices=GENDER_CHOICES, blank=True, null=True)
-    birth_date = models.DateField(blank=True, null=True)
+    first_name = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    gender = models.CharField(max_length=6, choices=GENDER_CHOICES, blank=True, null=True, db_index=True)
+    birth_date = models.DateField(blank=True, null=True, db_index=True)
     beneficiary_user_information_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_user_information_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_user_registration = models.OneToOneField(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name="beneficiary_user_information")
@@ -56,14 +56,14 @@ class BeneficiaryUserInformation(models.Model):
 
 class BeneficiaryUserAddress(models.Model):
     beneficiary_user_address_id = models.AutoField(primary_key=True)
-    province = models.ForeignKey(Province, on_delete=models.SET_NULL, blank=True, null=True, related_name='beneficiary_province')
-    city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True, related_name='beneficiary_city')
+    province = models.ForeignKey(Province, on_delete=models.SET_NULL, blank=True, null=True, db_index=True, related_name='beneficiary_province')
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True, db_index=True, related_name='beneficiary_city')
     neighborhood = models.CharField(max_length=255, blank=True, null=True)
     street = models.CharField(max_length=255, blank=True, null=True)
     alley = models.CharField(max_length=255, blank=True, null=True)
     building_number = models.PositiveIntegerField(blank=True, null=True)
     unit = models.PositiveIntegerField(blank=True, null=True)
-    postal_code = models.CharField(blank=True, null=True, max_length=10)
+    postal_code = models.CharField(blank=True, null=True, max_length=10, db_index=True)
     longitude = models.FloatField(blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     beneficiary_user_address_created_at = models.DateTimeField(auto_now_add=True)

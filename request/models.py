@@ -69,8 +69,8 @@ class BeneficiaryRequestProcessingStage(models.Model):
 
 class BeneficiaryRequest(models.Model):
     beneficiary_request_id = models.AutoField(primary_key=True)
-    beneficiary_request_type_layer1 = models.ForeignKey(BeneficiaryRequestTypeLayer1, on_delete=models.PROTECT)
-    beneficiary_request_type_layer2 = models.ForeignKey(BeneficiaryRequestTypeLayer2, on_delete=models.PROTECT)
+    beneficiary_request_type_layer1 = models.ForeignKey(BeneficiaryRequestTypeLayer1, on_delete=models.PROTECT, db_index=True)
+    beneficiary_request_type_layer2 = models.ForeignKey(BeneficiaryRequestTypeLayer2, on_delete=models.PROTECT, db_index=True)
     beneficiary_request_title = models.CharField(max_length=255, blank=True, null=True)
     beneficiary_request_description = models.TextField(blank=True, null=True)
     beneficiary_request_duration = models.ForeignKey(
@@ -78,15 +78,16 @@ class BeneficiaryRequest(models.Model):
         on_delete=models.PROTECT, 
         blank=True, 
         null=True,
-        related_name='requests'
+        related_name='requests',
+        db_index=True
     )
     beneficiary_request_document = models.FileField(upload_to='request_docs/', blank=True, null=True)
-    beneficiary_request_processing_stage = models.ForeignKey(BeneficiaryRequestProcessingStage, on_delete=models.CASCADE)
-    beneficiary_request_date = models.DateField(blank=True, null=True)
+    beneficiary_request_processing_stage = models.ForeignKey(BeneficiaryRequestProcessingStage, on_delete=models.CASCADE, db_index=True)
+    beneficiary_request_date = models.DateField(blank=True, null=True, db_index=True)
     beneficiary_request_time = models.TimeField(blank=True, null=True)
-    beneficiary_request_created_at = models.DateTimeField(auto_now_add=True)
+    beneficiary_request_created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     beneficiary_request_updated_at = models.DateTimeField(auto_now=True)
-    beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name='beneficiary_requests')
+    beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name='beneficiary_requests', db_index=True)
 
     def __str__(self):
         return f"Request #{self.beneficiary_request_id} - {self.beneficiary_request_title}"
@@ -108,7 +109,7 @@ class BeneficiaryRequest(models.Model):
 
 class BeneficiaryRequestDurationOnetime(models.Model):
     beneficiary_request_duration_onetime_id = models.AutoField(primary_key=True)
-    beneficiary_request_duration_onetime_deadline = models.DateField()
+    beneficiary_request_duration_onetime_deadline = models.DateField(db_index=True)
     beneficiary_request_duration_onetime_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_duration_onetime_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_request_duration = models.ForeignKey(BeneficiaryRequestDuration, on_delete=models.CASCADE)
@@ -120,7 +121,8 @@ class BeneficiaryRequestDurationOnetime(models.Model):
 class BeneficiaryRequestDurationRecurring(models.Model):
     beneficiary_request_duration_recurring_id = models.AutoField(primary_key=True)
     beneficiary_request_duration_recurring_limit = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(12)]
+        validators=[MinValueValidator(1), MaxValueValidator(12)],
+        db_index=True
     )
     beneficiary_request_duration_recurring_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_duration_recurring_updated_at = models.DateTimeField(auto_now=True)
@@ -139,7 +141,7 @@ class BeneficiaryRequestHistory(models.Model):
     beneficiary_request_history_time = models.TimeField(blank=True, null=True)
     beneficiary_request_history_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_history_updated_at = models.DateTimeField(auto_now=True)
-    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE, related_name='beneficiary_request_history')
+    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE, related_name='beneficiary_request_history', db_index=True)
 
     def __str__(self):
         return f"History: {self.beneficiary_request_history_title}"
@@ -148,12 +150,12 @@ class BeneficiaryRequestChild(models.Model):
     beneficiary_request_child_id = models.AutoField(primary_key=True)
     beneficiary_request_child_description = models.TextField()
     beneficiary_request_child_document = models.FileField(upload_to='child_docs/', blank=True, null=True)
-    beneficiary_request_child_processing_stage = models.ForeignKey(BeneficiaryRequestProcessingStage, on_delete=models.CASCADE)
+    beneficiary_request_child_processing_stage = models.ForeignKey(BeneficiaryRequestProcessingStage, on_delete=models.CASCADE, db_index=True)
     beneficiary_request_child_date = models.DateField(blank=True, null=True)
     beneficiary_request_child_time = models.TimeField(blank=True, null=True)
     beneficiary_request_child_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_child_updated_at = models.DateTimeField(auto_now=True)
-    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE,related_name='beneficiary_request_child')
+    beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE,related_name='beneficiary_request_child',db_index=True)
 
     def __str__(self):
         return f"Child request of #{self.beneficiary_request.beneficiary_request_id}"
