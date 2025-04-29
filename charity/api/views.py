@@ -185,7 +185,8 @@ class BeneficiaryRequestCreateView(generics.CreateAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = RequestCreationSerializer
 
-    def get_queryset(self):
+    @staticmethod
+    def get_queryset():
         return BeneficiaryRequest.objects.select_related(
             'beneficiary_request_type_layer1',
             'beneficiary_request_type_layer2'
