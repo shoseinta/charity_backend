@@ -54,14 +54,16 @@ class BeneficiaryInformationUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryUserInformation
         exclude = ['beneficiary_user_registration']
-    def validate_first_name(self, value):
+    @staticmethod
+    def validate_first_name(value):
          # Regular expression to match Persian characters and common punctuation
         persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
         
         if not persian_regex.match(value):
             raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
         return value
-    def validate_last_name(self, value):
+    @staticmethod
+    def validate_last_name(value):
          # Regular expression to match Persian characters and common punctuation
         persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
         
@@ -73,26 +75,30 @@ class BeneficiaryAddressUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryUserAddress
         exclude = ['beneficiary_user_registration']
-    def validate(self, data):
+    @staticmethod
+    def validate(data):
         city = data.get('city')
         province = data.get('province')
         if city != province:
             raise serializers.ValidationError("City must match the province")
         return data
-    def validate_postal_code(self, value):
+    @staticmethod
+    def validate_postal_code(value):
         if not value:
             return value
         if len(value) != 10:
             raise serializers.ValidationError("Postal code must be 10 digits")
         if not value.isdigit():
             raise serializers.ValidationError("Postal code must be numeric")
-    def validate_longitude(self, value):
+    @staticmethod
+    def validate_longitude(value):
         if not value:
             return value
         if not (-180 <= value <= 180):
             raise serializers.ValidationError("Longitude must be between -180 and 180 degrees")
         return value
-    def validate_latitude(self, value):
+    @staticmethod
+    def validate_latitude(value):
         if not value:
             return value
         if not (-90 <= value <= 90):
@@ -143,26 +149,33 @@ class BeneficiaryListSerializer(serializers.ModelSerializer):
         ]
 
     # --- Related fields manual access ---
-    def get_first_name(self, obj):
+    @staticmethod
+    def get_first_name(obj):
         return getattr(obj.beneficiary_user_information, 'first_name', None)
 
-    def get_last_name(self, obj):
+    @staticmethod
+    def get_last_name(obj):
         return getattr(obj.beneficiary_user_information, 'last_name', None)
 
-    def get_gender(self, obj):
+    @staticmethod
+    def get_gender(obj):
         return getattr(obj.beneficiary_user_information, 'gender', None)
 
-    def get_birth_date(self, obj):
+    @staticmethod
+    def get_birth_date(obj):
         return getattr(obj.beneficiary_user_information, 'birth_date', None)
 
-    def get_province_name(self, obj):
+    @staticmethod
+    def get_province_name(obj):
         return getattr(getattr(obj.beneficiary_user_address, 'province', None), 'province_name', None)
 
-    def get_city_name(self, obj):
+    @staticmethod
+    def get_city_name(obj):
         return getattr(getattr(obj.beneficiary_user_address, 'city', None), 'city_name', None)
 
     # --- Additional info optimized ---
-    def get_additional_info_list(self, obj):
+    @staticmethod
+    def get_additional_info_list(obj):
         additional_infos = getattr(obj, 'beneficiary_user_additional_info', None)
         if additional_infos is not None:
             return [info.beneficiary_user_additional_info_title for info in additional_infos.all()]
@@ -175,7 +188,8 @@ class RequestCreationSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequest
         exclude = ['beneficiary_user_registration']
 
-    def validate(self, data):
+    @staticmethod
+    def validate(data):
         layer1 = data.get('beneficiary_request_type_layer1')
         layer2 = data.get('beneficiary_request_type_layer2')
 
@@ -254,7 +268,8 @@ class BeneficiaryUpdateRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequest
         exclude = ['beneficiary_user_registration']
-    def validate(self, data):
+    @staticmethod
+    def validate(data):
         layer1 = data.get('beneficiary_request_type_layer1')
         layer2 = data.get('beneficiary_request_type_layer2')
 
@@ -289,7 +304,8 @@ class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestDurationOnetime
         exclude = ['beneficiary_request']
-    def validate(self,data):
+    @staticmethod
+    def validate(data):
         if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time'):
             raise serializers.ValidationError("This request must be a onetime request.")
         return data
@@ -299,7 +315,8 @@ class BeneficiarySingleRequestRecurringSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequestDurationRecurring
         exclude = ['beneficiary_request']
 
-    def validate(self,data):
+    @staticmethod
+    def validate(data):
         if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'):
             raise serializers.ValidationError("This request must be a recurring request.")
         return data
