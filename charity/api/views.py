@@ -104,7 +104,6 @@ class BeneficiaryListView(generics.ListAPIView):
                 queryset=BeneficiaryUserAdditionalInfo.objects.only(
                     'beneficiary_user_registration',  # required for the relation
                     'beneficiary_user_additional_info_title',
-                    'beneficiary_user_additional_info_value'
                 )
             )
         )
