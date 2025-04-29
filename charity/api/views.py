@@ -98,15 +98,28 @@ class BeneficiaryListView(generics.ListAPIView):
             'beneficiary_user_information',
             'beneficiary_user_address__province',
             'beneficiary_user_address__city'
+        ).only(
+            'beneficiary_user_registration_id',
+            'identification_number',
+            'beneficiary_id',
+            'phone_number',
+            'email',
+            'beneficiary_user_information__first_name',
+            'beneficiary_user_information__last_name',
+            'beneficiary_user_information__gender',
+            'beneficiary_user_information__birth_date',
+            'beneficiary_user_address__province__province_name',
+            'beneficiary_user_address__city__city_name',
         ).prefetch_related(
             Prefetch(
                 'beneficiary_user_additional_info',
                 queryset=BeneficiaryUserAdditionalInfo.objects.only(
-                    'beneficiary_user_registration',  # required for the relation
-                    'beneficiary_user_additional_info_title',
+                    'beneficiary_user_registration',  # relation field
+                    'beneficiary_user_additional_info_title'
                 )
             )
         )
+
 
 
         if search_query:

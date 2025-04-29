@@ -113,19 +113,17 @@ class BeneficiaryAdditionalInfoSimpleSerializer(serializers.ModelSerializer):
         ]
 
 
+
 class BeneficiaryListSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(source='beneficiary_user_information.first_name')
-    last_name = serializers.CharField(source='beneficiary_user_information.last_name')
-    gender = serializers.CharField(source='beneficiary_user_information.gender')
-    birth_date = serializers.DateField(source='beneficiary_user_information.birth_date')
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+    gender = serializers.SerializerMethodField()
+    birth_date = serializers.SerializerMethodField()
 
-    province_name = serializers.CharField(source='beneficiary_user_address.province.province_name')
-    city_name = serializers.CharField(source='beneficiary_user_address.city.city_name')
+    province_name = serializers.SerializerMethodField()
+    city_name = serializers.SerializerMethodField()
 
-    additional_info_list = BeneficiaryAdditionalInfoSimpleSerializer(
-        source='beneficiary_user_additional_info',
-        many=True
-    )
+    additional_info_list = serializers.SerializerMethodField()
 
     class Meta:
         model = BeneficiaryUserRegistration
@@ -143,6 +141,34 @@ class BeneficiaryListSerializer(serializers.ModelSerializer):
             'city_name',
             'additional_info_list',
         ]
+
+    # --- Related fields manual access ---
+    def get_first_name(self, obj):
+        return getattr(obj.beneficiary_user_information, 'first_name', None)
+
+    def get_last_name(self, obj):
+        return getattr(obj.beneficiary_user_information, 'last_name', None)
+
+    def get_gender(self, obj):
+        return getattr(obj.beneficiary_user_information, 'gender', None)
+
+    def get_birth_date(self, obj):
+        return getattr(obj.beneficiary_user_information, 'birth_date', None)
+
+    def get_province_name(self, obj):
+        return getattr(getattr(obj.beneficiary_user_address, 'province', None), 'province_name', None)
+
+    def get_city_name(self, obj):
+        return getattr(getattr(obj.beneficiary_user_address, 'city', None), 'city_name', None)
+
+    # --- Additional info optimized ---
+    def get_additional_info_list(self, obj):
+        additional_infos = getattr(obj, 'beneficiary_user_additional_info', None)
+        if additional_infos is not None:
+            return [info.beneficiary_user_additional_info_title for info in additional_infos.all()]
+        return []
+
+
 
 class RequestCreationSerializer(serializers.ModelSerializer):
     class Meta:
