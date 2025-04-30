@@ -40,7 +40,8 @@ class BeneficiaryRequestSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequest
         exclude = ['beneficiary_user_registration','beneficiary_request_processing_stage']
     
-    def validate(self, data):
+    @staticmethod
+    def validate(data):
         layer1 = data.get('beneficiary_request_type_layer1')
         layer2 = data.get('beneficiary_request_type_layer2')
 
@@ -56,7 +57,8 @@ class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestDurationOnetime
         exclude = ['beneficiary_request']
-    def validate(self,data):
+    @staticmethod
+    def validate(data):
         if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time'):
             raise serializers.ValidationError("This request must be a onetime request.")
         return data
@@ -66,7 +68,8 @@ class BeneficiarySingleRequestRecurringSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequestDurationRecurring
         exclude = ['beneficiary_request']
 
-    def validate(self,data):
+    @staticmethod
+    def validate(data):
         if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'):
             raise serializers.ValidationError("This request must be a recurring request.")
         return data
