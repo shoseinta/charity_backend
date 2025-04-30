@@ -294,8 +294,7 @@ class BeneficiaryLoginView(APIView):
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @staticmethod
-    def post(request):
+    def post(self, request):
         try:
             refresh_token = request.data["refresh"]
             token = RefreshToken(refresh_token)

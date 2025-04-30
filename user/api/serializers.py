@@ -25,14 +25,12 @@ class CharityRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'password', 'password2')
 
-    @staticmethod
-    def validate(attrs):
+    def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs
 
-    @staticmethod
-    def create(validated_data):
+    def create(self, validated_data):
         user = User.objects.create(
             username=validated_data['username'],
         )
@@ -84,8 +82,7 @@ class BeneficiaryRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'charity_id')  # Add charity_id to fields
 
-    @staticmethod
-    def validate_username(value):
+    def validate_username(self, value):
         """
         Validate that username:
         1. Must be all numeric
@@ -99,14 +96,12 @@ class BeneficiaryRegistrationSerializer(serializers.ModelSerializer):
             
         return value
 
-    @staticmethod
-    def validate(attrs):
+    def validate(self, attrs):
         if BeneficiaryUserRegistration.objects.filter(identification_number=attrs['username']).exists():
             raise serializers.ValidationError({"username": "This beneficiary already exists"})
         return attrs
 
-    @staticmethod
-    def create(validated_data):
+    def create(self, validated_data):
         # Extract charity from validated_data
         charity = validated_data.pop('charity')
         
@@ -191,8 +186,7 @@ class BeneficiaryUserRegistrationInfoSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("This email is already registered")
         return value
 
-    @staticmethod
-    def validate(data):
+    def validate(self, data):
         """Ensure at least one contact method is provided"""
         if not data.get('phone_number') and not data.get('email'):
             raise serializers.ValidationError("Either phone number or email must be provided")
@@ -203,16 +197,14 @@ class BeneficiaryInformationSerializer(serializers.ModelSerializer):
         model = BeneficiaryUserInformation
         fields = '__all__'
 
-    @staticmethod
-    def validate_first_name(value):
+    def validate_first_name(self, value):
          # Regular expression to match Persian characters and common punctuation
         persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
         
         if not persian_regex.match(value):
             raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
         return value
-    @staticmethod
-    def validate_last_name(value):
+    def validate_last_name(self, value):
          # Regular expression to match Persian characters and common punctuation
         persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
         
@@ -226,16 +218,14 @@ class BeneficiaryInformationSingleSerializer(serializers.ModelSerializer):
         exclude = ['beneficiary_user_registration']
         read_only_fields = ['beneficiary_user_information_id']
 
-    @staticmethod
-    def validate_first_name(value):
+    def validate_first_name(self, value):
          # Regular expression to match Persian characters and common punctuation
         persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
         
         if not persian_regex.match(value):
             raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
         return value
-    @staticmethod
-    def validate_last_name(value):
+    def validate_last_name(self, value):
          # Regular expression to match Persian characters and common punctuation
         persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
         
@@ -248,8 +238,7 @@ class CharityUsernameUpdate(serializers.ModelSerializer):
         model = Charity
         fields = ['charity_username']
     
-    @staticmethod
-    def validate_charity_username(value):
+    def validate_charity_username(self, value):
         if Charity.objects.filter(charity_username=value).exists():
             raise serializers.ValidationError("This charity username is already taken.")
         return value
@@ -281,30 +270,26 @@ class BeneficiaryAddressInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryUserAddress
         exclude = ['beneficiary_user_registration']
-    @staticmethod
-    def validate(data):
+    def validate(self, data):
         city = data.get('city')
         province = data.get('province')
         if city != province:
             raise serializers.ValidationError("City must match the province")
         return data
-    @staticmethod
-    def validate_postal_code(value):
+    def validate_postal_code(self, value):
         if not value:
             return value
         if len(value) != 10:
             raise serializers.ValidationError("Postal code must be 10 digits")
         if not value.isdigit():
             raise serializers.ValidationError("Postal code must be numeric")
-    @staticmethod
-    def validate_longitude(value):
+    def validate_longitude(self, value):
         if not value:
             return value
         if not (-180 <= value <= 180):
             raise serializers.ValidationError("Longitude must be between -180 and 180 degrees")
         return value
-    @staticmethod
-    def validate_latitude(value):
+    def validate_latitude(self, value):
         if not value:
             return value
         if not (-90 <= value <= 90):
@@ -321,8 +306,7 @@ class CharityWorkFieldSerializer(serializers.ModelSerializer):
         model = CharityWorkfield
         exclude = ['charity']
     
-    @staticmethod
-    def validate_charity_work_field_name(value):
+    def validate_charity_work_field_name(self, value):
         if CharityWorkfield.objects.filter(charity_work_field_name=value).exists():
             raise serializers.ValidationError("This charity work field name is already taken.")
         return value

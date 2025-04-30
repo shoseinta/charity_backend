@@ -83,6 +83,11 @@ class BeneficiaryListView(generics.ListAPIView):
         return [val.strip() for val in combined.split(',') if val.strip()]
 
     def get_queryset(self):
+        genders = self.get_filtered_list('gender')
+        provinces = self.get_filtered_list('province')
+        tags = self.get_filtered_list('tag')
+        min_age = self.request.query_params.get('min_age')
+        max_age = self.request.query_params.get('max_age')
         search_query = self.request.query_params.get("search")
         page = self.request.query_params.get("page", 1)
         filters_dict = {
@@ -92,8 +97,10 @@ class BeneficiaryListView(generics.ListAPIView):
             'min_age': self.request.query_params.get('min_age', ''),
             'max_age': self.request.query_params.get('max_age', ''),
         }
-
-
+        cache_key = GlobalCacheManager.make_paginated_key("beneficiary:list", page, **filters_dict)
+        cached_queryset = GlobalCacheManager.get(cache_key)
+        if cached_queryset:
+            return cached_queryset
         base_queryset = BeneficiaryUserRegistration.objects.select_related(
             'beneficiary_user_information',
             'beneficiary_user_address__province',
@@ -119,9 +126,9 @@ class BeneficiaryListView(generics.ListAPIView):
                 )
             )
         )
-
-
-
+        
+        if not(search_query or genders or provinces or tags or min_age or max_age):
+            return base_queryset
         if search_query:
             try:
                 results = client.index("beneficiaries").search(search_query)
@@ -132,39 +139,33 @@ class BeneficiaryListView(generics.ListAPIView):
 
             return base_queryset
 
-        cache_key = GlobalCacheManager.make_paginated_key("beneficiary:list", page, **filters_dict)
-        cached_queryset = GlobalCacheManager.get(cache_key)
-        if cached_queryset:
-            return cached_queryset
-
-        queryset = base_queryset
-
-        genders = self.get_filtered_list('gender')
-        provinces = self.get_filtered_list('province')
-        tags = self.get_filtered_list('tag')
-        min_age = self.request.query_params.get('min_age')
-        max_age = self.request.query_params.get('max_age')
-
         if genders:
-            queryset = queryset.filter(beneficiary_user_information__gender__in=genders)
-
+            base_queryset = base_queryset.filter(
+                Q(beneficiary_user_information__gender__in=genders) | 
+                Q(beneficiary_user_information__isnull=True)
+            )
         if provinces:
-            queryset = queryset.filter(beneficiary_user_address__province__province_name__in=provinces)
-
+            base_queryset = base_queryset.filter(
+                Q(beneficiary_user_address__province__province_name__in=provinces) |
+                Q(beneficiary_user_address__isnull=True)
+            )
         if tags:
             tag_filter = Q()
             for tag in tags:
                 tag_filter |= Q(
                     beneficiary_user_additional_info__beneficiary_user_additional_info_title__icontains=tag
                 )
-            queryset = queryset.filter(tag_filter).distinct()
+            base_queryset = base_queryset.filter(tag_filter).distinct()
 
         today = date.today()
         if min_age:
             try:
                 min_age = int(min_age)
                 max_birth_date = today - relativedelta(years=min_age)
-                queryset = queryset.filter(beneficiary_user_information__birth_date__lte=max_birth_date)
+                base_queryset = base_queryset.filter(
+                    Q(beneficiary_user_information__birth_date__lte=max_birth_date) |
+                    Q(beneficiary_user_information__isnull=True)
+                )
             except (ValueError, TypeError):
                 pass
 
@@ -172,12 +173,15 @@ class BeneficiaryListView(generics.ListAPIView):
             try:
                 max_age = int(max_age)
                 min_birth_date = today - relativedelta(years=max_age)
-                queryset = queryset.filter(beneficiary_user_information__birth_date__gte=min_birth_date)
+                base_queryset = base_queryset.filter(
+                    Q(beneficiary_user_information__birth_date__gte=min_birth_date) |
+                    Q(beneficiary_user_information__isnull=True)
+                )
             except (ValueError, TypeError):
                 pass
 
-        GlobalCacheManager.set(cache_key, queryset)
-        return queryset
+        GlobalCacheManager.set(cache_key, base_queryset)
+        return base_queryset
 
 
 
@@ -185,8 +189,7 @@ class BeneficiaryRequestCreateView(generics.CreateAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = RequestCreationSerializer
 
-    @staticmethod
-    def get_queryset():
+    def get_queryset(self):
         return BeneficiaryRequest.objects.select_related(
             'beneficiary_request_type_layer1',
             'beneficiary_request_type_layer2'
