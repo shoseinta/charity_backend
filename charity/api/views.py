@@ -293,14 +293,6 @@ class BeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
         qs = BeneficiaryRequest.objects.all()
 
         # Annotate effective date
-        qs = qs.annotate(
-            effective_date=Coalesce(
-                'beneficiary_request_date',
-                'beneficiary_request_created_at',
-                output_field=DateTimeField()
-            )
-        )
-
         request = self.request
         params = request.query_params
 
@@ -604,9 +596,7 @@ class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, MeiliSearchReq
 
         if search_query:
             # If search is active, do not cache, return real-time queryset
-            base_qs = BeneficiaryRequest.objects.annotate(
-                effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-            ).filter(
+            base_qs = BeneficiaryRequest.objects.filter(
                 beneficiary_request_processing_stage__in=[
                     BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted'),
                     BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='pending_review'),
@@ -627,9 +617,7 @@ class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, MeiliSearchReq
             return queryset
 
         # Generate queryset
-        base_qs = BeneficiaryRequest.objects.annotate(
-            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-        ).filter(
+        base_qs = BeneficiaryRequest.objects.filter(
             beneficiary_request_processing_stage__in=[
                 BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted'),
                 BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='pending_review'),
@@ -658,9 +646,7 @@ class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, MeiliSe
 
         if search_query:
             # If searching, don't cache
-            base_qs = BeneficiaryRequest.objects.annotate(
-                effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-            ).filter(
+            base_qs = BeneficiaryRequest.objects.filter(
                 beneficiary_request_processing_stage__in=[
                     BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
                     BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
@@ -682,9 +668,7 @@ class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, MeiliSe
         if queryset:
             return queryset
 
-        base_qs = BeneficiaryRequest.objects.annotate(
-            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-        ).filter(
+        base_qs = BeneficiaryRequest.objects.filter(
             beneficiary_request_processing_stage__in=[
                 BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
                 BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
@@ -716,9 +700,7 @@ class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, MeiliSe
 
         if search_query:
             # If searching, no cache
-            base_qs = BeneficiaryRequest.objects.annotate(
-                effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-            ).filter(
+            base_qs = BeneficiaryRequest.objects.filter(
                 beneficiary_request_processing_stage__in=[
                     BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
                     BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
@@ -741,9 +723,7 @@ class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, MeiliSe
         if queryset:
             return queryset
 
-        base_qs = BeneficiaryRequest.objects.annotate(
-            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-        ).filter(
+        base_qs = BeneficiaryRequest.objects.filter(
             beneficiary_request_processing_stage__in=[
                 BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
                 BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),

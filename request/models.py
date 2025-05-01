@@ -88,7 +88,14 @@ class BeneficiaryRequest(models.Model):
     beneficiary_request_created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     beneficiary_request_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name='beneficiary_requests', db_index=True)
+    effective_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Coalesce of beneficiary_request_date and beneficiary_request_created_at"
+    )
 
+        
     def __str__(self):
         return f"Request #{self.beneficiary_request_id} - {self.beneficiary_request_title}"
     
@@ -104,7 +111,8 @@ class BeneficiaryRequest(models.Model):
                 # Delete associated recurring duration if exists
                 if hasattr(previous, 'beneficiary_request_duration_recurring'):
                     previous.beneficiary_request_duration_recurring.delete()
-
+        # Calculate effective_date before saving
+        self.effective_date = self.beneficiary_request_date or self.beneficiary_request_created_at
         super().save(*args, **kwargs)
 
 class BeneficiaryRequestDurationOnetime(models.Model):
