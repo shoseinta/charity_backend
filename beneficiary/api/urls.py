@@ -18,7 +18,12 @@ from .views import (BeneficiaryUserView,
                     BeneficiarySingleHistoryGetView,
                     AnnouncementView,
                     AnnouncementRequestView,
-                    BeneficiaryAllRequestsGetView,)
+                    BeneficiaryAllRequestsGetView,
+                    BeneficiaryRequestTypeLayer1View,
+                    BeneficiaryRequestTypeLayer2View,
+                    BeneficiaryRequestProcessingStageView,
+                    BeneficiaryRequestDurationLookupView
+                    )
 from django.urls import path
 
 urlpatterns = [
@@ -43,6 +48,12 @@ urlpatterns = [
     path('beneficiary/<int:pk>/request-single-history-get/<int:request_pk>/', BeneficiarySingleHistoryGetView.as_view(), name='beneficiary_single_history_get'),
     path('beneficiary/<int:pk>/announcement-get/', AnnouncementView.as_view(), name='beneficiary_request_announcement_get'),
     path('beneficiary/<int:pk>/request-announcement-get/<int:request_pk>/', AnnouncementRequestView.as_view(), name='beneficiary_request_announcement_request_get'),
+
+    #lookup request fields
+    path('requests/type-layer1/', BeneficiaryRequestTypeLayer1View.as_view(), name="type-layer1"),
+    path('requests/type-layer2/', BeneficiaryRequestTypeLayer2View.as_view(), name="type-layer2"),
+    path('requests/processing-stage/', BeneficiaryRequestProcessingStageView.as_view(), name="processing-stage"),
+    path('requests/duration', BeneficiaryRequestDurationLookupView.as_view(), name="duration"),
 
     
 ]

@@ -30,6 +30,10 @@ from .views import (BeneficiaryListView,
                     SingleRequestHistoriesView,
                     SingleBeneficiaryAllRequestsView,
                     AllRequestChildsView,
+                    BeneficiaryRequestTypeLayer1View,
+                    BeneficiaryRequestTypeLayer2View,
+                    BeneficiaryRequestProcessingStageView,
+                    BeneficiaryRequestDurationLookupView,
                     )
 
 urlpatterns = [
@@ -63,4 +67,11 @@ urlpatterns = [
     path('requests/<int:pk>/announcement/create/', BeneficiaryRequestAnnouncementCreateView.as_view(), name='beneficiary-request-announcement-create'),
     path('request-announcement/<int:pk>/update/', BeneficiaryRequestAnnouncementUpdateView.as_view(), name='beneficiary-request-announcement-update'),
     path('announcement/<int:pk>/update/', BeneficiaryAnnouncementUpdateView.as_view(), name='beneficiary-announcement-update'),
+
+    #lookup request fields
+    path('requests/type-layer1/', BeneficiaryRequestTypeLayer1View.as_view(), name="type-layer1"),
+    path('requests/type-layer2/', BeneficiaryRequestTypeLayer2View.as_view(), name="type-layer2"),
+    path('requests/processing-stage/', BeneficiaryRequestProcessingStageView.as_view(), name="processing-stage"),
+    path('requests/duration', BeneficiaryRequestDurationLookupView.as_view(), name="duration"),
+
 ]

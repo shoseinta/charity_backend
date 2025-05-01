@@ -12,7 +12,10 @@ from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
                             BeneficiaryRequestDurationRecurring,
                             BeneficiaryRequestDuration,
-                            CharityAnnouncementForRequest,)
+                            CharityAnnouncementForRequest,
+                            BeneficiaryRequestTypeLayer1,
+                            BeneficiaryRequestTypeLayer2,
+                            BeneficiaryRequestProcessingStage,)
 import re
 
 class BenefciaryProvinceSerializer(serializers.ModelSerializer):
@@ -332,4 +335,24 @@ class BeneficiaryRequestGetOnetimeSerializer(serializers.ModelSerializer):
 class BeneficiaryRequestGetRecurringSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestDurationRecurring
+        fields = '__all__'
+
+class BeneficiaryRequestTypeLayer1Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestTypeLayer1
+        fields = '__all__'
+
+class BeneficiaryRequestTypeLayer2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestTypeLayer2
+        fields = '__all__'
+
+class BeneficiaryRequestProcessingStageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestProcessingStage
+        fields = '__all__'
+
+class BeneficiaryRequestDurationLookupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDuration
         fields = '__all__'

@@ -11,7 +11,10 @@ from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestDurationRecurring,
                             BeneficiaryRequestProcessingStage,
                             BeneficiaryRequestDuration,
-                            CharityAnnouncementForRequest)
+                            CharityAnnouncementForRequest,
+                            BeneficiaryRequestTypeLayer1,
+                            BeneficiaryRequestTypeLayer2,
+                            BeneficiaryRequestProcessingStage)
 from .serializers import (BeneficiaryListSerializer,
                           RequestCreationSerializer,
                           BeneficiaryListSingleSerializer,
@@ -29,8 +32,10 @@ from .serializers import (BeneficiaryListSerializer,
                           BeneficiaryInformationUpdateSerializer,
                           BeneficiaryRequestAnnouncementUpdateSerializer,
                           CharityAnnouncementToBeneficiarySerializer,
-                          BeneficiaryRequestGetOnetimeSerializer,
-                          BeneficiaryRequestGetRecurringSerializer)
+                          BeneficiaryRequestTypeLayer1Serializer,
+                          BeneficiaryRequestTypeLayer2Serializer,
+                          BeneficiaryRequestProcessingStageSerializer,
+                          BeneficiaryRequestDurationLookupSerializer)
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
@@ -969,3 +974,23 @@ class AllRequestChildsView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = SingleRequestChildSerializer
     queryset = BeneficiaryRequestChild.objects.all()
+
+class BeneficiaryRequestTypeLayer1View(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryRequestTypeLayer1Serializer
+    queryset = BeneficiaryRequestTypeLayer1.objects.all()
+
+class BeneficiaryRequestTypeLayer2View(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryRequestTypeLayer2Serializer
+    queryset = BeneficiaryRequestTypeLayer2.objects.all()
+
+class BeneficiaryRequestProcessingStageView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryRequestProcessingStageSerializer
+    queryset = BeneficiaryRequestProcessingStage.objects.all()
+
+class BeneficiaryRequestDurationLookupView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryRequestDurationLookupSerializer
+    queryset = BeneficiaryRequestDuration.objects.all()

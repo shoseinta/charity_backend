@@ -18,14 +18,22 @@ from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestChildCreateSerializer,
                           BeneficiaryRequestHistorySerializer,
                           AnnouncementSerializer,
-                          BeneficiaryRequestAnnouncementSerializer,)
+                          BeneficiaryRequestAnnouncementSerializer,
+                          BeneficiaryRequestTypeLayer1Serializer,
+                          BeneficiaryRequestTypeLayer2Serializer,
+                          BeneficiaryRequestProcessingStageSerializer,
+                          BeneficiaryRequestDurationLookupSerializer)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
                             BeneficiaryRequestDurationRecurring,
                             BeneficiaryRequestChild,
                             BeneficiaryRequestHistory,
-                            CharityAnnouncementForRequest,)
+                            CharityAnnouncementForRequest,
+                            BeneficiaryRequestTypeLayer1,
+                            BeneficiaryRequestTypeLayer2,
+                            BeneficiaryRequestDuration,
+                            )
 from beneficiary.models import CharityAnnouncementToBeneficiary
 from user.api.permissions import IsCertainBeneficiary
 from django.db.models.functions import Coalesce
@@ -410,3 +418,23 @@ class AnnouncementRequestView(generics.ListAPIView):
         return CharityAnnouncementForRequest.objects.filter(
             beneficiary_request=BeneficiaryRequest.objects.get(pk=request_pk)
         )
+
+class BeneficiaryRequestTypeLayer1View(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestTypeLayer1Serializer
+    queryset = BeneficiaryRequestTypeLayer1.objects.all()
+
+class BeneficiaryRequestTypeLayer2View(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestTypeLayer2Serializer
+    queryset = BeneficiaryRequestTypeLayer2.objects.all()
+
+class BeneficiaryRequestProcessingStageView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestProcessingStageSerializer
+    queryset = BeneficiaryRequestProcessingStage.objects.all()
+
+class BeneficiaryRequestDurationLookupView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryRequestDurationLookupSerializer
+    queryset = BeneficiaryRequestDuration.objects.all()

@@ -14,6 +14,9 @@ from request.models import (
     BeneficiaryRequestChild,
     BeneficiaryRequestDuration,
     CharityAnnouncementForRequest,
+    BeneficiaryRequestTypeLayer1,
+    BeneficiaryRequestTypeLayer2,
+    BeneficiaryRequestProcessingStage,
 )
 
 
@@ -131,3 +134,23 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     class Meta:
         model = CharityAnnouncementToBeneficiary
         exclude = ['beneficiary_user_registration']
+
+class BeneficiaryRequestTypeLayer1Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestTypeLayer1
+        fields = '__all__'
+
+class BeneficiaryRequestTypeLayer2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestTypeLayer2
+        fields = '__all__'
+
+class BeneficiaryRequestProcessingStageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestProcessingStage
+        fields = '__all__'
+
+class BeneficiaryRequestDurationLookupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestDuration
+        fields = '__all__'
