@@ -251,7 +251,36 @@ class BeneficiaryRequestAnnouncementSerializer(serializers.ModelSerializer):
         model = CharityAnnouncementForRequest
         fields = '__all__'
 
+class BeneficiaryInfoForRequestSerializer(serializers.ModelSerializer):
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+    province_name = serializers.SerializerMethodField()
+    city_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BeneficiaryUserRegistration
+        fields = ['beneficiary_user_registration_id',
+                  'first_name', 
+                  'last_name', 
+                  'beneficiary_id', 
+                  'identification_number', 
+                  'province_name', 
+                  'city_name']
+        
+    def get_first_name(self, obj):
+        return obj.beneficiary_user_information.first_name
+    
+    def get_last_name(self, obj):
+        return obj.beneficiary_user_information.last_name
+    
+    def get_province_name(self, obj):
+        return obj.beneficiary_user_address.province.province_name
+    
+    def get_city_name(self, obj):
+        return obj.beneficiary_user_address.city.city_name
+        
 class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
+    beneficiary_user_registration = BeneficiaryInfoForRequestSerializer(read_only=True)
     beneficiary_request_duration_onetime = BeneficiaryRequestOneTimeSerializer(read_only=True)
     beneficiary_request_duration_recurring = BeneficiaryRequestRecurringSerializer(read_only=True)  # Updated to read_only=True
     class Meta:

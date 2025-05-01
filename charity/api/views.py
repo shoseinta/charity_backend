@@ -73,8 +73,6 @@ class MeiliSearchRequestMixin:
         except Exception:
             return base_queryset  # fallback on failure
 
-client = meilisearch.Client("http://127.0.0.1:7700", "search-master-key")
-
 class BeneficiaryListView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryListSerializer
@@ -145,15 +143,21 @@ class BeneficiaryListView(generics.ListAPIView):
             return base_queryset
 
         if genders:
-            base_queryset = base_queryset.filter(
-                Q(beneficiary_user_information__gender__in=genders) | 
-                Q(beneficiary_user_information__isnull=True)
-            )
+            try:
+                base_queryset = base_queryset.filter(
+                    Q(beneficiary_user_information__gender__in=genders) | 
+                    Q(beneficiary_user_information__isnull=True)
+                )
+            except:
+                pass
         if provinces:
-            base_queryset = base_queryset.filter(
-                Q(beneficiary_user_address__province__province_name__in=provinces) |
-                Q(beneficiary_user_address__isnull=True)
-            )
+            try:
+                base_queryset = base_queryset.filter(
+                    Q(beneficiary_user_address__province__province_name__in=provinces) |
+                    Q(beneficiary_user_address__isnull=True)
+                )
+            except:
+                pass
         if tags:
             tag_filter = Q()
             for tag in tags:
