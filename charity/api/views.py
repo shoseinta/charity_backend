@@ -290,7 +290,34 @@ class BeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
     ordering = ['effective_date']
 
     def get_queryset(self):
-        qs = BeneficiaryRequest.objects.all()
+        qs = BeneficiaryRequest.objects.select_related(
+            'beneficiary_user_registration',
+            'beneficiary_request_duration_onetime',
+            'beneficiary_request_duration_recurring'
+        ).only(
+            "beneficiary_request_id",
+            "beneficiary_user_registration__beneficiary_user_registration_id",
+            "beneficiary_user_registration__beneficiary_user_information__first_name",
+            "beneficiary_user_registration__beneficiary_user_information__last_name",
+            "beneficiary_user_registration__beneficiary_id",
+            "beneficiary_user_registration__identification_number",
+            "beneficiary_user_registration__beneficiary_user_address__province__province_name",
+            "beneficiary_user_registration__beneficiary_user_address__city__city_name",
+            "beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline",
+            "beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit",
+            "beneficiary_request_title",
+            "beneficiary_request_description",
+            "beneficiary_request_document",
+            "beneficiary_request_date",
+            "beneficiary_request_time",
+            "beneficiary_request_created_at",
+            "beneficiary_request_updated_at",
+            "effective_date",
+            "beneficiary_request_type_layer1",
+            "beneficiary_request_type_layer2",
+            "beneficiary_request_duration",
+            "beneficiary_request_processing_stage",
+        )
 
         # Annotate effective date
         request = self.request
