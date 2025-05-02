@@ -293,7 +293,11 @@ class BeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
         qs = BeneficiaryRequest.objects.select_related(
             'beneficiary_user_registration',
             'beneficiary_request_duration_onetime',
-            'beneficiary_request_duration_recurring'
+            'beneficiary_request_duration_recurring',
+        ).prefetch_related(
+            Prefetch('beneficiary_user_registration__beneficiary_user_information'),
+            Prefetch('beneficiary_user_registration__beneficiary_user_address__province'),
+            Prefetch('beneficiary_user_registration__beneficiary_user_address__city'),
         ).only(
             "beneficiary_request_id",
             "beneficiary_user_registration__beneficiary_user_registration_id",
@@ -322,6 +326,8 @@ class BeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
         # Annotate effective date
         request = self.request
         params = request.query_params
+        if not params:
+            return qs
 
         def get_list(param):
             return [p.strip() for p in params.get(param, '').split(',') if p.strip()]
@@ -618,18 +624,20 @@ class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, MeiliSearchReq
     ordering = ['effective_date']
 
     def get_queryset(self):
+        # Generate queryset
+        base_qs = BeneficiaryRequest.objects.filter(
+            beneficiary_request_processing_stage__in=[
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted'),
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='pending_review'),
+                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='under_evaluation'),
+            ]
+        )
         search_query = self.request.query_params.get("search")
         page = self.request.query_params.get("page", 1)
-
+        params = self.request.query_params
+        if not params:
+            return base_qs
         if search_query:
-            # If search is active, do not cache, return real-time queryset
-            base_qs = BeneficiaryRequest.objects.filter(
-                beneficiary_request_processing_stage__in=[
-                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted'),
-                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='pending_review'),
-                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='under_evaluation'),
-                ]
-            )
             base_qs = self.meili_filtered_queryset(base_qs)
             return self.apply_filters(base_qs)
 
@@ -643,16 +651,7 @@ class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, MeiliSearchReq
         if queryset:
             return queryset
 
-        # Generate queryset
-        base_qs = BeneficiaryRequest.objects.filter(
-            beneficiary_request_processing_stage__in=[
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted'),
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='pending_review'),
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='under_evaluation'),
-            ]
-        )
 
-        base_qs = self.meili_filtered_queryset(base_qs)
         filtered_qs = self.apply_filters(base_qs)
 
         GlobalCacheManager.set(cache_key, filtered_qs)

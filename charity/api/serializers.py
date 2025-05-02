@@ -259,25 +259,24 @@ class BeneficiaryInfoForRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BeneficiaryUserRegistration
-        fields = ['beneficiary_user_registration_id',
-                  'first_name', 
-                  'last_name', 
-                  'beneficiary_id', 
-                  'identification_number', 
-                  'province_name', 
-                  'city_name']
+        fields = ['beneficiary_user_registration_id', 'first_name', 'last_name', 
+                 'beneficiary_id', 'identification_number', 'province_name', 'city_name']
         
     def get_first_name(self, obj):
-        return obj.beneficiary_user_information.first_name
+        return obj.beneficiary_user_information.first_name if hasattr(obj, 'beneficiary_user_information') else None
     
     def get_last_name(self, obj):
-        return obj.beneficiary_user_information.last_name
+        return obj.beneficiary_user_information.last_name if hasattr(obj, 'beneficiary_user_information') else None
     
     def get_province_name(self, obj):
-        return obj.beneficiary_user_address.province.province_name
+        if hasattr(obj, 'beneficiary_user_address') and obj.beneficiary_user_address.province:
+            return obj.beneficiary_user_address.province.province_name
+        return None
     
     def get_city_name(self, obj):
-        return obj.beneficiary_user_address.city.city_name
+        if hasattr(obj, 'beneficiary_user_address') and obj.beneficiary_user_address.city:
+            return obj.beneficiary_user_address.city.city_name
+        return None
         
 class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
     beneficiary_user_registration = BeneficiaryInfoForRequestSerializer(read_only=True)
