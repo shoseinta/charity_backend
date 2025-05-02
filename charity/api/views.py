@@ -60,19 +60,6 @@ from django.db.models import Prefetch
 
 client = meilisearch.Client("http://127.0.0.1:7700", 'search-master-key')
 
-class MeiliSearchRequestMixin:
-    def meili_filtered_queryset(self, base_queryset):
-        search_query = self.request.query_params.get("search")
-        if not search_query:
-            return base_queryset
-
-        try:
-            results = client.index("requests").search(search_query)
-            ids = [int(hit["id"]) for hit in results.get("hits", [])]
-            return base_queryset.filter(pk__in=ids)
-        except Exception:
-            return base_queryset  # fallback on failure
-
 class BeneficiaryListView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryListSerializer
@@ -278,7 +265,7 @@ class BeneficiaryRequestChildCreate(generics.CreateAPIView):
         )
     
 
-class BeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
+class BeneficiaryAllRequestsView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
     filter_backends = [filters.OrderingFilter]
@@ -379,10 +366,19 @@ class BeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
             except ValueError:
                 pass
         
-        qs = self.meili_filtered_queryset(qs)
+        search_query = self.request.query_params.get("search")
+        if not search_query:
+            return qs
+        if search_query:
+            try:
+                results = client.index("requests").search(search_query)
+                ids = [int(hit["id"]) for hit in results.get("hits", [])]
+                return qs.filter(pk__in=ids)
+            except Exception:
+                return qs
         return qs
 
-class SingleBeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestMixin):
+class SingleBeneficiaryAllRequestsView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
     filter_backends = [filters.OrderingFilter]
@@ -458,8 +454,17 @@ class SingleBeneficiaryAllRequestsView(generics.ListAPIView, MeiliSearchRequestM
                 qs = qs.filter(effective_date__lte=max_date)
             except ValueError:
                 pass
+        search_query = self.request.query_params('search')
+        if not search_query:
+            return qs
+        if search_query:
+            try:
+                results = client.index("requests").search(search_query)
+                ids = [int(hit["id"]) for hit in results.get("hits", [])]
+                return qs.filter(pk__in=ids)
+            except Exception:
+                return qs
         
-        qs = self.meili_filtered_queryset(qs)
         return qs
 class BeneficiaryRequestOnetimeCreationView(generics.CreateAPIView):
     permission_classes = [IsAdminOrCharity]
@@ -522,253 +527,377 @@ class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED
         )
 
-class BeneficiaryRequestFilterMixin:
-    def apply_filters(self, queryset):
-        params = self.request.query_params
+class BeneficiaryNewRequestGetView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryGetRequestSerializer
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
+    ordering = ['effective_date']
+    _processing_stage_ids = None
+    
+    @classmethod
+    def get_processing_stage_ids(cls):
+        if cls._processing_stage_ids is None:
+            stage_names = ['submitted', 'pending_review', 'under_evaluation']
+            cls._processing_stage_ids = list(
+                BeneficiaryRequestProcessingStage.objects.filter(
+                    beneficiary_request_processing_stage_name__in=stage_names
+                ).values_list('pk', flat=True)
+            )
+        return cls._processing_stage_ids
+
+    def get_queryset(self):
+        qs = BeneficiaryRequest.objects.select_related(
+            'beneficiary_user_registration',
+            'beneficiary_request_duration_onetime',
+            'beneficiary_request_duration_recurring',
+        ).prefetch_related(
+            Prefetch('beneficiary_user_registration__beneficiary_user_information'),
+            Prefetch('beneficiary_user_registration__beneficiary_user_address__province'),
+            Prefetch('beneficiary_user_registration__beneficiary_user_address__city'),
+        ).only(
+            "beneficiary_request_id",
+            "beneficiary_user_registration__beneficiary_user_registration_id",
+            "beneficiary_user_registration__beneficiary_user_information__first_name",
+            "beneficiary_user_registration__beneficiary_user_information__last_name",
+            "beneficiary_user_registration__beneficiary_id",
+            "beneficiary_user_registration__identification_number",
+            "beneficiary_user_registration__beneficiary_user_address__province__province_name",
+            "beneficiary_user_registration__beneficiary_user_address__city__city_name",
+            "beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline",
+            "beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit",
+            "beneficiary_request_title",
+            "beneficiary_request_description",
+            "beneficiary_request_document",
+            "beneficiary_request_date",
+            "beneficiary_request_time",
+            "beneficiary_request_created_at",
+            "beneficiary_request_updated_at",
+            "effective_date",
+            "beneficiary_request_type_layer1",
+            "beneficiary_request_type_layer2",
+            "beneficiary_request_duration",
+            "beneficiary_request_processing_stage",
+        ).filter(
+            beneficiary_request_processing_stage__in = self.get_processing_stage_ids()
+        )
+
+        # Annotate effective date
+        request = self.request
+        params = request.query_params
+        if not params:
+            return qs
 
         def get_list(param):
             return [p.strip() for p in params.get(param, '').split(',') if p.strip()]
 
-        from datetime import datetime
-
-        # Filtering for ID fields
+        # Filtering
         layer1_ids = get_list('layer1_id')
         if layer1_ids:
-            queryset = queryset.filter(
-                beneficiary_request_type_layer1__beneficiary_request_type_layer1_id__in=layer1_ids
-            )
+            qs = qs.filter(beneficiary_request_type_layer1__beneficiary_request_type_layer1_id__in=layer1_ids)
 
         layer2_ids = get_list('layer2_id')
         if layer2_ids:
-            queryset = queryset.filter(
-                beneficiary_request_type_layer2__beneficiary_request_type_layer2_id__in=layer2_ids
-            )
+            qs = qs.filter(beneficiary_request_type_layer2__beneficiary_request_type_layer2_id__in=layer2_ids)
 
         duration_ids = get_list('duration_id')
         if duration_ids:
-            queryset = queryset.filter(
-                beneficiary_request_duration__beneficiary_request_duration_id__in=duration_ids
-            )
+            qs = qs.filter(beneficiary_request_duration__beneficiary_request_duration_id__in=duration_ids)
 
         processing_stage_ids = get_list('processing_stage_id')
         if processing_stage_ids:
-            queryset = queryset.filter(
-                beneficiary_request_processing_stage__beneficiary_request_processing_stage_id__in=processing_stage_ids
-            )
+            qs = qs.filter(beneficiary_request_processing_stage__beneficiary_request_processing_stage_id__in=processing_stage_ids)
 
-        # Range filtering for recurring limit
-        limit_min = params.get('limit_min')
-        limit_max = params.get('limit_max')
-        if limit_min:
-            try:
-                queryset = queryset.filter(
-                    beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__gte=int(limit_min)
-                )
-            except ValueError:
-                pass
-        if limit_max:
-            try:
-                queryset = queryset.filter(
-                    beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__lte=int(limit_max)
-                )
-            except ValueError:
-                pass
+        limits = get_list('limit')
+        if limits:
+            qs = qs.filter(beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__in=limits)
 
-        # Range filtering for onetime deadline
-        deadline_min = params.get('deadline_min')
-        deadline_max = params.get('deadline_max')
-        if deadline_min:
+        deadlines = get_list('deadline')
+        if deadlines:
             try:
-                min_date = datetime.strptime(deadline_min, '%Y-%m-%d').date()
-                queryset = queryset.filter(
-                    beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__gte=min_date
-                )
+                deadlines = [datetime.strptime(d, '%Y-%m-%d').date() for d in deadlines]
+                qs = qs.filter(beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__in=deadlines)
             except ValueError:
-                pass
+                pass  # ignore invalid date formats
 
-        if deadline_max:
-            try:
-                max_date = datetime.strptime(deadline_max, '%Y-%m-%d').date()
-                queryset = queryset.filter(
-                    beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__lte=max_date
-                )
-            except ValueError:
-                pass
-
-        # Range filtering for effective date
+        # Effective date range
         min_effective_date = params.get('min_effective_date')
         max_effective_date = params.get('max_effective_date')
+
         if min_effective_date:
             try:
                 min_date = datetime.strptime(min_effective_date, '%Y-%m-%d')
-                queryset = queryset.filter(effective_date__gte=min_date)
+                qs = qs.filter(effective_date__gte=min_date)
             except ValueError:
                 pass
 
         if max_effective_date:
             try:
                 max_date = datetime.strptime(max_effective_date, '%Y-%m-%d')
-                queryset = queryset.filter(effective_date__lte=max_date)
+                qs = qs.filter(effective_date__lte=max_date)
+            except ValueError:
+                pass
+        
+        search_query = self.request.query_params.get("search")
+        if not search_query:
+            return qs
+        if search_query:
+            try:
+                results = client.index("requests").search(search_query)
+                ids = [int(hit["id"]) for hit in results.get("hits", [])]
+                return qs.filter(pk__in=ids)
+            except Exception:
+                return qs
+        return qs
+
+class BeneficiaryOldRequestOnetimeGetView(generics.ListAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryGetRequestSerializer
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
+    ordering = ['effective_date']
+    _processing_stage_ids = None
+    _duration_ids = None
+    
+    @classmethod
+    def get_processing_stage_ids(cls):
+        if cls._processing_stage_ids is None:
+            stage_names = ['approved', 'in_progress']
+            cls._processing_stage_ids = list(
+                BeneficiaryRequestProcessingStage.objects.filter(
+                    beneficiary_request_processing_stage_name__in=stage_names
+                ).values_list('pk', flat=True)
+            )
+        return cls._processing_stage_ids
+    def get_queryset(self):
+        qs = BeneficiaryRequest.objects.select_related(
+            'beneficiary_user_registration',
+            'beneficiary_request_duration_onetime',
+            'beneficiary_request_duration_recurring',
+        ).prefetch_related(
+            Prefetch('beneficiary_user_registration__beneficiary_user_information'),
+            Prefetch('beneficiary_user_registration__beneficiary_user_address__province'),
+            Prefetch('beneficiary_user_registration__beneficiary_user_address__city'),
+        ).only(
+            "beneficiary_request_id",
+            "beneficiary_user_registration__beneficiary_user_registration_id",
+            "beneficiary_user_registration__beneficiary_user_information__first_name",
+            "beneficiary_user_registration__beneficiary_user_information__last_name",
+            "beneficiary_user_registration__beneficiary_id",
+            "beneficiary_user_registration__identification_number",
+            "beneficiary_user_registration__beneficiary_user_address__province__province_name",
+            "beneficiary_user_registration__beneficiary_user_address__city__city_name",
+            "beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline",
+            "beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit",
+            "beneficiary_request_title",
+            "beneficiary_request_description",
+            "beneficiary_request_document",
+            "beneficiary_request_date",
+            "beneficiary_request_time",
+            "beneficiary_request_created_at",
+            "beneficiary_request_updated_at",
+            "effective_date",
+            "beneficiary_request_type_layer1",
+            "beneficiary_request_type_layer2",
+            "beneficiary_request_duration",
+            "beneficiary_request_processing_stage",
+        ).filter(
+            beneficiary_request_processing_stage__in = self.get_processing_stage_ids(),
+            beneficiary_request_duration = 1
+        )
+
+        # Annotate effective date
+        request = self.request
+        params = request.query_params
+        if not params:
+            return qs
+
+        def get_list(param):
+            return [p.strip() for p in params.get(param, '').split(',') if p.strip()]
+
+        # Filtering
+        layer1_ids = get_list('layer1_id')
+        if layer1_ids:
+            qs = qs.filter(beneficiary_request_type_layer1__beneficiary_request_type_layer1_id__in=layer1_ids)
+
+        layer2_ids = get_list('layer2_id')
+        if layer2_ids:
+            qs = qs.filter(beneficiary_request_type_layer2__beneficiary_request_type_layer2_id__in=layer2_ids)
+
+        duration_ids = get_list('duration_id')
+        if duration_ids:
+            qs = qs.filter(beneficiary_request_duration__beneficiary_request_duration_id__in=duration_ids)
+
+        processing_stage_ids = get_list('processing_stage_id')
+        if processing_stage_ids:
+            qs = qs.filter(beneficiary_request_processing_stage__beneficiary_request_processing_stage_id__in=processing_stage_ids)
+
+        limits = get_list('limit')
+        if limits:
+            qs = qs.filter(beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__in=limits)
+
+        deadlines = get_list('deadline')
+        if deadlines:
+            try:
+                deadlines = [datetime.strptime(d, '%Y-%m-%d').date() for d in deadlines]
+                qs = qs.filter(beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__in=deadlines)
+            except ValueError:
+                pass  # ignore invalid date formats
+
+        # Effective date range
+        min_effective_date = params.get('min_effective_date')
+        max_effective_date = params.get('max_effective_date')
+
+        if min_effective_date:
+            try:
+                min_date = datetime.strptime(min_effective_date, '%Y-%m-%d')
+                qs = qs.filter(effective_date__gte=min_date)
             except ValueError:
                 pass
 
-        return queryset
-
-
-
-class BeneficiaryNewRequestGetView(BeneficiaryRequestFilterMixin, MeiliSearchRequestMixin, generics.ListAPIView):
+        if max_effective_date:
+            try:
+                max_date = datetime.strptime(max_effective_date, '%Y-%m-%d')
+                qs = qs.filter(effective_date__lte=max_date)
+            except ValueError:
+                pass
+        
+        search_query = self.request.query_params.get("search")
+        if not search_query:
+            return qs
+        if search_query:
+            try:
+                results = client.index("requests").search(search_query)
+                ids = [int(hit["id"]) for hit in results.get("hits", [])]
+                return qs.filter(pk__in=ids)
+            except Exception:
+                return qs
+        return qs    
+    
+class BeneficiaryOldRequestOngoingGetView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
     ordering = ['effective_date']
-
+    _processing_stage_ids = None
+    _duration_ids = None
+    
+    @classmethod
+    def get_processing_stage_ids(cls):
+        if cls._processing_stage_ids is None:
+            stage_names = ['approved', 'in_progress']
+            cls._processing_stage_ids = list(
+                BeneficiaryRequestProcessingStage.objects.filter(
+                    beneficiary_request_processing_stage_name__in=stage_names
+                ).values_list('pk', flat=True)
+            )
+        return cls._processing_stage_ids
     def get_queryset(self):
-        # Generate queryset
-        base_qs = BeneficiaryRequest.objects.filter(
-            beneficiary_request_processing_stage__in=[
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted'),
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='pending_review'),
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='under_evaluation'),
-            ]
+        qs = BeneficiaryRequest.objects.select_related(
+            'beneficiary_user_registration',
+            'beneficiary_request_duration_onetime',
+            'beneficiary_request_duration_recurring',
+        ).prefetch_related(
+            Prefetch('beneficiary_user_registration__beneficiary_user_information'),
+            Prefetch('beneficiary_user_registration__beneficiary_user_address__province'),
+            Prefetch('beneficiary_user_registration__beneficiary_user_address__city'),
+        ).only(
+            "beneficiary_request_id",
+            "beneficiary_user_registration__beneficiary_user_registration_id",
+            "beneficiary_user_registration__beneficiary_user_information__first_name",
+            "beneficiary_user_registration__beneficiary_user_information__last_name",
+            "beneficiary_user_registration__beneficiary_id",
+            "beneficiary_user_registration__identification_number",
+            "beneficiary_user_registration__beneficiary_user_address__province__province_name",
+            "beneficiary_user_registration__beneficiary_user_address__city__city_name",
+            "beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline",
+            "beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit",
+            "beneficiary_request_title",
+            "beneficiary_request_description",
+            "beneficiary_request_document",
+            "beneficiary_request_date",
+            "beneficiary_request_time",
+            "beneficiary_request_created_at",
+            "beneficiary_request_updated_at",
+            "effective_date",
+            "beneficiary_request_type_layer1",
+            "beneficiary_request_type_layer2",
+            "beneficiary_request_duration",
+            "beneficiary_request_processing_stage",
+        ).filter(
+            beneficiary_request_processing_stage__in = self.get_processing_stage_ids(),
+            beneficiary_request_duration__in = [2,3],
         )
-        search_query = self.request.query_params.get("search")
-        page = self.request.query_params.get("page", 1)
-        params = self.request.query_params
+
+        # Annotate effective date
+        request = self.request
+        params = request.query_params
         if not params:
-            return base_qs
-        if search_query:
-            base_qs = self.meili_filtered_queryset(base_qs)
-            return self.apply_filters(base_qs)
+            return qs
 
-        # No search → apply caching
-        filters_dict = {
-            'stage': 'new'
-        }
-        cache_key = GlobalCacheManager.make_paginated_key("request:list:new", page, **filters_dict)
+        def get_list(param):
+            return [p.strip() for p in params.get(param, '').split(',') if p.strip()]
 
-        queryset = GlobalCacheManager.get(cache_key)
-        if queryset:
-            return queryset
+        # Filtering
+        layer1_ids = get_list('layer1_id')
+        if layer1_ids:
+            qs = qs.filter(beneficiary_request_type_layer1__beneficiary_request_type_layer1_id__in=layer1_ids)
 
+        layer2_ids = get_list('layer2_id')
+        if layer2_ids:
+            qs = qs.filter(beneficiary_request_type_layer2__beneficiary_request_type_layer2_id__in=layer2_ids)
 
-        filtered_qs = self.apply_filters(base_qs)
+        duration_ids = get_list('duration_id')
+        if duration_ids:
+            qs = qs.filter(beneficiary_request_duration__beneficiary_request_duration_id__in=duration_ids)
 
-        GlobalCacheManager.set(cache_key, filtered_qs)
+        processing_stage_ids = get_list('processing_stage_id')
+        if processing_stage_ids:
+            qs = qs.filter(beneficiary_request_processing_stage__beneficiary_request_processing_stage_id__in=processing_stage_ids)
 
-        return filtered_qs
+        limits = get_list('limit')
+        if limits:
+            qs = qs.filter(beneficiary_request_duration_recurring__beneficiary_request_duration_recurring_limit__in=limits)
 
-    
-class BeneficiaryOldRequestOnetimeGetView(BeneficiaryRequestFilterMixin, MeiliSearchRequestMixin, generics.ListAPIView):
-    permission_classes = [IsAdminOrCharity]
-    serializer_class = BeneficiaryGetRequestSerializer
-    filter_backends = [filters.OrderingFilter]
-    ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
-    ordering = ['effective_date']
+        deadlines = get_list('deadline')
+        if deadlines:
+            try:
+                deadlines = [datetime.strptime(d, '%Y-%m-%d').date() for d in deadlines]
+                qs = qs.filter(beneficiary_request_duration_onetime__beneficiary_request_duration_onetime_deadline__in=deadlines)
+            except ValueError:
+                pass  # ignore invalid date formats
 
-    def get_queryset(self):
+        # Effective date range
+        min_effective_date = params.get('min_effective_date')
+        max_effective_date = params.get('max_effective_date')
+
+        if min_effective_date:
+            try:
+                min_date = datetime.strptime(min_effective_date, '%Y-%m-%d')
+                qs = qs.filter(effective_date__gte=min_date)
+            except ValueError:
+                pass
+
+        if max_effective_date:
+            try:
+                max_date = datetime.strptime(max_effective_date, '%Y-%m-%d')
+                qs = qs.filter(effective_date__lte=max_date)
+            except ValueError:
+                pass
+        
         search_query = self.request.query_params.get("search")
-        page = self.request.query_params.get("page", 1)
-
+        if not search_query:
+            return qs
         if search_query:
-            # If searching, don't cache
-            base_qs = BeneficiaryRequest.objects.filter(
-                beneficiary_request_processing_stage__in=[
-                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
-                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
-                ],
-                beneficiary_request_duration__in=[
-                    BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time')
-                ]
-            )
-            base_qs = self.meili_filtered_queryset(base_qs)
-            return self.apply_filters(base_qs)
+            try:
+                results = client.index("requests").search(search_query)
+                ids = [int(hit["id"]) for hit in results.get("hits", [])]
+                return qs.filter(pk__in=ids)
+            except Exception:
+                return qs
+        return qs
 
-        # No search: use cache
-        filters_dict = {
-            'stage': 'old_onetime'
-        }
-        cache_key = GlobalCacheManager.make_paginated_key("request:list:old_onetime", page, **filters_dict)
-
-        queryset = GlobalCacheManager.get(cache_key)
-        if queryset:
-            return queryset
-
-        base_qs = BeneficiaryRequest.objects.filter(
-            beneficiary_request_processing_stage__in=[
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
-            ],
-            beneficiary_request_duration__in=[
-                BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time')
-            ]
-        )
-
-        base_qs = self.meili_filtered_queryset(base_qs)
-        filtered_qs = self.apply_filters(base_qs)
-
-        GlobalCacheManager.set(cache_key, filtered_qs)
-
-        return filtered_qs
-
-
-    
-class BeneficiaryOldRequestOngoingGetView(BeneficiaryRequestFilterMixin, MeiliSearchRequestMixin, generics.ListAPIView):
-    permission_classes = [IsAdminOrCharity]
-    serializer_class = BeneficiaryGetRequestSerializer
-    filter_backends = [filters.OrderingFilter]
-    ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
-    ordering = ['effective_date']
-
-    def get_queryset(self):
-        search_query = self.request.query_params.get("search")
-        page = self.request.query_params.get("page", 1)
-
-        if search_query:
-            # If searching, no cache
-            base_qs = BeneficiaryRequest.objects.filter(
-                beneficiary_request_processing_stage__in=[
-                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
-                    BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
-                ],
-                beneficiary_request_duration__in=[
-                    BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'),
-                    BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='permanent'),
-                ]
-            )
-            base_qs = self.meili_filtered_queryset(base_qs)
-            return self.apply_filters(base_qs)
-
-        # No search: cache based on page
-        filters_dict = {
-            'stage': 'old_ongoing'
-        }
-        cache_key = GlobalCacheManager.make_paginated_key("request:list:old_ongoing", page, **filters_dict)
-
-        queryset = GlobalCacheManager.get(cache_key)
-        if queryset:
-            return queryset
-
-        base_qs = BeneficiaryRequest.objects.filter(
-            beneficiary_request_processing_stage__in=[
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='approved'),
-                BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='in_progress'),
-            ],
-            beneficiary_request_duration__in=[
-                BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'),
-                BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='permanent'),
-            ]
-        )
-
-        base_qs = self.meili_filtered_queryset(base_qs)
-        filtered_qs = self.apply_filters(base_qs)
-
-        GlobalCacheManager.set(cache_key, filtered_qs)
-
-        return filtered_qs
-
-
-    
 class SingleRequestGetView(generics.RetrieveAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryGetRequestSerializer

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'core',
     'rest_framework_simplejwt.token_blacklist',
     'silk',
+
 ]
 
 MIDDLEWARE = [
@@ -190,6 +191,7 @@ SIMPLE_JWT = {
 SILKY_PYTHON_PROFILER = True
 SILKY_PYTHON_PROFILER_BINARY = True
 SILKY_INTERCEPT_PERCENT = 100  # Profile every request
+
 
 
 
