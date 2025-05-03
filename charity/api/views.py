@@ -56,6 +56,8 @@ from datetime import datetime
 import meilisearch
 from core.cache_manager import GlobalCacheManager
 from django.db.models import Prefetch
+from django.db.models import F, ExpressionWrapper, fields
+from django.db.models.functions import Now, ExtractYear, ExtractMonth, ExtractDay
 
 
 client = meilisearch.Client("http://127.0.0.1:7700", 'search-master-key')
@@ -91,31 +93,47 @@ class BeneficiaryListView(generics.ListAPIView):
         cached_queryset = GlobalCacheManager.get(cache_key)
         if cached_queryset:
             return cached_queryset
+    
         base_queryset = BeneficiaryUserRegistration.objects.select_related(
             'beneficiary_user_information',
             'beneficiary_user_address__province',
             'beneficiary_user_address__city'
-        ).only(
-            'beneficiary_user_registration_id',
-            'identification_number',
-            'beneficiary_id',
-            'phone_number',
-            'email',
-            'beneficiary_user_information__first_name',
-            'beneficiary_user_information__last_name',
-            'beneficiary_user_information__gender',
-            'beneficiary_user_information__birth_date',
-            'beneficiary_user_address__province__province_name',
-            'beneficiary_user_address__city__city_name',
-        ).prefetch_related(
-            Prefetch(
-                'beneficiary_user_additional_info',
-                queryset=BeneficiaryUserAdditionalInfo.objects.only(
-                    'beneficiary_user_registration',  # relation field
-                    'beneficiary_user_additional_info_title'
+            ).annotate(
+                age=ExpressionWrapper(
+                    ExtractYear(Now()) - ExtractYear('beneficiary_user_information__birth_date') - 
+                    Case(
+                        When(beneficiary_user_information__birth_date__month__gt=ExtractMonth(Now()), then=1),
+                        When(
+                            beneficiary_user_information__birth_date__month=ExtractMonth(Now()),
+                            beneficiary_user_information__birth_date__day__gt=ExtractDay(Now()),
+                            then=1
+                        ),
+                        default=0,
+                        output_field=fields.IntegerField()
+                    ),
+                    output_field=fields.IntegerField()
+                )
+            ).only(
+                'beneficiary_user_registration_id',
+                'identification_number',
+                'beneficiary_id',
+                'phone_number',
+                'email',
+                'beneficiary_user_information__first_name',
+                'beneficiary_user_information__last_name',
+                'beneficiary_user_information__gender',
+                'beneficiary_user_information__birth_date',
+                'beneficiary_user_address__province__province_name',
+                'beneficiary_user_address__city__city_name',
+            ).prefetch_related(
+                Prefetch(
+                    'beneficiary_user_additional_info',
+                    queryset=BeneficiaryUserAdditionalInfo.objects.only(
+                        'beneficiary_user_registration',  # relation field
+                        'beneficiary_user_additional_info_title'
+                    )
                 )
             )
-        )
         
         if not(search_query or genders or provinces or tags or min_age or max_age):
             return base_queryset
@@ -157,9 +175,8 @@ class BeneficiaryListView(generics.ListAPIView):
         if min_age:
             try:
                 min_age = int(min_age)
-                max_birth_date = today - relativedelta(years=min_age)
                 base_queryset = base_queryset.filter(
-                    Q(beneficiary_user_information__birth_date__lte=max_birth_date) |
+                    Q(age__gte=min_age) |
                     Q(beneficiary_user_information__isnull=True)
                 )
             except (ValueError, TypeError):
@@ -168,9 +185,8 @@ class BeneficiaryListView(generics.ListAPIView):
         if max_age:
             try:
                 max_age = int(max_age)
-                min_birth_date = today - relativedelta(years=max_age)
                 base_queryset = base_queryset.filter(
-                    Q(beneficiary_user_information__birth_date__gte=min_birth_date) |
+                    Q(age__lte=max_age) |
                     Q(beneficiary_user_information__isnull=True)
                 )
             except (ValueError, TypeError):
