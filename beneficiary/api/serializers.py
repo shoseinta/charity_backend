@@ -166,3 +166,13 @@ class CityLookupSerializer(serializers.ModelSerializer):
     class Meta:
         model = City
         fields = '__all__'
+
+class RequestAnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityAnnouncementForRequest
+        fields = '__all__'
+
+class BeneficiaryAnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityAnnouncementToBeneficiary
+        fields = '__all__'

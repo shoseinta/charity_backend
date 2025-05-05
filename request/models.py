@@ -189,6 +189,7 @@ class CharityAnnouncementForRequest(models.Model):
     charity_announcement_for_request_description = models.TextField(blank=True, null=True)
     charity_announcement_for_request_created_at = models.DateTimeField(auto_now_add=True)
     charity_announcement_for_request_updated_at = models.DateTimeField(auto_now=True)
+    charity_announcement_for_request_seen = models.BooleanField(default=False)
     beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE, related_name='beneficiary_request_announcement')
 
     def __str__(self):

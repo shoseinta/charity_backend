@@ -49,7 +49,7 @@ urlpatterns = [
     path('beneficiary/<int:pk>/request-histories-get/<int:request_pk>/', BeneficiaryRequestHistoriesGetView.as_view(), name='beneficiary_request_histories_get'),
     path('beneficiary/<int:pk>/request-single-history-get/<int:request_pk>/', BeneficiarySingleHistoryGetView.as_view(), name='beneficiary_single_history_get'),
     path('beneficiary/<int:pk>/announcement-get/', AnnouncementView.as_view(), name='beneficiary_request_announcement_get'),
-    path('beneficiary/<int:pk>/request-announcement-get/<int:request_pk>/', AnnouncementRequestView.as_view(), name='beneficiary_request_announcement_request_get'),
+    path('beneficiary/<int:pk>/request-announcement-get/', AnnouncementRequestView.as_view(), name='beneficiary_request_announcement_request_get'),
 
     #lookup request fields
     path('requests/type-layer1/', BeneficiaryRequestTypeLayer1View.as_view(), name="type-layer1"),

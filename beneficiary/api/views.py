@@ -26,7 +26,9 @@ from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestProcessingStageSerializer,
                           BeneficiaryRequestDurationLookupSerializer,
                           ProvinceLookupSerializer,
-                          CityLookupSerializer,)
+                          CityLookupSerializer,
+                          RequestAnnouncementSerializer,
+                          BeneficiaryAnnouncementSerializer,)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
@@ -43,6 +45,8 @@ from user.api.permissions import IsCertainBeneficiary
 from django.db.models.functions import Coalesce
 from django.db.models import F, Case, When, Value, DateTimeField
 from core.cache_manager import GlobalCacheManager
+from datetime import timedelta
+from django.utils import timezone
 
 class BeneficiaryAllRequestsGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
@@ -403,13 +407,15 @@ class BeneficiarySingleHistoryGetView(generics.RetrieveAPIView):
 class AnnouncementView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = AnnouncementSerializer
-    def get_queryset(self):
-        # Get the 'pk' from the URL
-        beneficiary = self.kwargs.get('pk')
 
-        # Filter requests based on beneficiary
+    def get_queryset(self):
+        beneficiary = self.kwargs.get('pk')
+        one_month_ago = timezone.now() - timedelta(days=30)
+
         return CharityAnnouncementToBeneficiary.objects.filter(
-            beneficiary_user_registration=beneficiary
+            beneficiary_user_registration=beneficiary,
+            charity_announcement_to_beneficiary_created_at__gte=one_month_ago,
+            charity_announcement_to_beneficiary_seen=False
         )
 
 class AnnouncementRequestView(generics.ListAPIView):
@@ -417,11 +423,39 @@ class AnnouncementRequestView(generics.ListAPIView):
     serializer_class = BeneficiaryRequestAnnouncementSerializer
 
     def get_queryset(self):
-        request_pk = self.kwargs.get('request_pk')
+        beneficiary = self.kwargs.get('pk')
+        one_month_ago = timezone.now() - timedelta(days=30)
 
         return CharityAnnouncementForRequest.objects.filter(
-            beneficiary_request=BeneficiaryRequest.objects.get(pk=request_pk)
+            beneficiary_user_registration=beneficiary,
+            charity_announcement_to_beneficiary_created_at__gte=one_month_ago,
+            charity_announcement_to_beneficiary_seen=False
         )
+
+class RequestAnnouncementDetailView(generics.RetrieveAPIView):
+    queryset = CharityAnnouncementForRequest.objects.all()
+    serializer_class = RequestAnnouncementSerializer
+    lookup_field = 'pk'
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not instance.charity_announcement_for_request_seen:
+            instance.charity_announcement_for_request_seen = True
+            instance.save(update_fields=['charity_announcement_for_request_seen'])
+        return super().retrieve(request, *args, **kwargs)
+
+# 🔹 2. For Beneficiary-specific Announcements
+class BeneficiaryAnnouncementDetailView(generics.RetrieveAPIView):
+    queryset = CharityAnnouncementToBeneficiary.objects.all()
+    serializer_class = BeneficiaryAnnouncementSerializer
+    lookup_field = 'pk'
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not instance.charity_announcement_to_beneficiary_seen:
+            instance.charity_announcement_to_beneficiary_seen = True
+            instance.save(update_fields=['charity_announcement_to_beneficiary_seen'])
+        return super().retrieve(request, *args, **kwargs)
 
 class BeneficiaryRequestTypeLayer1View(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
