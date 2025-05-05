@@ -34,6 +34,8 @@ from .views import (BeneficiaryListView,
                     BeneficiaryRequestTypeLayer2View,
                     BeneficiaryRequestProcessingStageView,
                     BeneficiaryRequestDurationLookupView,
+                    ProvinceLookupView,
+                    CityLookupView,
                     )
 
 urlpatterns = [
@@ -73,5 +75,7 @@ urlpatterns = [
     path('requests/type-layer2/', BeneficiaryRequestTypeLayer2View.as_view(), name="type-layer2"),
     path('requests/processing-stage/', BeneficiaryRequestProcessingStageView.as_view(), name="processing-stage"),
     path('requests/duration/', BeneficiaryRequestDurationLookupView.as_view(), name="duration"),
+    path('provinces/',ProvinceLookupView.as_view(), name='provinces'),
+    path('cities/', CityLookupView.as_view(), name='cities'),
 
 ]

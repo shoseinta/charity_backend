@@ -5,6 +5,8 @@ from beneficiary.models import (
     BeneficiaryUserInformation,
     BeneficiaryUserAddress,
     CharityAnnouncementToBeneficiary,
+    Province,
+    City,
 )
 from request.models import (
     BeneficiaryRequest,
@@ -153,4 +155,14 @@ class BeneficiaryRequestProcessingStageSerializer(serializers.ModelSerializer):
 class BeneficiaryRequestDurationLookupSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestDuration
+        fields = '__all__'
+
+class ProvinceLookupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Province
+        fields = '__all__'
+
+class CityLookupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
         fields = '__all__'

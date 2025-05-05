@@ -6,7 +6,9 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.http import Http404
-from beneficiary.models import BeneficiaryUserRegistration
+from beneficiary.models import (BeneficiaryUserRegistration,
+                                Province,
+                                City)
 from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestSerializer,
                           BeneficiarySingleRequestOneTimeSerializer,
@@ -22,7 +24,9 @@ from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestTypeLayer1Serializer,
                           BeneficiaryRequestTypeLayer2Serializer,
                           BeneficiaryRequestProcessingStageSerializer,
-                          BeneficiaryRequestDurationLookupSerializer)
+                          BeneficiaryRequestDurationLookupSerializer,
+                          ProvinceLookupSerializer,
+                          CityLookupSerializer,)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
@@ -438,3 +442,15 @@ class BeneficiaryRequestDurationLookupView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestDurationLookupSerializer
     queryset = BeneficiaryRequestDuration.objects.all()
+
+class ProvinceLookupView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = ProvinceLookupSerializer
+    queryset = Province.objects.all()
+    pagination_class = None
+
+class CityLookupView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = CityLookupSerializer
+    queryset = City.objects.all()
+    pagination_class = None

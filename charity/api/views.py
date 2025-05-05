@@ -3,7 +3,9 @@ from beneficiary.models import (BeneficiaryUserRegistration,
                                 BeneficiaryUserInformation,
                                 BeneficiaryUserAddress,
                                 BeneficiaryUserAdditionalInfo,
-                                CharityAnnouncementToBeneficiary,)
+                                CharityAnnouncementToBeneficiary,
+                                Province,
+                                City,)
 from request.models import (BeneficiaryRequest,
                             BeneficiaryRequestHistory,
                             BeneficiaryRequestChild,
@@ -35,7 +37,9 @@ from .serializers import (BeneficiaryListSerializer,
                           BeneficiaryRequestTypeLayer1Serializer,
                           BeneficiaryRequestTypeLayer2Serializer,
                           BeneficiaryRequestProcessingStageSerializer,
-                          BeneficiaryRequestDurationLookupSerializer)
+                          BeneficiaryRequestDurationLookupSerializer,
+                          ProvinceLookupSerializer,
+                          CityLookupSerializer,)
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
@@ -1209,3 +1213,15 @@ class BeneficiaryRequestDurationLookupView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryRequestDurationLookupSerializer
     queryset = BeneficiaryRequestDuration.objects.all()
+
+class ProvinceLookupView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = ProvinceLookupSerializer
+    queryset = Province.objects.all()
+    pagination_class = None
+
+class CityLookupView(generics.ListAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = CityLookupSerializer
+    queryset = City.objects.all()
+    pagination_class = None
