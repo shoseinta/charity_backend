@@ -39,7 +39,8 @@ from .serializers import (BeneficiaryListSerializer,
                           BeneficiaryRequestProcessingStageSerializer,
                           BeneficiaryRequestDurationLookupSerializer,
                           ProvinceLookupSerializer,
-                          CityLookupSerializer,)
+                          CityLookupSerializer,
+                          ChildProcessingStageChangeSerializer)
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
@@ -62,7 +63,22 @@ from core.cache_manager import GlobalCacheManager
 from django.db.models import Prefetch
 from django.db.models import F, ExpressionWrapper, fields
 from django.db.models.functions import Now, ExtractYear, ExtractMonth, ExtractDay
-
+# request/views.py
+from charity.tasks import (create_request_announcement,
+                           update_request_announcement,
+                           delete_request_announcement,
+                           create_history_announcement,
+                           create_child_request_announcement,
+                           create_history_update_announcement,
+                           create_history_deletion_announcement,
+                           create_child_update_announcement,
+                           create_child_deletion_announcement,
+                           create_recurring_update_announcement,
+                           create_recurring_deletion_announcement,
+                           create_onetime_update_announcement,
+                           create_onetime_deletion_announcement,
+                           create_stage_change_announcement,
+                           create_child_stage_change_announcement,)
 
 client = meilisearch.Client("http://127.0.0.1:7700", 'search-master-key')
 
@@ -213,8 +229,10 @@ class BeneficiaryRequestCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         beneficiary_pk = self.kwargs.get('pk')  # Get pk from URL
-        serializer.save(beneficiary_user_registration_id=beneficiary_pk)
-
+        request = serializer.save(beneficiary_user_registration_id=beneficiary_pk)
+        
+        # Trigger async task to create announcement
+        create_request_announcement.delay(request.beneficiary_request_id)
 
 class BeneficiaryDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAdminOrCharity]
@@ -246,6 +264,8 @@ class BeneficiaryRequestHistoryCreate(generics.CreateAPIView):
         # Save the object while associating the BeneficiaryRequest
         serializer.save(beneficiary_request=beneficiary_request)
 
+        create_history_announcement.delay(beneficiary_request.pk)
+
         # Customize the response
         return Response(
             {
@@ -274,6 +294,8 @@ class BeneficiaryRequestChildCreate(generics.CreateAPIView):
 
         # Save the object while associating the BeneficiaryRequest
         serializer.save(beneficiary_request=beneficiary_request)
+
+        create_child_request_announcement.delay(beneficiary_request.pk)
 
         # Customize the response
         return Response(
@@ -984,11 +1006,22 @@ class SingleRequestGetView(generics.RetrieveAPIView):
     queryset = BeneficiaryRequest.objects.all()
     lookup_field = 'pk'
 
+
 class BeneficiaryUpdateRequestView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryUpdateRequestSerializer
     queryset = BeneficiaryRequest.objects.all()
     lookup_field = 'pk' 
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        update_request_announcement.delay(instance.pk)  # Async announcement
+
+    def perform_destroy(self, instance):
+        request_id = instance.pk
+        instance.delete()
+        delete_request_announcement.delay(request_id)
+ 
 
 class SingleHistoryUpdateView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrCharity]
@@ -996,11 +1029,31 @@ class SingleHistoryUpdateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BeneficiaryRequestHistory.objects.all()
     lookup_field = 'pk'
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        request_id = instance.beneficiary_request.pk
+        create_history_update_announcement.delay(request_id)
+
+    def perform_destroy(self, instance):
+        request_id = instance.beneficiary_request.pk
+        instance.delete()
+        create_history_deletion_announcement.delay(request_id)
+
 class SingleChildUpdateView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = SingleRequestChildSerializer
     queryset = BeneficiaryRequestChild.objects.all()
     lookup_field = 'pk'
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        request_id = instance.beneficiary_request.pk
+        create_child_update_announcement.delay(request_id)
+
+    def perform_destroy(self, instance):
+        request_id = instance.beneficiary_request.pk
+        instance.delete()
+        create_child_deletion_announcement.delay(request_id)
 
 
 class SingleOnetimeUpdateView(generics.RetrieveUpdateDestroyAPIView):
@@ -1009,17 +1062,54 @@ class SingleOnetimeUpdateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BeneficiaryRequestDurationOnetime.objects.all()
     lookup_field = 'pk'
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        request_id = instance.beneficiary_request.pk
+        create_onetime_update_announcement.delay(request_id)
+
+    def perform_destroy(self, instance):
+        request_id = instance.beneficiary_request.pk
+        instance.delete()
+        create_onetime_deletion_announcement.delay(request_id)
+
 class SingleRecurringUpdateView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryRequestUpdateRecurringSerializer
     queryset = BeneficiaryRequestDurationRecurring.objects.all()
     lookup_field = 'pk'
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        request_id = instance.beneficiary_request.pk
+        create_recurring_update_announcement.delay(request_id)
+
+    def perform_destroy(self, instance):
+        request_id = instance.beneficiary_request.pk
+        instance.delete()
+        create_recurring_deletion_announcement.delay(request_id)
+
 class ChangeRequestProcessingStageView(generics.UpdateAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = BeneficiaryRequestChangeProcessingStageSerializer
     queryset = BeneficiaryRequest.objects.all()
     lookup_field = 'pk'
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        new_stage = instance.beneficiary_request_processing_stage.beneficiary_request_processing_stage_name
+        create_stage_change_announcement.delay(instance.pk, new_stage)
+
+class ChangeChildRequestProcessingStage(generics.UpdateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = ChildProcessingStageChangeSerializer
+    queryset = BeneficiaryRequestChild.objects.all()
+    lookup_field = 'pk'
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        new_stage = instance.beneficiary_request_child_processing_stage.beneficiary_request_processing_stage_name
+        parent_request_id = instance.beneficiary_request.pk
+        create_child_stage_change_announcement.delay(parent_request_id, new_stage)
 
 class UpdateBeneficiaryAddressView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrCharity]

@@ -394,3 +394,8 @@ class CityLookupSerializer(serializers.ModelSerializer):
     class Meta:
         model = City
         fields = '__all__'
+
+class ChildProcessingStageChangeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryChildRequestSerializer
+        fields = ['beneficiary_request_child_processing_stage']
