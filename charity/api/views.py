@@ -415,14 +415,14 @@ class BeneficiaryAllRequestsView(generics.ListAPIView):
         if min_amount:
             try:
                 min_amount = int(min_amount)
-                qs = qs.filter(beneficiary_request_min_amount__gte=min_amount)
+                qs = qs.filter(beneficiary_request_amount__gte=min_amount)
             except ValueError:
                 pass
 
         if max_amount:
             try:
                 max_amount = int(max_amount)
-                qs = qs.filter(beneficiary_request_max_amount__lte=max_amount)
+                qs = qs.filter(beneficiary_request_amount__lte=max_amount)
             except ValueError:
                 pass
         
@@ -695,14 +695,14 @@ class BeneficiaryNewRequestGetView(generics.ListAPIView):
         if min_amount:
             try:
                 min_amount = int(min_amount)
-                qs = qs.filter(beneficiary_request_min_amount__gte=min_amount)
+                qs = qs.filter(beneficiary_request_amount__gte=min_amount)
             except ValueError:
                 pass
 
         if max_amount:
             try:
                 max_amount = int(max_amount)
-                qs = qs.filter(beneficiary_request_max_amount__lte=max_amount)
+                qs = qs.filter(beneficiary_request_amount__lte=max_amount)
             except ValueError:
                 pass
 
@@ -836,14 +836,14 @@ class BeneficiaryOldRequestOnetimeGetView(generics.ListAPIView):
         if min_amount:
             try:
                 min_amount = int(min_amount)
-                qs = qs.filter(beneficiary_request_min_amount__gte=min_amount)
+                qs = qs.filter(beneficiary_request_amount__gte=min_amount)
             except ValueError:
                 pass
 
         if max_amount:
             try:
                 max_amount = int(max_amount)
-                qs = qs.filter(beneficiary_request_max_amount__lte=max_amount)
+                qs = qs.filter(beneficiary_request_amount__lte=max_amount)
             except ValueError:
                 pass
 
@@ -977,14 +977,14 @@ class BeneficiaryOldRequestOngoingGetView(generics.ListAPIView):
         if min_amount:
             try:
                 min_amount = int(min_amount)
-                qs = qs.filter(beneficiary_request_min_amount__gte=min_amount)
+                qs = qs.filter(beneficiary_request_amount__gte=min_amount)
             except ValueError:
                 pass
 
         if max_amount:
             try:
                 max_amount = int(max_amount)
-                qs = qs.filter(beneficiary_request_max_amount__lte=max_amount)
+                qs = qs.filter(beneficiary_request_amount__lte=max_amount)
             except ValueError:
                 pass
 
