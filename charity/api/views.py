@@ -315,6 +315,7 @@ class BeneficiaryAllRequestsView(generics.ListAPIView):
             "beneficiary_request_title",
             "beneficiary_request_description",
             "beneficiary_request_document",
+            "beneficiary_request_amount",
             "beneficiary_request_date",
             "beneficiary_request_time",
             "beneficiary_request_created_at",
@@ -381,6 +382,23 @@ class BeneficiaryAllRequestsView(generics.ListAPIView):
                 qs = qs.filter(effective_date__lte=max_date)
             except ValueError:
                 pass
+
+        min_amount = params.get('min_amount')
+        max_amount = params.get('max_amount')
+
+        if min_amount:
+            try:
+                min_amount = int(min_amount)
+                qs = qs.filter(beneficiary_request_min_amount__gte=min_amount)
+            except ValueError:
+                pass
+
+        if max_amount:
+            try:
+                max_amount = int(max_amount)
+                qs = qs.filter(beneficiary_request_max_amount__lte=max_amount)
+            except ValueError:
+                pass
         
         search_query = self.request.query_params.get("search")
         if not search_query:
@@ -408,15 +426,6 @@ class SingleBeneficiaryAllRequestsView(generics.ListAPIView):
     def get_queryset(self):
         pk = self.kwargs.get('pk')
         qs = BeneficiaryRequest.objects.filter(beneficiary_user_registration = pk)
-
-        # Annotate effective date
-        qs = qs.annotate(
-            effective_date=Coalesce(
-                'beneficiary_request_date',
-                'beneficiary_request_created_at',
-                output_field=DateTimeField()
-            )
-        )
 
         request = self.request
         params = request.query_params
@@ -585,6 +594,7 @@ class BeneficiaryNewRequestGetView(generics.ListAPIView):
             "beneficiary_request_title",
             "beneficiary_request_description",
             "beneficiary_request_document",
+            "beneficiary_request_amount",
             "beneficiary_request_date",
             "beneficiary_request_time",
             "beneficiary_request_created_at",
@@ -653,7 +663,23 @@ class BeneficiaryNewRequestGetView(generics.ListAPIView):
                 qs = qs.filter(effective_date__lte=max_date)
             except ValueError:
                 pass
-        
+        min_amount = params.get('min_amount')
+        max_amount = params.get('max_amount')
+
+        if min_amount:
+            try:
+                min_amount = int(min_amount)
+                qs = qs.filter(beneficiary_request_min_amount__gte=min_amount)
+            except ValueError:
+                pass
+
+        if max_amount:
+            try:
+                max_amount = int(max_amount)
+                qs = qs.filter(beneficiary_request_max_amount__lte=max_amount)
+            except ValueError:
+                pass
+
         search_query = self.request.query_params.get("search")
         if not search_query:
             return qs
@@ -708,6 +734,7 @@ class BeneficiaryOldRequestOnetimeGetView(generics.ListAPIView):
             "beneficiary_request_title",
             "beneficiary_request_description",
             "beneficiary_request_document",
+            "beneficiary_request_amount",
             "beneficiary_request_date",
             "beneficiary_request_time",
             "beneficiary_request_created_at",
@@ -777,7 +804,23 @@ class BeneficiaryOldRequestOnetimeGetView(generics.ListAPIView):
                 qs = qs.filter(effective_date__lte=max_date)
             except ValueError:
                 pass
-        
+        min_amount = params.get('min_amount')
+        max_amount = params.get('max_amount')
+
+        if min_amount:
+            try:
+                min_amount = int(min_amount)
+                qs = qs.filter(beneficiary_request_min_amount__gte=min_amount)
+            except ValueError:
+                pass
+
+        if max_amount:
+            try:
+                max_amount = int(max_amount)
+                qs = qs.filter(beneficiary_request_max_amount__lte=max_amount)
+            except ValueError:
+                pass
+
         search_query = self.request.query_params.get("search")
         if not search_query:
             return qs
@@ -832,6 +875,7 @@ class BeneficiaryOldRequestOngoingGetView(generics.ListAPIView):
             "beneficiary_request_title",
             "beneficiary_request_description",
             "beneficiary_request_document",
+            "beneficiary_request_amount",
             "beneficiary_request_date",
             "beneficiary_request_time",
             "beneficiary_request_created_at",
@@ -901,7 +945,23 @@ class BeneficiaryOldRequestOngoingGetView(generics.ListAPIView):
                 qs = qs.filter(effective_date__lte=max_date)
             except ValueError:
                 pass
-        
+        min_amount = params.get('min_amount')
+        max_amount = params.get('max_amount')
+
+        if min_amount:
+            try:
+                min_amount = int(min_amount)
+                qs = qs.filter(beneficiary_request_min_amount__gte=min_amount)
+            except ValueError:
+                pass
+
+        if max_amount:
+            try:
+                max_amount = int(max_amount)
+                qs = qs.filter(beneficiary_request_max_amount__lte=max_amount)
+            except ValueError:
+                pass
+
         search_query = self.request.query_params.get("search")
         if not search_query:
             return qs
