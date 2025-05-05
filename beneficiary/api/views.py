@@ -428,8 +428,8 @@ class AnnouncementRequestView(generics.ListAPIView):
 
         return CharityAnnouncementForRequest.objects.filter(
             beneficiary_user_registration=beneficiary,
-            charity_announcement_to_beneficiary_created_at__gte=one_month_ago,
-            charity_announcement_to_beneficiary_seen=False
+            charity_announcement_for_request_created_at__gte=one_month_ago,
+            charity_announcement_for_request_seen=False
         )
 
 class RequestAnnouncementDetailView(generics.RetrieveAPIView):
