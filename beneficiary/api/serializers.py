@@ -5,6 +5,7 @@ from beneficiary.models import (
     BeneficiaryUserInformation,
     BeneficiaryUserAddress,
     CharityAnnouncementToBeneficiary,
+    BeneficiaryUserAdditionalInfo,
     Province,
     City,
 )
@@ -32,13 +33,18 @@ class BeneficiaryUserAddressSerializer(serializers.ModelSerializer):
         model = BeneficiaryUserAddress
         fields = '__all__'
 
+class BeneficiaryUserAdditionalInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserAdditionalInfo
+        fields = '__all__'
+
 class BeneficiaryUserSerializer(serializers.ModelSerializer):
     beneficiary_user_information = BeneficiaryUserInformationSerializer()
     beneficiary_user_address = BeneficiaryUserAddressSerializer()
-
+    beneficiary_user_additional_info = BeneficiaryUserAdditionalInfoSerializer(many=True)
     class Meta:
         model = BeneficiaryUserRegistration
-        exclude = ['password']
+        fields = '__all__'
 
 class BeneficiaryRequestSerializer(serializers.ModelSerializer):
     class Meta:
