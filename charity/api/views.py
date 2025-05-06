@@ -229,7 +229,7 @@ class BeneficiaryRequestCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         beneficiary_pk = self.kwargs.get('pk')  # Get pk from URL
-        request = serializer.save(beneficiary_user_registration_id=beneficiary_pk)
+        request = serializer.save(beneficiary_user_registration_id=beneficiary_pk,beneficiary_request_is_created_by_charity=True)
         
         # Trigger async task to create announcement
         create_request_announcement.delay(request.beneficiary_request_id)
@@ -293,7 +293,7 @@ class BeneficiaryRequestChildCreate(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         # Save the object while associating the BeneficiaryRequest
-        serializer.save(beneficiary_request=beneficiary_request)
+        serializer.save(beneficiary_request=beneficiary_request,beneficiary_request_child_is_created_by_charity=True)
 
         create_child_request_announcement.delay(beneficiary_request.pk)
 
@@ -342,6 +342,7 @@ class BeneficiaryAllRequestsView(generics.ListAPIView):
             "beneficiary_request_description",
             "beneficiary_request_document",
             "beneficiary_request_amount",
+            "beneficiary_request_is_created_by_charity",
             "beneficiary_request_date",
             "beneficiary_request_time",
             "beneficiary_request_created_at",
@@ -536,7 +537,7 @@ class BeneficiaryRequestOnetimeCreationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         # Save the object while associating the BeneficiaryRequest
-        serializer.save(beneficiary_request=beneficiary_request)
+        serializer.save(beneficiary_request=beneficiary_request,beneficiary_request_duration_onetime_is_created_by_charity=True)
 
         # Customize the response
         return Response(
@@ -567,7 +568,7 @@ class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         # Save the object while associating the BeneficiaryRequest
-        serializer.save(beneficiary_request=beneficiary_request)
+        serializer.save(beneficiary_request=beneficiary_request,beneficiary_request_duration_recurring_is_created_by_charity=True)
 
         # Customize the response
         return Response(
@@ -621,6 +622,7 @@ class BeneficiaryNewRequestGetView(generics.ListAPIView):
             "beneficiary_request_description",
             "beneficiary_request_document",
             "beneficiary_request_amount",
+            "beneficiary_request_is_created_by_charity",
             "beneficiary_request_date",
             "beneficiary_request_time",
             "beneficiary_request_created_at",
@@ -761,6 +763,7 @@ class BeneficiaryOldRequestOnetimeGetView(generics.ListAPIView):
             "beneficiary_request_description",
             "beneficiary_request_document",
             "beneficiary_request_amount",
+            "beneficiary_request_is_created_by_charity",
             "beneficiary_request_date",
             "beneficiary_request_time",
             "beneficiary_request_created_at",
@@ -902,6 +905,7 @@ class BeneficiaryOldRequestOngoingGetView(generics.ListAPIView):
             "beneficiary_request_description",
             "beneficiary_request_document",
             "beneficiary_request_amount",
+            "beneficiary_request_is_created_by_charity",
             "beneficiary_request_date",
             "beneficiary_request_time",
             "beneficiary_request_created_at",
@@ -1014,7 +1018,7 @@ class BeneficiaryUpdateRequestView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk' 
 
     def perform_update(self, serializer):
-        instance = serializer.save()
+        instance = serializer.save(beneficiary_request_is_created_by_charity=True)
         update_request_announcement.delay(instance.pk)  # Async announcement
 
     def perform_destroy(self, instance):
@@ -1046,7 +1050,7 @@ class SingleChildUpdateView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
 
     def perform_update(self, serializer):
-        instance = serializer.save()
+        instance = serializer.save(beneficiary_request_child_is_created_by_charity=True)
         request_id = instance.beneficiary_request.pk
         create_child_update_announcement.delay(request_id)
 
@@ -1063,7 +1067,7 @@ class SingleOnetimeUpdateView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
 
     def perform_update(self, serializer):
-        instance = serializer.save()
+        instance = serializer.save(beneficiary_request_duration_onetime_is_created_by_charity=True)
         request_id = instance.beneficiary_request.pk
         create_onetime_update_announcement.delay(request_id)
 
@@ -1079,7 +1083,7 @@ class SingleRecurringUpdateView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
 
     def perform_update(self, serializer):
-        instance = serializer.save()
+        instance = serializer.save(beneficiary_request_duration_recurring_is_created_by_charity=True)
         request_id = instance.beneficiary_request.pk
         create_recurring_update_announcement.delay(request_id)
 
@@ -1174,6 +1178,9 @@ class UpdateBeneficiaryAdditionalInfoView(generics.RetrieveUpdateDestroyAPIView)
             raise Http404("BeneficiaryUserRegistration does not exist")
         except BeneficiaryUserAdditionalInfo.DoesNotExist:
             raise Http404("BeneficiaryUserInformation does not exist")
+        
+    def perform_update(self, serializer):
+        serializer.save(beneficiary_user_additional_info_is_created_by_charity=True)
     
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
