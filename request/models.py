@@ -86,6 +86,7 @@ class BeneficiaryRequest(models.Model):
     beneficiary_request_amount = models.PositiveBigIntegerField(default=None, db_index=True)
     beneficiary_request_date = models.DateField(blank=True, null=True, db_index=True)
     beneficiary_request_time = models.TimeField(blank=True, null=True)
+    beneficiary_request_is_created_by_charity = models.BooleanField(default=False)
     beneficiary_request_created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     beneficiary_request_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name='beneficiary_requests', db_index=True)
@@ -119,6 +120,7 @@ class BeneficiaryRequest(models.Model):
 class BeneficiaryRequestDurationOnetime(models.Model):
     beneficiary_request_duration_onetime_id = models.AutoField(primary_key=True)
     beneficiary_request_duration_onetime_deadline = models.DateField(db_index=True)
+    beneficiary_request_duration_onetime_is_created_by_charity = models.BooleanField(default=False)
     beneficiary_request_duration_onetime_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_duration_onetime_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_request_duration = models.ForeignKey(BeneficiaryRequestDuration, on_delete=models.CASCADE)
@@ -133,6 +135,7 @@ class BeneficiaryRequestDurationRecurring(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(12)],
         db_index=True
     )
+    beneficiary_request_duration_recurring_is_created_by_charity = models.BooleanField(default=False)
     beneficiary_request_duration_recurring_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_duration_recurring_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_request_duration = models.ForeignKey(BeneficiaryRequestDuration, on_delete=models.CASCADE)
@@ -164,6 +167,7 @@ class BeneficiaryRequestChild(models.Model):
     beneficiary_request_child_amount = models.PositiveBigIntegerField(default=None)
     beneficiary_request_child_date = models.DateField(blank=True, null=True)
     beneficiary_request_child_time = models.TimeField(blank=True, null=True)
+    beneficiary_request_child_is_created_by_charity = models.BooleanField(default=False)
     beneficiary_request_child_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_request_child_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_request = models.ForeignKey(BeneficiaryRequest, on_delete=models.CASCADE,related_name='beneficiary_request_child',db_index=True)

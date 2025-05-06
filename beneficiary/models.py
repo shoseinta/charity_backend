@@ -78,6 +78,7 @@ class BeneficiaryUserAdditionalInfo(models.Model):
     beneficiary_user_additional_info_title = models.CharField(max_length=255)
     beneficiary_user_additional_info_description = models.TextField(blank=True, null=True)
     beneficiary_user_additional_info_document = models.FileField(upload_to='beneficiary_docs/', blank=True, null=True)
+    beneficiary_user_additional_info_is_created_by_charity = models.BooleanField(default=False)
     beneficiary_user_additional_info_created_at = models.DateTimeField(auto_now_add=True)
     beneficiary_user_additional_info_updated_at = models.DateTimeField(auto_now=True)
     beneficiary_user_registration = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name="beneficiary_user_additional_info")
