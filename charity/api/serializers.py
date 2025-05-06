@@ -387,3 +387,58 @@ class ChildProcessingStageChangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestChild
         fields = ['beneficiary_request_child_processing_stage']
+
+class AddingBeneficiarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserRegistration
+        fields = ['identification_number', 'beneficiary_id']
+
+    def validate_identification_number(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("Identification number must be all digits")
+        
+        if len(value) != 10:
+            raise serializers.ValidationError("Length of identification number must be 10 digits")
+        
+        if BeneficiaryUserRegistration.objects.exclude(pk=self.instance.pk).filter(identification_number=value).exists():
+                raise serializers.ValidationError("This email is already registered")   
+        return value
+    
+class UpdatingDeletingBeneficiaryUserRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserRegistration
+        fields = '__all__'
+    
+    def validate_phone_number(self, value):
+        """Validate phone number: must be 11 digits, start with 09, and unique"""
+        if value:
+            value = value.strip()
+
+            # Check Persian mobile format: 11 digits and starts with '09'
+            if not re.fullmatch(r'09\d{9}', value):
+                raise serializers.ValidationError("Phone number must be in Persian format: start with 09 and be 11 digits long.")
+
+            # Uniqueness check excluding current instance (for updates)
+            if BeneficiaryUserRegistration.objects.exclude(pk=getattr(self.instance, 'pk', None)).filter(phone_number=value).exists():
+                raise serializers.ValidationError("This phone number is already registered.")
+
+        return value
+
+    def validate_email(self, value):
+        """Validate email if provided"""
+        if value:  # Only validate if email exists
+            value = value.strip()
+            if BeneficiaryUserRegistration.objects.exclude(pk=self.instance.pk).filter(email=value).exists():
+                raise serializers.ValidationError("This email is already registered")
+        return value
+    
+    def validate_identification_number(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("Identification number must be all digits")
+        
+        if len(value) != 10:
+            raise serializers.ValidationError("Length of identification number must be 10 digits")
+        
+        if BeneficiaryUserRegistration.objects.exclude(pk=self.instance.pk).filter(identification_number=value).exists():
+                raise serializers.ValidationError("This email is already registered")   
+        return value

@@ -40,7 +40,10 @@ from .serializers import (BeneficiaryListSerializer,
                           BeneficiaryRequestDurationLookupSerializer,
                           ProvinceLookupSerializer,
                           CityLookupSerializer,
-                          ChildProcessingStageChangeSerializer)
+                          ChildProcessingStageChangeSerializer,
+                          AddingBeneficiarySerializer,
+                          UpdatingDeletingBeneficiaryUserRegistrationSerializer,
+                          )
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
 from rest_framework import status
@@ -1290,6 +1293,104 @@ class AllRequestChildsView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
     serializer_class = SingleRequestChildSerializer
     queryset = BeneficiaryRequestChild.objects.all()
+
+class CreateBeneficiary(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = AddingBeneficiarySerializer
+    queryset = BeneficiaryUserRegistration.objects.all()
+
+class CreateBeneficiaryInformation(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryInformationUpdateSerializer
+
+    def post(self, request, *args, **kwargs):
+        pk = self.kwargs.get('pk')
+
+        # Check if the user registration exists
+        try:
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response({'detail': 'BeneficiaryUserRegistration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if information already exists
+        if BeneficiaryUserInformation.objects.get(beneficiary_user_registration=beneficiary):
+            return Response({'detail': 'Beneficiary information already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create new information
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(beneficiary_user_registration=beneficiary)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class DeleteBeneficiaryInformation(generics.RetrieveDestroyAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryInformationUpdateSerializer
+
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        try:
+            user_register = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise Http404("BeneficiaryUserRegistration does not exist")
+
+        try:
+            return BeneficiaryUserInformation.objects.get(beneficiary_user_registration=user_register)
+        except BeneficiaryUserInformation.DoesNotExist:
+            raise Http404("BeneficiaryUserInformation does not exist")
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"message": "Beneficiary information deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+    
+class UpdateBeneficiaryUserRegistration(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = UpdatingDeletingBeneficiaryUserRegistrationSerializer
+    queryset = BeneficiaryUserRegistration.objects.all()
+    lookup_field = 'pk'
+
+class CreateAddress(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryAddressUpdateSerializer
+    queryset = BeneficiaryUserAddress.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        pk = self.kwargs.get('pk')
+
+        # Check if the user registration exists
+        try:
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response({'detail': 'BeneficiaryUserRegistration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if information already exists
+        if BeneficiaryUserAddress.objects.get(beneficiary_user_registration=beneficiary):
+            return Response({'detail': 'Beneficiary information already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create new information
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(beneficiary_user_registration=beneficiary)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class CreateAdditionalInfo(generics.CreateAPIView):
+    permission_classes = [IsAdminOrCharity]
+    serializer_class = BeneficiaryAdditionalInfoUpdateSerializer
+
+    def post(self, request, *args, **kwargs):
+        pk = self.kwargs.get('pk')
+
+        # Check if the user registration exists
+        try:
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response({'detail': 'BeneficiaryUserRegistration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Create new information
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(beneficiary_user_registration=beneficiary, beneficiary_user_additional_info_is_created_by_charity=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class BeneficiaryRequestTypeLayer1View(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]

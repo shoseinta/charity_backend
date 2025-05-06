@@ -46,6 +46,7 @@ class CharityRegistrationView(generics.CreateAPIView):
     
 class BeneficiaryRegisterView(generics.CreateAPIView):
     serializer_class = BeneficiaryRegistrationSerializer
+    permission_classes = [IsAdminOrCharity]
     queryset = User.objects.all()
 
     def create(self, request, *args, **kwargs):
