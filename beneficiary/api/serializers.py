@@ -41,15 +41,23 @@ class BeneficiaryUserAdditionalInfoSerializer(serializers.ModelSerializer):
 class BeneficiaryUserSerializer(serializers.ModelSerializer):
     beneficiary_user_information = BeneficiaryUserInformationSerializer()
     beneficiary_user_address = BeneficiaryUserAddressSerializer()
-    beneficiary_user_additional_info = BeneficiaryUserAdditionalInfoSerializer(many=True)
+    beneficiary_user_additional_info = serializers.SerializerMethodField()
+
     class Meta:
         model = BeneficiaryUserRegistration
         fields = '__all__'
 
+    def get_beneficiary_user_additional_info(self, obj):
+        additional_infos = obj.beneficiary_user_additional_info.filter(
+            beneficiary_user_additional_info_is_created_by_charity=False
+        )
+        return BeneficiaryUserAdditionalInfoSerializer(additional_infos, many=True).data
+
+
 class BeneficiaryRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequest
-        exclude = ['beneficiary_user_registration','beneficiary_request_processing_stage']
+        exclude = ['beneficiary_user_registration','beneficiary_request_processing_stage','beneficiary_request_is_created_by_charity']
     
     def validate(self, data):
         layer1 = data.get('beneficiary_request_type_layer1')
@@ -66,7 +74,7 @@ class BeneficiaryRequestSerializer(serializers.ModelSerializer):
 class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestDurationOnetime
-        exclude = ['beneficiary_request']
+        exclude = ['beneficiary_request', 'beneficiary_request_duration_onetime_is_created_by_charity']
     def validate(self,data):
         if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time'):
             raise serializers.ValidationError("This request must be a onetime request.")
@@ -75,7 +83,7 @@ class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
 class BeneficiarySingleRequestRecurringSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestDurationRecurring
-        exclude = ['beneficiary_request']
+        exclude = ['beneficiary_request', 'beneficiary_request_duration_recurring_is_created_by_charity']
 
     def validate(self,data):
         if data['beneficiary_request_duration'] != BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring'):
@@ -95,7 +103,7 @@ class BeneficiaryRequestChildSerializer(serializers.ModelSerializer):
 class BeneficiaryRequestChildCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequestChild
-        exclude = ['beneficiary_request', 'beneficiary_request_child_processing_stage']
+        exclude = ['beneficiary_request', 'beneficiary_request_child_processing_stage','beneficiary_request_child_is_created_by_charity']
 
 class BeneficiaryRequestChildGetSerializer(serializers.ModelSerializer):
     class Meta:

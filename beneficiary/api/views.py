@@ -298,7 +298,8 @@ class BeneficiaryUpdateSingleRequestView(generics.UpdateAPIView, generics.Destro
 
     def get_object(self):
         obj = get_object_or_404(BeneficiaryRequest, pk=self.kwargs.get('request_pk'))
-
+        if obj.beneficiary_request_is_created_by_charity:
+            raise PermissionDenied("You can only update or delete a request you created")
         if obj.beneficiary_request_processing_stage.beneficiary_request_processing_stage_name.lower() != "submitted":
             raise PermissionDenied("You can only update or delete a request in the 'submitted' stage.")
 
@@ -318,6 +319,8 @@ class BeneficiaryUpdateOnetimeView(generics.UpdateAPIView):
         except BeneficiaryRequestDurationOnetime.DoesNotExist:
             raise Http404("BeneficiaryRequestDurationOnetime not found.")
 
+        if beneficiary_request.beneficiary_request_duration_onetime_is_created_by_charity:
+            raise PermissionDenied("You can only update a request you created.")
         # Save with validated data + beneficiary_request relation
         serializer.save(beneficiary_request=beneficiary_request)
 
@@ -333,6 +336,8 @@ class BeneficiaryUpdateRecurringView(generics.UpdateAPIView):
         except BeneficiaryRequestDurationRecurring.DoesNotExist:
             raise Http404("BeneficiaryRequestDurationRecurring not found.")
 
+        if beneficiary_request.beneficiary_request_duration_recurring_is_created_by_charity:
+            raise PermissionDenied("You can only update a request you created.")
         # Save with validated data + beneficiary_request relation
         serializer.save(beneficiary_request=beneficiary_request)
 
@@ -376,6 +381,8 @@ class BeneficiarySingleChildUpdateView(generics.UpdateAPIView, generics.DestroyA
 
     def get_object(self):
         obj = get_object_or_404(BeneficiaryRequestChild, pk=self.kwargs.get('request_pk'))
+        if obj.beneficiary_request_child_is_created_by_charity:
+            raise PermissionDenied("You can only update or delete a request you created.")
 
         if obj.beneficiary_request_child_processing_stage.beneficiary_request_processing_stage_name.lower() != "submitted":
             raise PermissionDenied("You can only update or delete a request in the 'submitted' stage.")
