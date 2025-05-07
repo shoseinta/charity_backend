@@ -8,7 +8,10 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 from beneficiary.models import (BeneficiaryUserRegistration,
                                 Province,
-                                City)
+                                City,
+                                BeneficiaryUserInformation,
+                                BeneficiaryUserAddress,
+                                BeneficiaryUserAdditionalInfo)
 from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestSerializer,
                           BeneficiarySingleRequestOneTimeSerializer,
@@ -28,7 +31,11 @@ from .serializers import (BeneficiaryUserSerializer,
                           ProvinceLookupSerializer,
                           CityLookupSerializer,
                           RequestAnnouncementSerializer,
-                          BeneficiaryAnnouncementSerializer,)
+                          BeneficiaryAnnouncementSerializer,
+                          BeneficiaryInformationUpdateSerializer,
+                          BeneficiaryAddressUpdateSerializer,
+                          BeneficiaryAdditionalInfoUpdateSerializer,
+                          UpdatingDeletingBeneficiaryUserRegistrationSerializer)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
@@ -84,7 +91,150 @@ class BeneficiaryUserView(APIView):
         serializer = self.serializer_class(beneficiary)
         return Response(serializer.data)
 
+class CreateBeneficiaryInformation(generics.CreateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryInformationUpdateSerializer
 
+    def post(self, request, *args, **kwargs):
+        pk = self.kwargs.get('pk')
+
+        # Check if the user registration exists
+        try:
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response({'detail': 'BeneficiaryUserRegistration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if information already exists
+        if BeneficiaryUserInformation.objects.get(beneficiary_user_registration=beneficiary):
+            return Response({'detail': 'Beneficiary information already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create new information
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(beneficiary_user_registration=beneficiary)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class UpdateBeneficiaryInformationView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryInformationUpdateSerializer
+    queryset = BeneficiaryUserInformation.objects.all()
+    #i want to find user_register = userregistration(pk=pk) and then find userinformation(beneficiary_user_registration=user_register) and then update it based on input or retreive or delete it
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        try:
+            user_register = BeneficiaryUserRegistration.objects.get(pk=pk)
+            user_information = BeneficiaryUserInformation.objects.get(beneficiary_user_registration=user_register)
+            return user_information
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise Http404("BeneficiaryUserRegistration does not exist")
+        except BeneficiaryUserInformation.DoesNotExist:
+            raise Http404("BeneficiaryUserInformation does not exist")
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+    
+class CreateAddress(generics.CreateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryAddressUpdateSerializer
+    queryset = BeneficiaryUserAddress.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        pk = self.kwargs.get('pk')
+
+        # Check if the user registration exists
+        try:
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response({'detail': 'BeneficiaryUserRegistration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if information already exists
+        if BeneficiaryUserAddress.objects.get(beneficiary_user_registration=beneficiary):
+            return Response({'detail': 'Beneficiary information already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create new information
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(beneficiary_user_registration=beneficiary)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class UpdateBeneficiaryAddressView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryAddressUpdateSerializer
+    queryset = BeneficiaryUserAddress.objects.all()
+    #i want to find user_register = userregistration(pk=pk) and then find userinformation(beneficiary_user_registration=user_register) and then update it based on input or retreive or delete it
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        try:
+            user_register = BeneficiaryUserRegistration.objects.get(pk=pk)
+            user_information = BeneficiaryUserAddress.objects.get(beneficiary_user_registration=user_register)
+            return user_information
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise Http404("BeneficiaryUserRegistration does not exist")
+        except BeneficiaryUserAddress.DoesNotExist:
+            raise Http404("BeneficiaryUserAddress does not exist")
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+    
+class CreateAdditionalInfo(generics.CreateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryAdditionalInfoUpdateSerializer
+
+    def post(self, request, *args, **kwargs):
+        pk = self.kwargs.get('pk')
+
+        # Check if the user registration exists
+        try:
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response({'detail': 'BeneficiaryUserRegistration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Create new information
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(beneficiary_user_registration=beneficiary)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class UpdateBeneficiaryAdditionalInfoView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryAdditionalInfoUpdateSerializer
+    queryset = BeneficiaryUserAdditionalInfo.objects.all()
+    #i want to find user_register = userregistration(pk=pk) and then find userinformation(beneficiary_user_registration=user_register) and then update it based on input or retreive or delete it
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        try:
+            user_information = BeneficiaryUserAdditionalInfo.objects.get(pk=pk)
+            return user_information
+        except BeneficiaryUserAdditionalInfo.DoesNotExist:
+            raise Http404("BeneficiaryUserInformation does not exist")
+        
+    def perform_update(self, serializer):
+        serializer.save(beneficiary_user_additional_info_is_created_by_charity=False)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+    
+class UpdateBeneficiaryUserRegistration(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = UpdatingDeletingBeneficiaryUserRegistrationSerializer
+    queryset = BeneficiaryUserRegistration.objects.all()
+    lookup_field = 'pk'
+    
 class BeneficiaryRequestView(generics.CreateAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestSerializer

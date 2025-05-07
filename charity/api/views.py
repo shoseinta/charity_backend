@@ -1174,11 +1174,8 @@ class UpdateBeneficiaryAdditionalInfoView(generics.RetrieveUpdateDestroyAPIView)
     def get_object(self):
         pk = self.kwargs.get('pk')
         try:
-            user_register = BeneficiaryUserRegistration.objects.get(pk=pk)
-            user_information = BeneficiaryUserAdditionalInfo.objects.get(beneficiary_user_registration=user_register)
+            user_information = BeneficiaryUserAdditionalInfo.objects.get(pk=pk)
             return user_information
-        except BeneficiaryUserRegistration.DoesNotExist:
-            raise Http404("BeneficiaryUserRegistration does not exist")
         except BeneficiaryUserAdditionalInfo.DoesNotExist:
             raise Http404("BeneficiaryUserInformation does not exist")
         

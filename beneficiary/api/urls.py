@@ -24,12 +24,27 @@ from .views import (BeneficiaryUserView,
                     BeneficiaryRequestProcessingStageView,
                     BeneficiaryRequestDurationLookupView,
                     ProvinceLookupView,
-                    CityLookupView
+                    CityLookupView,
+                    CreateBeneficiaryInformation,
+                    UpdateBeneficiaryInformationView,
+                    CreateAddress,
+                    UpdateBeneficiaryAddressView,
+                    CreateAdditionalInfo,
+                    UpdateBeneficiaryAdditionalInfoView,
+                    UpdateBeneficiaryUserRegistration,
                     )
+
 from django.urls import path
 
 urlpatterns = [
     path('beneficiary/<int:pk>/information/', BeneficiaryUserView.as_view(), name='beneficiary_information'),
+    path('beneficiary/<int:pk>/create-user-information/',CreateBeneficiaryInformation.as_view(), name="create-beneficiary-information"),
+    path('beneficiary/<int:pk>/create-user-address/',CreateAddress.as_view(), name="create-user-address"),
+    path('beneficiary/<int:pk>/create-user-additional-info/',CreateAdditionalInfo.as_view(), name="create-user-additional-info"),
+    path('beneficiary/<int:pk>/update-user-register/',UpdateBeneficiaryUserRegistration.as_view(), name='update-user-register'),
+    path('beneficiary/<int:pk>/update-user-information/',UpdateBeneficiaryInformationView.as_view(), name="update-user-information"),
+    path('beneficiary/<int:pk>/update-user-address/',UpdateBeneficiaryAddressView.as_view(),name="update-user-address"),
+    path('beneficiary/<int:pk>/update-additional-info/<int:info_pk>/',UpdateBeneficiaryAdditionalInfoView.as_view(),name="update-user-additional-info"),
     path('beneficiary/<int:pk>/request-create/', BeneficiaryRequestView.as_view(), name='beneficiary_request_create'),
     path('beneficiary/<int:pk>/request-create-onetime/<int:request_pk>/', BeneficiaryRequestOnetimeCreationView.as_view(), name='beneficiary_request_create_onetime'),
     path('beneficiary/<int:pk>/request-create-recurring/<int:request_pk>/', BeneficiaryRequestRecurringCreationView.as_view(), name='beneficiary_request_create_recurring'),
