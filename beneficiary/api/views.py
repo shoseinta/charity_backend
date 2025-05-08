@@ -212,11 +212,22 @@ class UpdateBeneficiaryAdditionalInfoView(generics.RetrieveUpdateDestroyAPIView)
     #i want to find user_register = userregistration(pk=pk) and then find userinformation(beneficiary_user_registration=user_register) and then update it based on input or retreive or delete it
     def get_object(self):
         pk = self.kwargs.get('pk')
+        info_pk = self.kwargs.get('info_pk')
+
         try:
-            user_information = BeneficiaryUserAdditionalInfo.objects.get(pk=pk)
-            return user_information
+            beneficiary_user = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise NotFound("BeneficiaryUserRegistration does not exist")
+
+        try:
+            user_information = BeneficiaryUserAdditionalInfo.objects.get(pk=info_pk)
         except BeneficiaryUserAdditionalInfo.DoesNotExist:
-            raise Http404("BeneficiaryUserInformation does not exist")
+            raise NotFound("BeneficiaryUserAdditionalInfo does not exist")
+
+        if user_information.beneficiary_user_registration != beneficiary_user:
+            raise PermissionDenied("You do not have permission to access this information.")
+
+        return user_information
         
     def perform_update(self, serializer):
         serializer.save(beneficiary_user_additional_info_is_created_by_charity=False)
