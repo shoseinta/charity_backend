@@ -584,6 +584,9 @@ class BeneficiarySingleChildUpdateView(generics.UpdateAPIView, generics.DestroyA
 
     def get_object(self):
         obj = get_object_or_404(BeneficiaryRequestChild, pk=self.kwargs.get('request_pk'))
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=self.kwargs.get('pk'))
+        if obj.beneficiary_request.beneficiary_user_registration != beneficiary:
+            raise PermissionDenied('you can only update child request belong to you')
         if obj.beneficiary_request_child_is_created_by_charity:
             raise PermissionDenied("You can only update or delete a request you created.")
 
