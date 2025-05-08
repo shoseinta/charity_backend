@@ -472,14 +472,15 @@ class BeneficiaryUpdateOnetimeView(generics.UpdateAPIView):
         request_pk = self.kwargs.get('request_pk')
 
         try:
-            beneficiary_request = BeneficiaryRequestDurationOnetime.objects.get(pk=request_pk).beneficiary_request
+            beneficiary_request_onetime = BeneficiaryRequestDurationOnetime.objects.get(pk=request_pk)
+            beneficiary_request = beneficiary_request_onetime.beneficiary_request
         except BeneficiaryRequestDurationOnetime.DoesNotExist:
             raise Http404("BeneficiaryRequestDurationOnetime not found.")
 
-        if beneficiary_request.beneficiary_request_duration_onetime_is_created_by_charity:
+        if beneficiary_request_onetime.beneficiary_request_duration_onetime_is_created_by_charity:
             raise PermissionDenied("You can only update a request you created.")
         # Save with validated data + beneficiary_request relation
-        serializer.save(beneficiary_request=beneficiary_request)
+        serializer.save()
 
 class BeneficiaryUpdateRecurringView(generics.UpdateAPIView):
     permission_classes = [IsCertainBeneficiary]
@@ -489,14 +490,15 @@ class BeneficiaryUpdateRecurringView(generics.UpdateAPIView):
         request_pk = self.kwargs.get('request_pk')
 
         try:
-            beneficiary_request = BeneficiaryRequestDurationRecurring.objects.get(pk=request_pk).beneficiary_request
+            beneficiary_request_recurring = BeneficiaryRequestDurationOnetime.objects.get(pk=request_pk)
+            beneficiary_request = beneficiary_request_recurring.beneficiary_request
         except BeneficiaryRequestDurationRecurring.DoesNotExist:
             raise Http404("BeneficiaryRequestDurationRecurring not found.")
 
-        if beneficiary_request.beneficiary_request_duration_recurring_is_created_by_charity:
+        if beneficiary_request_recurring.beneficiary_request_duration_recurring_is_created_by_charity:
             raise PermissionDenied("You can only update a request you created.")
         # Save with validated data + beneficiary_request relation
-        serializer.save(beneficiary_request=beneficiary_request)
+        serializer.save()
 
 class BeneficiarySingleRequestChildsGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
