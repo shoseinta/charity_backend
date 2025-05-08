@@ -105,7 +105,7 @@ class CreateBeneficiaryInformation(generics.CreateAPIView):
             return Response({'detail': 'BeneficiaryUserRegistration not found'}, status=status.HTTP_404_NOT_FOUND)
 
         # Check if information already exists
-        if BeneficiaryUserInformation.objects.get(beneficiary_user_registration=beneficiary):
+        if BeneficiaryUserInformation.objects.filter(beneficiary_user_registration=beneficiary).exists():
             return Response({'detail': 'Beneficiary information already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create new information
