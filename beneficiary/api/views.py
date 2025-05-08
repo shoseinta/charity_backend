@@ -447,6 +447,16 @@ class BenefeciarySingleRequestGetView(generics.RetrieveAPIView):
 
     def get_object(self):
         request_pk = self.kwargs.get('request_pk')
+        pk = self.kwargs.get('pk')
+        try:
+            beneficiary_request = BeneficiaryRequest.objects.get(pk=request_pk)
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+            if beneficiary_request.beneficiary_user_registration != beneficiary:
+                raise PermissionDenied("you can only see request belong to you")
+        except BeneficiaryRequest.DoesNotExist:
+            raise Http404('beneficiary request not found')
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise Http404('beneficiary not found') 
         return get_object_or_404(BeneficiaryRequest, pk=request_pk)
 
 class BeneficiaryUpdateSingleRequestView(generics.UpdateAPIView, generics.DestroyAPIView):
@@ -454,7 +464,14 @@ class BeneficiaryUpdateSingleRequestView(generics.UpdateAPIView, generics.Destro
     serializer_class = BeneficiaryRequestSerializer
 
     def get_object(self):
+        pk = self.kwargs.get('pk')
         obj = get_object_or_404(BeneficiaryRequest, pk=self.kwargs.get('request_pk'))
+        try:
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+            if obj.beneficiary_user_registration != beneficiary:
+                raise PermissionDenied("you can only update requests related to you")
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise Http404('beneficiary not found')
         if obj.beneficiary_request_is_created_by_charity:
             raise PermissionDenied("You can only update or delete a request you created")
         if obj.beneficiary_request_processing_stage.beneficiary_request_processing_stage_name.lower() != "submitted":
@@ -512,7 +529,10 @@ class BeneficiarySingleRequestChildsGetView(generics.ListAPIView):
         # Get the 'pk' from the URL
         request_pk = self.kwargs.get('request_pk')
         pk = self.kwargs.get('pk')
-        beneficiary_request = BeneficiaryRequest.objects.get(pk=request_pk)
+        try:
+            beneficiary_request = BeneficiaryRequest.objects.get(pk=request_pk)
+        except BeneficiaryRequest.DoesNotExist:
+            raise Http404("BeneficiaryRequest not found.")
         beneficiary_request_child = BeneficiaryRequestChild.objects.filter(
             beneficiary_request=beneficiary_request
         )
@@ -528,6 +548,17 @@ class BeneficiarySingleChildGetView(generics.RetrieveAPIView):
 
     def get_object(self):
         request_pk = self.kwargs.get('request_pk')
+        pk = self.kwargs.get('pk')
+        try:
+            beneficiary_child_request = BeneficiaryRequestChild.objects.get(pk = request_pk)
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+            if beneficiary_child_request.beneficiary_request.beneficiary_user_registration != beneficiary:
+                raise PermissionDenied("You can only see child request belong to you.")
+        except BeneficiaryRequestChild.DoesNotExist:
+            raise NotFound("BeneficiaryRequestChild not found")
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise NotFound("beneficiary not found")
+
         return get_object_or_404(BeneficiaryRequestChild, pk=request_pk)
 
 class BeneficiaryChildCreateView(generics.CreateAPIView):
@@ -536,9 +567,11 @@ class BeneficiaryChildCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         # Get the BeneficiaryRequest object or raise 404
-        pk = self.kwargs.get('request_pk')
-        beneficiary_request = get_object_or_404(BeneficiaryRequest, pk=pk)
-        if beneficiary_request.beneficiary_user_registration != BeneficiaryUserRegistration.objects.get(pk=self.kwargs.get('pk')):
+        request_pk = self.kwargs.get('request_pk')
+        pk = self.kwargs.get('pk')
+        beneficiary_request = get_object_or_404(BeneficiaryRequest, pk=request_pk)
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=pk)
+        if beneficiary_request.beneficiary_user_registration != beneficiary:
             raise PermissionDenied("You can only create child requests for request belong to you.")
         submitted = BeneficiaryRequestProcessingStage.objects.get(beneficiary_request_processing_stage_name='submitted')
         # Save the BeneficiaryRequest with the associated beneficiary and processing stage
@@ -566,8 +599,12 @@ class BeneficiaryRequestHistoriesGetView(generics.ListAPIView):
 
     def get_queryset(self):
         # Get the 'pk' from the URL
-        beneficiary_request = self.kwargs.get('request_pk')
-
+        request_pk = self.kwargs.get('request_pk')
+        pk = self.kwargs.get('pk')
+        beneficiary_request = get_object_or_404(BeneficiaryRequest, pk=request_pk)
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=pk)
+        if beneficiary_request.beneficiary_user_registration != beneficiary:
+            raise PermissionDenied('you can only see histories related to your request')
         # Filter requests based on beneficiary
         return BeneficiaryRequestHistory.objects.filter(
             beneficiary_request=beneficiary_request
@@ -579,6 +616,11 @@ class BeneficiarySingleHistoryGetView(generics.RetrieveAPIView):
 
     def get_object(self):
         request_pk = self.kwargs.get('request_pk')
+        pk = self.kwargs.get('pk')
+        history = get_object_or_404(BeneficiaryRequestHistory, pk=request_pk)
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=pk)
+        if history.beneficiary_request.beneficiary_user_registration != beneficiary:
+            raise PermissionDenied('you can only see a history related to you')
         return get_object_or_404(BeneficiaryRequestHistory, pk=request_pk)
 
 class AnnouncementView(generics.ListAPIView):
