@@ -272,6 +272,9 @@ class BeneficiaryRequestOnetimeCreationView(generics.CreateAPIView):
             beneficiary_request = BeneficiaryRequest.objects.get(pk=beneficiary_request_pk)
             if beneficiary_request.beneficiary_user_registration != BeneficiaryUserRegistration.objects.get(pk=beneficiary):
                 return Response({"error": "This request does not belong to the specified beneficiary."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if beneficiary_request.beneficiary_request_duration.beneficiary_request_duration_name != 'one_time':
+                return Response({'error': "this request is not onetime"}, status=status.HTTP_400_BAD_REQUEST)
 
         except BeneficiaryRequest.DoesNotExist:
             return Response({"error": "BeneficiaryRequest not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -306,6 +309,9 @@ class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
             beneficiary_request = BeneficiaryRequest.objects.get(pk=beneficiary_request_pk)
             if beneficiary_request.beneficiary_user_registration != BeneficiaryUserRegistration.objects.get(pk=beneficiary):
                 return Response({"error": "This request does not belong to the specified beneficiary."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if beneficiary_request.beneficiary_request_duration.beneficiary_request_duration_name != 'recurring':
+                return Response({'error': "this request is not onetime"}, status=status.HTTP_400_BAD_REQUEST)
         except BeneficiaryRequest.DoesNotExist:
             return Response({"error": "BeneficiaryRequest not found."}, status=status.HTTP_404_NOT_FOUND)
 
