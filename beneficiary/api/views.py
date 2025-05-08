@@ -72,9 +72,7 @@ class BeneficiaryAllRequestsGetView(generics.ListAPIView):
         if queryset:
             return queryset
 
-        base_qs = BeneficiaryRequest.objects.annotate(
-            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-        ).filter(
+        base_qs = BeneficiaryRequest.objects.filter(
             beneficiary_user_registration=pk
         )
 
@@ -351,9 +349,7 @@ class BeneficiaryRequestInitialStagesGetView(generics.ListAPIView):
             return queryset
 
         target_stages = ['submitted', 'pending_review', 'under_evaluation']
-        base_qs = BeneficiaryRequest.objects.annotate(
-            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-        ).filter(
+        base_qs = BeneficiaryRequest.objects.filter(
             beneficiary_user_registration=pk,
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
@@ -380,9 +376,7 @@ class BeneficiaryRequestInProgressGetView(generics.ListAPIView):
             return queryset
 
         target_stages = ['approved', 'in_progress']
-        base_qs = BeneficiaryRequest.objects.annotate(
-            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-        ).filter(
+        base_qs = BeneficiaryRequest.objects.filter(
             beneficiary_user_registration=pk,
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
@@ -409,9 +403,7 @@ class BeneficiaryRequestCompletedGetView(generics.ListAPIView):
             return queryset
 
         target_stages = ['completed']
-        base_qs = BeneficiaryRequest.objects.annotate(
-            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-        ).filter(
+        base_qs = BeneficiaryRequest.objects.filter(
             beneficiary_user_registration=pk,
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
@@ -438,9 +430,7 @@ class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
             return queryset
 
         target_stages = ['rejected']
-        base_qs = BeneficiaryRequest.objects.annotate(
-            effective_date=Coalesce('beneficiary_request_date', 'beneficiary_request_created_at', output_field=DateTimeField())
-        ).filter(
+        base_qs = BeneficiaryRequest.objects.filter(
             beneficiary_user_registration=pk,
             beneficiary_request_processing_stage__beneficiary_request_processing_stage_name__in=target_stages
         )
