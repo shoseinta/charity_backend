@@ -1361,7 +1361,7 @@ class CreateAddress(generics.CreateAPIView):
             return Response({'detail': 'BeneficiaryUserRegistration not found'}, status=status.HTTP_404_NOT_FOUND)
 
         # Check if information already exists
-        if BeneficiaryUserAddress.objects.get(beneficiary_user_registration=beneficiary):
+        if BeneficiaryUserAddress.objects.filter(beneficiary_user_registration=beneficiary).exists():
             return Response({'detail': 'Beneficiary information already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create new information

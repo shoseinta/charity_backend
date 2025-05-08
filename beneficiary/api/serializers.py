@@ -218,8 +218,14 @@ class BeneficiaryAddressUpdateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         city = data.get('city')
         province = data.get('province')
-        if city != province:
-            raise serializers.ValidationError("City must match the province")
+        try:
+            city_obj = City.objects.get(pk=city.pk)  # Or use city.id
+        except City.DoesNotExist:
+            raise serializers.ValidationError("City does not exist.")
+
+        if city_obj.province != province:
+            raise serializers.ValidationError("Selected city does not belong to the selected province.")
+
         return data
     def validate_postal_code(self, value):
         if not value:
