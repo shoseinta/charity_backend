@@ -44,10 +44,11 @@ from .views import (BeneficiaryListView,
                     CreateAddress,
                     CreateAdditionalInfo,
                     )
+from user.api.views import (BeneficiaryRegisterView,)
 
 urlpatterns = [
     path('beneficiaries/list/', BeneficiaryListView.as_view(), name='beneficiary-list'),
-    path('beneficiaries/create/',CreateBeneficiary.as_view(), name='create-beneficiary'),
+    path('beneficiaries/create/',BeneficiaryRegisterView.as_view(), name='create-beneficiary'),
     path('beneficiaries/<int:pk>/update-register/',UpdateBeneficiaryUserRegistration.as_view(),name='update-register'),
     path('beneficiaries/<int:pk>/create-information/',CreateBeneficiaryInformation.as_view(), name="create-user-information"),
     path('beneficiaries/<int:pk>/delete-information/',DeleteBeneficiaryInformation.as_view(), name="delete-user-information"),

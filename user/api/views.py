@@ -59,7 +59,6 @@ class BeneficiaryRegisterView(generics.CreateAPIView):
             'data': {
                 'user_id': user.id,
                 'beneficiary_id': user.username,
-                'charity_id': user.beneficiaryuserregistration.charity.charity_id,
                 'message': 'Beneficiary registered successfully'
             }
         }, status=status.HTTP_201_CREATED)

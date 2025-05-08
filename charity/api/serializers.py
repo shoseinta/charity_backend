@@ -400,8 +400,13 @@ class AddingBeneficiarySerializer(serializers.ModelSerializer):
         if len(value) != 10:
             raise serializers.ValidationError("Length of identification number must be 10 digits")
         
-        if BeneficiaryUserRegistration.objects.exclude(pk=self.instance.pk).filter(identification_number=value).exists():
-                raise serializers.ValidationError("This email is already registered")   
+        if BeneficiaryUserRegistration.objects.filter(identification_number=value).exists():
+                raise serializers.ValidationError("This identification number is already registered")   
+        return value
+    
+    def validate_beneficiary_id(self, value):
+        if BeneficiaryUserRegistration.objects.filter(beneficiary_id=value).exists():
+                raise serializers.ValidationError("This beneficiary id is already registered")   
         return value
     
 class UpdatingDeletingBeneficiaryUserRegistrationSerializer(serializers.ModelSerializer):

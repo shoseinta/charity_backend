@@ -71,16 +71,9 @@ class CharityLoginSerializer(serializers.Serializer):
     
 
 class BeneficiaryRegistrationSerializer(serializers.ModelSerializer):
-    charity_id = serializers.PrimaryKeyRelatedField(
-        queryset=Charity.objects.all(),
-        source='charity',
-        write_only=True,
-        required=True
-    )
-    
     class Meta:
         model = User
-        fields = ('username', 'charity_id')  # Add charity_id to fields
+        fields = ('username', 'password')  # Add charity_id to fields
 
     def validate_username(self, value):
         """
@@ -99,12 +92,11 @@ class BeneficiaryRegistrationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if BeneficiaryUserRegistration.objects.filter(identification_number=attrs['username']).exists():
             raise serializers.ValidationError({"username": "This beneficiary already exists"})
+        if BeneficiaryUserRegistration.objects.filter(beneficiary_id = attrs['password']).exists():
+            raise serializers.ValidationError({"beneficiary id": "this beneficiary id already exists"})
         return attrs
 
     def create(self, validated_data):
-        # Extract charity from validated_data
-        charity = validated_data.pop('charity')
-        
         user = User.objects.create(
             username=validated_data['username'],
         )
@@ -112,13 +104,11 @@ class BeneficiaryRegistrationSerializer(serializers.ModelSerializer):
         beneficiary = BeneficiaryUserRegistration.objects.create(
             benficiary_user_id=user,
             identification_number=validated_data['username'],
-            beneficiary_id=validated_data['username'],
-            password=validated_data['username'],
-            charity=charity,  # Assign the selected charity
+            beneficiary_id=validated_data['password'],
+            password=validated_data['password'],  # Assign the selected charity
             # Add other required fields with default values if needed
         )
         beneficiary.save()
-        user.set_password(validated_data['username'])
         user.save()
         
         return user
