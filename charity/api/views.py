@@ -1082,6 +1082,12 @@ class SingleOnetimeUpdateView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         instance = serializer.save(beneficiary_request_duration_onetime_is_created_by_charity=True)
         request_id = instance.beneficiary_request.pk
+        # Get the related request
+        related_request = instance.beneficiary_request
+
+        # Mark the request as created by charity
+        related_request.beneficiary_request_is_created_by_charity = True
+        related_request.save(update_fields=['beneficiary_request_is_created_by_charity'])
         create_onetime_update_announcement.delay(request_id)
 
     def perform_destroy(self, instance):
@@ -1098,6 +1104,13 @@ class SingleRecurringUpdateView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         instance = serializer.save(beneficiary_request_duration_recurring_is_created_by_charity=True)
         request_id = instance.beneficiary_request.pk
+
+        # Get the related request
+        related_request = instance.beneficiary_request
+
+        # Mark the request as created by charity
+        related_request.beneficiary_request_is_created_by_charity = True
+        related_request.save(update_fields=['beneficiary_request_is_created_by_charity'])
         create_recurring_update_announcement.delay(request_id)
 
     def perform_destroy(self, instance):
