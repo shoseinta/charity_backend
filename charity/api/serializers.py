@@ -419,7 +419,7 @@ class AddingBeneficiarySerializer(serializers.ModelSerializer):
 class UpdatingDeletingBeneficiaryUserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryUserRegistration
-        fields = '__all__'
+        exclude = ['benficiary_user_id']
     
     def validate_phone_number(self, value):
         """Validate phone number: must be 11 digits, start with 09, and unique"""
