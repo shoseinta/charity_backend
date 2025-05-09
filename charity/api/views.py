@@ -455,7 +455,11 @@ class SingleBeneficiaryAllRequestsView(generics.ListAPIView):
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
-        qs = BeneficiaryRequest.objects.filter(beneficiary_user_registration = pk)
+        try:
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            raise Http404('beneficiary does not exist')
+        qs = BeneficiaryRequest.objects.filter(beneficiary_user_registration = beneficiary)
 
         request = self.request
         params = request.query_params
@@ -509,7 +513,7 @@ class SingleBeneficiaryAllRequestsView(generics.ListAPIView):
                 qs = qs.filter(effective_date__lte=max_date)
             except ValueError:
                 pass
-        search_query = self.request.query_params('search')
+        search_query = self.request.query_params.get('search')
         if not search_query:
             return qs
         if search_query:
