@@ -100,7 +100,9 @@ class BeneficiaryRegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             username=validated_data['username'],
         )
-
+        user.set_password(validated_data['password'])
+        user.save()
+        
         beneficiary = BeneficiaryUserRegistration.objects.create(
             benficiary_user_id=user,
             identification_number=validated_data['username'],
@@ -109,7 +111,7 @@ class BeneficiaryRegistrationSerializer(serializers.ModelSerializer):
             # Add other required fields with default values if needed
         )
         beneficiary.save()
-        user.save()
+        
         
         return user
     
