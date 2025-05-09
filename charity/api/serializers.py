@@ -294,7 +294,7 @@ class BeneficiaryRequestChangeProcessingStageSerializer(serializers.ModelSeriali
 class BeneficiaryUpdateRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BeneficiaryRequest
-        exclude = ['beneficiary_user_registration','beneficiary_request_is_created_by_charity']
+        exclude = ['beneficiary_user_registration','beneficiary_request_is_created_by_charity','effective_date']
     def validate(self, data):
         layer1 = data.get('beneficiary_request_type_layer1')
         layer2 = data.get('beneficiary_request_type_layer2')
