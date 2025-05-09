@@ -293,7 +293,12 @@ class BeneficiaryGetRequestSerializer(serializers.ModelSerializer):
 class BeneficiaryRequestAnnouncementUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CharityAnnouncementForRequest
-        exclude = ['beneficiary_request']
+        exclude = ['beneficiary_request','charity_announcement_for_request_seen']
+
+class BeneficiaryRequestAnnouncementListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharityAnnouncementForRequest
+        fields = '__all__'
         
 class BeneficiaryRequestChangeProcessingStageSerializer(serializers.ModelSerializer):
     class Meta:

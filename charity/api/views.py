@@ -45,6 +45,7 @@ from .serializers import (BeneficiaryListSerializer,
                           UpdatingDeletingBeneficiaryUserRegistrationSerializer,
                           CharityAnnouncementToBeneficiaryGetSerializer,
                           SingleRequestChildGetSerializer,
+                          BeneficiaryRequestAnnouncementListSerializer
                           )
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
@@ -1215,7 +1216,7 @@ class UpdateBeneficiaryAdditionalInfoView(generics.RetrieveUpdateDestroyAPIView)
     
 class BeneficiaryRequestAnnouncementListView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
-    serializer_class = BeneficiaryRequestAnnouncementUpdateSerializer
+    serializer_class = BeneficiaryRequestAnnouncementListSerializer
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
