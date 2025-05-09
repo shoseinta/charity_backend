@@ -541,12 +541,14 @@ class BeneficiaryRequestOnetimeCreationView(generics.CreateAPIView):
             return Response({"error": "BeneficiaryRequest not found."}, status=status.HTTP_404_NOT_FOUND)
         if BeneficiaryRequestDurationOnetime.objects.filter(beneficiary_request=beneficiary_request).exists():
             return Response({"error": "This request already has a onetime duration."}, status=status.HTTP_400_BAD_REQUEST)
+        if beneficiary_request.beneficiary_request_duration.beneficiary_request_duration_name != 'one_time':
+            return Response({"error": "This request must be onetime"}, status=status.HTTP_400_BAD_REQUEST)
         # Initialize the serializer with the request data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        beneficiary_request_onetime = BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time')
         # Save the object while associating the BeneficiaryRequest
-        serializer.save(beneficiary_request=beneficiary_request,beneficiary_request_duration_onetime_is_created_by_charity=True)
+        serializer.save(beneficiary_request=beneficiary_request,beneficiary_request_duration_onetime_is_created_by_charity=True,beneficiary_request_duration=beneficiary_request_onetime)
 
         # Customize the response
         return Response(
@@ -572,6 +574,8 @@ class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
 
         if BeneficiaryRequestDurationRecurring.objects.filter(beneficiary_request=beneficiary_request).exists():
             return Response({"error": "This request already has a recurring duration."}, status=status.HTTP_400_BAD_REQUEST)
+        if beneficiary_request.beneficiary_request_duration.beneficiary_request_duration_name != 'recurring':
+            return Response({"error": "This request must be onetime"}, status=status.HTTP_400_BAD_REQUEST)
         # Initialize the serializer with the request data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
