@@ -44,6 +44,7 @@ from .serializers import (BeneficiaryListSerializer,
                           AddingBeneficiarySerializer,
                           UpdatingDeletingBeneficiaryUserRegistrationSerializer,
                           CharityAnnouncementToBeneficiaryGetSerializer,
+                          SingleRequestChildGetSerializer,
                           )
 from user.api.permissions import IsAdminOrCharity, IsCertainBeneficiary
 from rest_framework.response import Response
@@ -1281,7 +1282,7 @@ class SingleRequestHistoriesView(generics.ListAPIView):
         
 class SingleRequestChildsView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
-    serializer_class = SingleRequestChildSerializer
+    serializer_class = SingleRequestChildGetSerializer
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
@@ -1293,7 +1294,7 @@ class SingleRequestChildsView(generics.ListAPIView):
 
 class AllRequestChildsView(generics.ListAPIView):
     permission_classes = [IsAdminOrCharity]
-    serializer_class = SingleRequestChildSerializer
+    serializer_class = SingleRequestChildGetSerializer
     queryset = BeneficiaryRequestChild.objects.all()
 
 class CreateBeneficiary(generics.CreateAPIView):

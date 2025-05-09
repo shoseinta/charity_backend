@@ -325,6 +325,11 @@ class SingleRequestChildSerializer(serializers.ModelSerializer):
         model = BeneficiaryRequestChild
         exclude = ['beneficiary_request','beneficiary_request_child_is_created_by_charity']
 
+class SingleRequestChildGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryRequestChild
+        fields = '__all__'
+
 
 class BeneficiarySingleRequestOneTimeSerializer(serializers.ModelSerializer):
     class Meta:
