@@ -663,15 +663,20 @@ class RequestAnnouncementForRequestSeenView(generics.RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         pk = self.kwargs.get('pk')
         announcement_pk = self.kwargs.get('announcement_pk')
-        beneficiary = get_object_or_404(BeneficiaryUserRegistration.objects.get(pk=pk))
-        announcement = get_object_or_404(CharityAnnouncementForRequest.objects.get(pk=announcement_pk))
+
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=pk)
+        announcement = get_object_or_404(CharityAnnouncementForRequest, pk=announcement_pk)
+
         if announcement.beneficiary_request.beneficiary_user_registration != beneficiary:
-            raise PermissionDenied('you can only see announcement relevant to you')
-        instance = announcement
-        if not instance.charity_announcement_for_request_seen:
-            instance.charity_announcement_for_request_seen = True
-            instance.save(update_fields=['charity_announcement_for_request_seen'])
-        return super().retrieve(request, *args, **kwargs)
+            raise PermissionDenied("You can only see announcements relevant to you.")
+
+        if not announcement.charity_announcement_for_request_seen:
+            announcement.charity_announcement_for_request_seen = True
+            announcement.save(update_fields=['charity_announcement_for_request_seen'])
+
+        serializer = self.get_serializer(announcement)
+        return Response(serializer.data)
+
 
 # 🔹 2. For Beneficiary-specific Announcements
 class BeneficiaryAnnouncementSeenView(generics.RetrieveAPIView):
@@ -681,15 +686,19 @@ class BeneficiaryAnnouncementSeenView(generics.RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         pk = self.kwargs.get('pk')
         announcement_pk = self.kwargs.get('announcement_pk')
-        beneficiary = get_object_or_404(BeneficiaryUserRegistration.objects.get(pk=pk))
-        announcement = get_object_or_404(CharityAnnouncementToBeneficiary.objects.get(pk=announcement_pk))
+
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=pk)
+        announcement = get_object_or_404(CharityAnnouncementToBeneficiary, pk=announcement_pk)
+
         if announcement.beneficiary_user_registration != beneficiary:
-            raise PermissionDenied('you can only see announcement relevant to you')
-        instance = announcement
-        if not instance.charity_announcement_to_beneficiary_seen:
-            instance.charity_announcement_to_beneficiary_seen = True
-            instance.save(update_fields=['charity_announcement_to_beneficiary_seen'])
-        return super().retrieve(request, *args, **kwargs)
+            raise PermissionDenied("You can only see announcements relevant to you.")
+
+        if not announcement.charity_announcement_to_beneficiary_seen:
+            announcement.charity_announcement_to_beneficiary_seen = True
+            announcement.save(update_fields=['charity_announcement_to_beneficiary_seen'])
+
+        serializer = self.get_serializer(announcement)
+        return Response(serializer.data)
 
 class BeneficiaryRequestTypeLayer1View(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
