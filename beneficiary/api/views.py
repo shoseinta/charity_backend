@@ -648,32 +648,44 @@ class AnnouncementRequestView(generics.ListAPIView):
         beneficiary = self.kwargs.get('pk')
         one_month_ago = timezone.now() - timedelta(days=30)
 
+        request = BeneficiaryRequest.objects.filter(beneficiary_user_registration=beneficiary)
+
         return CharityAnnouncementForRequest.objects.filter(
-            beneficiary_user_registration=beneficiary,
+            beneficiary_request_id__in = request,
             charity_announcement_for_request_created_at__gte=one_month_ago,
             charity_announcement_for_request_seen=False
         )
 
-class RequestAnnouncementDetailView(generics.RetrieveAPIView):
+class RequestAnnouncementForRequestSeenView(generics.RetrieveAPIView):
     queryset = CharityAnnouncementForRequest.objects.all()
     serializer_class = RequestAnnouncementSerializer
-    lookup_field = 'pk'
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+        pk = self.kwargs.get('pk')
+        announcement_pk = self.kwargs.get('announcement_pk')
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration.objects.get(pk=pk))
+        announcement = get_object_or_404(CharityAnnouncementForRequest.objects.get(pk=announcement_pk))
+        if announcement.beneficiary_request.beneficiary_user_registration != beneficiary:
+            raise PermissionDenied('you can only see announcement relevant to you')
+        instance = announcement
         if not instance.charity_announcement_for_request_seen:
             instance.charity_announcement_for_request_seen = True
             instance.save(update_fields=['charity_announcement_for_request_seen'])
         return super().retrieve(request, *args, **kwargs)
 
 # 🔹 2. For Beneficiary-specific Announcements
-class BeneficiaryAnnouncementDetailView(generics.RetrieveAPIView):
+class BeneficiaryAnnouncementSeenView(generics.RetrieveAPIView):
     queryset = CharityAnnouncementToBeneficiary.objects.all()
     serializer_class = BeneficiaryAnnouncementSerializer
-    lookup_field = 'pk'
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+        pk = self.kwargs.get('pk')
+        announcement_pk = self.kwargs.get('announcement_pk')
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration.objects.get(pk=pk))
+        announcement = get_object_or_404(CharityAnnouncementToBeneficiary.objects.get(pk=announcement_pk))
+        if announcement.beneficiary_user_registration != beneficiary:
+            raise PermissionDenied('you can only see announcement relevant to you')
+        instance = announcement
         if not instance.charity_announcement_to_beneficiary_seen:
             instance.charity_announcement_to_beneficiary_seen = True
             instance.save(update_fields=['charity_announcement_to_beneficiary_seen'])

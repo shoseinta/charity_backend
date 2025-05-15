@@ -32,6 +32,8 @@ from .views import (BeneficiaryUserView,
                     CreateAdditionalInfo,
                     UpdateBeneficiaryAdditionalInfoView,
                     UpdateBeneficiaryUserRegistration,
+                    RequestAnnouncementForRequestSeenView,
+                    BeneficiaryAnnouncementSeenView,
                     )
 
 from django.urls import path
@@ -65,7 +67,10 @@ urlpatterns = [
     path('beneficiary/<int:pk>/request-single-history-get/<int:request_pk>/', BeneficiarySingleHistoryGetView.as_view(), name='beneficiary_single_history_get'),
     path('beneficiary/<int:pk>/announcement-get/', AnnouncementView.as_view(), name='beneficiary_request_announcement_get'),
     path('beneficiary/<int:pk>/request-announcement-get/', AnnouncementRequestView.as_view(), name='beneficiary_request_announcement_request_get'),
+    path('beneficiary/<int:pk>/request-announcement-seen/<int:announcement_pk>/',RequestAnnouncementForRequestSeenView.as_view(),name="request-announcement-seen"),
+    path('beneficiary/<int:pk>/announcement-seen/<int:announcement_pk>/', BeneficiaryAnnouncementSeenView.as_view(), name="announcement-seen"),
 
+    
     #lookup request fields
     path('requests/type-layer1/', BeneficiaryRequestTypeLayer1View.as_view(), name="type-layer1"),
     path('requests/type-layer2/', BeneficiaryRequestTypeLayer2View.as_view(), name="type-layer2"),

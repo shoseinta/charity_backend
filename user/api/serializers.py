@@ -102,7 +102,7 @@ class BeneficiaryRegistrationSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
-        
+
         beneficiary = BeneficiaryUserRegistration.objects.create(
             benficiary_user_id=user,
             identification_number=validated_data['username'],
@@ -128,11 +128,14 @@ class BeneficiaryLoginSerializer(serializers.Serializer):
                               username=username, password=password)
             beneficiary_user = BeneficiaryUserRegistration.objects.filter(identification_number=username, password=password)
             if not user:
+                print('hello from user')
                 raise serializers.ValidationError("Unable to log in with provided credentials.")
             if not user.is_active:
                 raise serializers.ValidationError("User account is disabled.")
             if not beneficiary_user:
+                print('hello from here.')
                 raise serializers.ValidationError("Unable to log in with provided credentials.")
+                
         else:
             raise serializers.ValidationError("Must include 'username' and 'password'.")
         
