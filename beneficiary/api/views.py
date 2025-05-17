@@ -281,9 +281,9 @@ class BeneficiaryRequestOnetimeCreationView(generics.CreateAPIView):
         # Initialize the serializer with the request data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        onetime = BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='one_time')
         # Save the object while associating the BeneficiaryRequest
-        serializer.save(beneficiary_request=beneficiary_request)
+        serializer.save(beneficiary_request=beneficiary_request,beneficiary_request_duration=onetime)
 
         # Customize the response
         return Response(
@@ -319,8 +319,9 @@ class BeneficiaryRequestRecurringCreationView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        recurring = BeneficiaryRequestDuration.objects.get(beneficiary_request_duration_name='recurring')
         # Save the object while associating the BeneficiaryRequest
-        serializer.save(beneficiary_request=beneficiary_request)
+        serializer.save(beneficiary_request=beneficiary_request,beneficiary_request_duration=recurring)
 
         # Customize the response
         return Response(
