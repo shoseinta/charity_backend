@@ -701,33 +701,31 @@ class BeneficiaryAnnouncementSeenView(generics.RetrieveAPIView):
         return Response(serializer.data)
 
 class BeneficiaryRequestTypeLayer1View(generics.ListAPIView):
-    permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestTypeLayer1Serializer
     queryset = BeneficiaryRequestTypeLayer1.objects.all()
-
+    pagination_class = None
+    
 class BeneficiaryRequestTypeLayer2View(generics.ListAPIView):
-    permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestTypeLayer2Serializer
     queryset = BeneficiaryRequestTypeLayer2.objects.all()
+    pagination_class = None
 
 class BeneficiaryRequestProcessingStageView(generics.ListAPIView):
-    permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestProcessingStageSerializer
     queryset = BeneficiaryRequestProcessingStage.objects.all()
+    pagination_class = None
 
 class BeneficiaryRequestDurationLookupView(generics.ListAPIView):
-    permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestDurationLookupSerializer
     queryset = BeneficiaryRequestDuration.objects.all()
+    pagination_class = None
 
 class ProvinceLookupView(generics.ListAPIView):
-    permission_classes = [IsCertainBeneficiary]
     serializer_class = ProvinceLookupSerializer
     queryset = Province.objects.all()
     pagination_class = None
 
 class CityLookupView(generics.ListAPIView):
-    permission_classes = [IsCertainBeneficiary]
     serializer_class = CityLookupSerializer
     queryset = City.objects.all()
     pagination_class = None
