@@ -102,20 +102,33 @@ class BeneficiaryRequest(models.Model):
         return f"Request #{self.beneficiary_request_id} - {self.beneficiary_request_title}"
     
     def save(self, *args, **kwargs):
-        # Check if the object already exists
+        # Calculate effective_date
+        if self.effective_date is None:
+            if self.beneficiary_request_date:
+                self.effective_date = self.beneficiary_request_date
+            elif self.pk:  # For existing instances
+                self.effective_date = self.beneficiary_request_created_at
+        
+        # Handle duration changes for existing instances
         if self.pk:
-            previous = BeneficiaryRequest.objects.get(pk=self.pk)
-            # If the duration object has changed
-            if previous.beneficiary_request_duration != self.beneficiary_request_duration:
-                # Delete associated one-time duration if exists
-                if hasattr(previous, 'beneficiary_request_duration_onetime'):
-                    previous.beneficiary_request_duration_onetime.delete()
-                # Delete associated recurring duration if exists
-                if hasattr(previous, 'beneficiary_request_duration_recurring'):
-                    previous.beneficiary_request_duration_recurring.delete()
-        # Calculate effective_date before saving
-        self.effective_date = self.beneficiary_request_date or self.beneficiary_request_created_at
+            try:
+                previous = BeneficiaryRequest.objects.get(pk=self.pk)
+                if previous.beneficiary_request_duration != self.beneficiary_request_duration:
+                    if hasattr(previous, 'beneficiary_request_duration_onetime'):
+                        previous.beneficiary_request_duration_onetime.delete()
+                    if hasattr(previous, 'beneficiary_request_duration_recurring'):
+                        previous.beneficiary_request_duration_recurring.delete()
+            except BeneficiaryRequest.DoesNotExist:
+                pass
+        
+        # Save the instance
         super().save(*args, **kwargs)
+        
+        # For new instances, set effective_date if still null
+        if not hasattr(self, '_effective_date_set') and self.effective_date is None:
+            self.effective_date = self.beneficiary_request_created_at
+            self.save(update_fields=['effective_date'])
+
 
 class BeneficiaryRequestDurationOnetime(models.Model):
     beneficiary_request_duration_onetime_id = models.AutoField(primary_key=True)
