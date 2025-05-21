@@ -30,3 +30,22 @@ urlpatterns = [
     path('silk/', include('silk.urls', namespace='silk')),
     #path('__debug__/', include('debug_toolbar.urls')),
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+from django.urls import path
+
+from django.views.static import serve
+import os
+
+
+BASE_DIR = settings.BASE_DIR
+
+urlpatterns  += [
+    # your other paths here...
+    
+    # Serve /request_docs/ URLs from custom folder
+    path('request_docs/<path:path>/', serve, {
+        'document_root': os.path.join(BASE_DIR, 'request_docs'),
+    }),
+]

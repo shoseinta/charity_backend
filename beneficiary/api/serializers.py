@@ -118,6 +118,8 @@ class BeneficiaryRequestAnnouncementSerializer(serializers.ModelSerializer):
         model = CharityAnnouncementForRequest
         fields = '__all__'
 
+from rest_framework import serializers
+
 class BeneficiaryRequestGetSerializer(serializers.ModelSerializer):
     beneficiary_request_duration_onetime = BeneficiaryRequestOnetimeSerializer()
     beneficiary_request_duration_recurring = BeneficiaryRequestRecurringSerializer()
@@ -125,9 +127,27 @@ class BeneficiaryRequestGetSerializer(serializers.ModelSerializer):
     beneficiary_request_child = BeneficiaryRequestChildSerializer(many=True, required=False)
     beneficiary_request_announcement = BeneficiaryRequestAnnouncementSerializer(many=True)
 
+    beneficiary_request_type_layer1 = serializers.SerializerMethodField()
+    beneficiary_request_type_layer2 = serializers.SerializerMethodField()
+    beneficiary_request_duration = serializers.SerializerMethodField()
+    beneficiary_request_processing_stage = serializers.SerializerMethodField()
+
     class Meta:
         model = BeneficiaryRequest
         fields = '__all__'
+
+    def get_beneficiary_request_type_layer1(self, obj):
+        return obj.beneficiary_request_type_layer1.get_beneficiary_request_type_layer1_name_display()
+
+    def get_beneficiary_request_type_layer2(self, obj):
+        return obj.beneficiary_request_type_layer2.beneficiary_request_type_layer2_name
+
+    def get_beneficiary_request_duration(self, obj):
+        return obj.beneficiary_request_duration.get_beneficiary_request_duration_name_display() if obj.beneficiary_request_duration else None
+
+    def get_beneficiary_request_processing_stage(self, obj):
+        return obj.beneficiary_request_processing_stage.get_beneficiary_request_processing_stage_name_display()
+
 
 class UpdateOnetimeSerializer(serializers.ModelSerializer):
     class Meta:

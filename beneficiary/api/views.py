@@ -60,7 +60,7 @@ class BeneficiaryAllRequestsGetView(generics.ListAPIView):
     serializer_class = BeneficiaryRequestGetSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['effective_date', 'beneficiary_request_processing_stage__beneficiary_request_processing_stage_id']
-    ordering = ['effective_date']
+    ordering = ['-effective_date']
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
@@ -337,7 +337,7 @@ class BeneficiaryRequestInitialStagesGetView(generics.ListAPIView):
     serializer_class = BeneficiaryRequestGetSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['effective_date']
-    ordering = ['effective_date']
+    ordering = ['-effective_date']
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
@@ -364,7 +364,7 @@ class BeneficiaryRequestInProgressGetView(generics.ListAPIView):
     serializer_class = BeneficiaryRequestGetSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['effective_date']
-    ordering = ['effective_date']
+    ordering = ['-effective_date']
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
@@ -391,7 +391,7 @@ class BeneficiaryRequestCompletedGetView(generics.ListAPIView):
     serializer_class = BeneficiaryRequestGetSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['effective_date']
-    ordering = ['effective_date']
+    ordering = ['-effective_date']
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
@@ -418,7 +418,7 @@ class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
     serializer_class = BeneficiaryRequestGetSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['effective_date']
-    ordering = ['effective_date']
+    ordering = ['-effective_date']
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
