@@ -35,7 +35,8 @@ from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryInformationUpdateSerializer,
                           BeneficiaryAddressUpdateSerializer,
                           BeneficiaryAdditionalInfoUpdateSerializer,
-                          UpdatingDeletingBeneficiaryUserRegistrationSerializer)
+                          UpdatingDeletingBeneficiaryUserRegistrationSerializer,
+                          BeneficiaryRequestGetSingleSerializer,)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
@@ -444,7 +445,7 @@ class BeneficiaryRequestRejectedGetView(generics.ListAPIView):
 
 class BenefeciarySingleRequestGetView(generics.RetrieveAPIView):
     permission_classes = [IsCertainBeneficiary]
-    serializer_class = BeneficiaryRequestGetSerializer
+    serializer_class = BeneficiaryRequestGetSingleSerializer
 
     def get_object(self):
         request_pk = self.kwargs.get('request_pk')
