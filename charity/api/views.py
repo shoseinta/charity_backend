@@ -73,10 +73,10 @@ from django.db.models.functions import Now, ExtractYear, ExtractMonth, ExtractDa
 from charity.tasks import (create_request_announcement,
                            update_request_announcement,
                            delete_request_announcement,
-                           create_history_announcement,
+                           #create_history_announcement,
                            create_child_request_announcement,
-                           create_history_update_announcement,
-                           create_history_deletion_announcement,
+                           #create_history_update_announcement,
+                           #create_history_deletion_announcement,
                            create_child_update_announcement,
                            create_child_deletion_announcement,
                            create_recurring_update_announcement,
@@ -270,7 +270,7 @@ class BeneficiaryRequestHistoryCreate(generics.CreateAPIView):
         # Save the object while associating the BeneficiaryRequest
         serializer.save(beneficiary_request=beneficiary_request)
 
-        create_history_announcement.delay(beneficiary_request.pk)
+        #create_history_announcement.delay(beneficiary_request.pk)
 
         # Customize the response
         return Response(
@@ -1050,12 +1050,12 @@ class SingleHistoryUpdateView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         instance = serializer.save()
         request_id = instance.beneficiary_request.pk
-        create_history_update_announcement.delay(request_id)
+        #create_history_update_announcement.delay(request_id)
 
     def perform_destroy(self, instance):
         request_id = instance.beneficiary_request.pk
         instance.delete()
-        create_history_deletion_announcement.delay(request_id)
+        #create_history_deletion_announcement.delay(request_id)
 
 class SingleChildUpdateView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrCharity]

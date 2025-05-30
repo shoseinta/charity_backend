@@ -150,7 +150,7 @@ def create_recurring_deletion_announcement(request_id):
     )
 
 @shared_task
-def create_recurring_update_announcement(request_id):
+def create_onetime_update_announcement(request_id):
     from request.models import BeneficiaryRequest, CharityAnnouncementForRequest
 
     try:
@@ -164,7 +164,7 @@ def create_recurring_update_announcement(request_id):
         pass
 
 @shared_task
-def create_recurring_deletion_announcement(request_id):
+def create_onetime_deletion_announcement(request_id):
     from request.models import CharityAnnouncementForRequest
 
     CharityAnnouncementForRequest.objects.create(
