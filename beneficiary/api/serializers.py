@@ -274,6 +274,7 @@ class BeneficiaryAddressUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Postal code must be 10 digits")
         if not value.isdigit():
             raise serializers.ValidationError("Postal code must be numeric")
+        return value
     def validate_longitude(self, value):
         if not value:
             return value
