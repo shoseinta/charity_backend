@@ -486,42 +486,38 @@ class BeneficiaryUpdateSingleRequestView(generics.UpdateAPIView, generics.Destro
 class BeneficiaryUpdateOnetimeView(generics.UpdateAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = UpdateOnetimeSerializer
-    queryset = BeneficiaryRequestDurationOnetime.objects.all()
-    def perform_update(self, serializer):
-        request_pk = self.kwargs.get('request_pk')
-        pk = self.kwargs.get('pk')
-        try:
-            beneficiary_request_onetime = BeneficiaryRequestDurationOnetime.objects.get(pk=request_pk)
-            beneficiary_request = beneficiary_request_onetime.beneficiary_request
-            if beneficiary_request != BeneficiaryUserRegistration.objects.get(pk=pk):
-                 raise PermissionDenied("You can only update a request you created.")
-        except BeneficiaryRequestDurationOnetime.DoesNotExist:
-            raise Http404("BeneficiaryRequestDurationOnetime not found.")
 
-        if beneficiary_request_onetime.beneficiary_request_duration_onetime_is_created_by_charity:
-            raise PermissionDenied("You can only update a request you created.")
-        # Save with validated data + beneficiary_request relation
-        serializer.save()
+    def get_object(self):
+        obj = get_object_or_404(BeneficiaryRequestDurationOnetime, pk=self.kwargs.get('request_pk'))
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=self.kwargs.get('pk'))
+        if obj.beneficiary_request.beneficiary_user_registration != beneficiary:
+            raise PermissionDenied('you can only update a request belong to you')
+        if obj.beneficiary_request_duration_onetime_is_created_by_charity:
+            raise PermissionDenied("You can only update or delete a request you created.")
+
+        # if obj.beneficiary_request_child_processing_stage.beneficiary_request_processing_stage_name.lower() != "submitted":
+        #     raise PermissionDenied("You can only update or delete a request in the 'submitted' stage.")
+
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 class BeneficiaryUpdateRecurringView(generics.UpdateAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = UpdateRecurringSerializer
-    queryset = BeneficiaryRequestDurationRecurring.objects.all()
-    def perform_update(self, serializer):
-        request_pk = self.kwargs.get('request_pk')
-        pk = self.kwargs.get('pk')
-        try:
-            beneficiary_request_recurring = BeneficiaryRequestDurationOnetime.objects.get(pk=request_pk)
-            beneficiary_request = beneficiary_request_recurring.beneficiary_request
-            if beneficiary_request != BeneficiaryUserRegistration.objects.get(pk=pk):
-                 raise PermissionDenied("You can only update a request you created.")
-        except BeneficiaryRequestDurationRecurring.DoesNotExist:
-            raise Http404("BeneficiaryRequestDurationRecurring not found.")
 
-        if beneficiary_request_recurring.beneficiary_request_duration_recurring_is_created_by_charity:
-            raise PermissionDenied("You can only update a request you created.")
-        # Save with validated data + beneficiary_request relation
-        serializer.save()
+    def get_object(self):
+        obj = get_object_or_404(BeneficiaryRequestDurationRecurring, pk=self.kwargs.get('request_pk'))
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=self.kwargs.get('pk'))
+        if obj.beneficiary_request.beneficiary_user_registration != beneficiary:
+            raise PermissionDenied('you can only update a request belong to you')
+        if obj.beneficiary_request_duration_recurring_is_created_by_charity:
+            raise PermissionDenied("You can only update or delete a request you created.")
+
+        # if obj.beneficiary_request_child_processing_stage.beneficiary_request_processing_stage_name.lower() != "submitted":
+        #     raise PermissionDenied("You can only update or delete a request in the 'submitted' stage.")
+
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 class BeneficiarySingleRequestChildsGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
