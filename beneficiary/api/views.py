@@ -483,7 +483,7 @@ class BeneficiaryUpdateSingleRequestView(generics.UpdateAPIView, generics.Destro
         return obj
 
 
-class BeneficiaryUpdateOnetimeView(generics.UpdateAPIView):
+class BeneficiaryUpdateOnetimeView(generics.UpdateAPIView, generics.DestroyAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = UpdateOnetimeSerializer
 
@@ -501,7 +501,7 @@ class BeneficiaryUpdateOnetimeView(generics.UpdateAPIView):
         self.check_object_permissions(self.request, obj)
         return obj
 
-class BeneficiaryUpdateRecurringView(generics.UpdateAPIView):
+class BeneficiaryUpdateRecurringView(generics.UpdateAPIView, generics.DestroyAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = UpdateRecurringSerializer
 
