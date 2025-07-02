@@ -522,6 +522,7 @@ class BeneficiaryUpdateRecurringView(generics.UpdateAPIView, generics.DestroyAPI
 class BeneficiarySingleRequestChildsGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
     serializer_class = BeneficiaryRequestChildGetSerializer
+    pagination_class = None
 
     def get_queryset(self):
         # Get the 'pk' from the URL
