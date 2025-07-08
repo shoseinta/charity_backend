@@ -11,7 +11,8 @@ from beneficiary.models import (BeneficiaryUserRegistration,
                                 City,
                                 BeneficiaryUserInformation,
                                 BeneficiaryUserAddress,
-                                BeneficiaryUserAdditionalInfo)
+                                BeneficiaryUserAdditionalInfo,
+                                BeneficiaryUserFamilyInfo)
 from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryRequestSerializer,
                           BeneficiarySingleRequestOneTimeSerializer,
@@ -75,6 +76,20 @@ class BeneficiaryUserFamilyCreateView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(beneficiary_user_registration_id=beneficiary)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class BeneficiaryUserFamilyDeleteView(generics.RetrieveDestroyAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryUserFamilyInfoCreate
+
+    def get_object(self):
+        obj = get_object_or_404(BeneficiaryUserFamilyInfo, pk=self.kwargs.get('family_pk'))
+        beneficiary = get_object_or_404(BeneficiaryUserRegistration, pk=self.kwargs.get('pk'))
+        if obj.beneficiary_user_registration_id != beneficiary:
+            raise PermissionDenied('you can only delete family member related to you')
+        
+        self.check_object_permissions(self.request, obj)
+        return obj
+    
 
 class BeneficiaryAllRequestsGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
