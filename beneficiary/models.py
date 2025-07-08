@@ -86,6 +86,26 @@ class BeneficiaryUserAdditionalInfo(models.Model):
     def __str__(self):
         return self.beneficiary_user_additional_info_title
     
+class BeneficiaryUserFamilyInfo(models.Model):
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+    ]
+    RELATION_CHOICES = [
+        ('child', 'Child'),
+        ('partner','Partner')
+    ]
+    beneficiary_user_family_info_id = models.AutoField(primary_key=True)
+    beneficiary_user_family_info_family_relation = models.CharField(max_length=10,choices=RELATION_CHOICES)
+    beneficiary_user_family_info_identification_number = models.CharField(max_length=10,unique=True)
+    beneficiary_user_family_info_first_name = models.CharField(max_length=255)
+    beneficiary_user_family_info_last_name = models.CharField(max_length=255)
+    beneficiary_user_family_info_birth_date = models.DateField(blank=True, null=True)
+    beneficiary_user_family_info_gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
+    beneficiary_user_family_info_created_at = models.DateTimeField(auto_now_add=True)
+    beneficiary_user_family_info_updated_at = models.DateTimeField(auto_now=True)
+    beneficiary_user_registration_id = models.ForeignKey(BeneficiaryUserRegistration, on_delete=models.CASCADE, related_name="beneficiary_user_family_info")
+    
 class CharityAnnouncementToBeneficiary(models.Model):
     charity_announcement_to_beneficiary_id = models.AutoField(primary_key=True)
     charity_announcement_to_beneficiary_title = models.CharField(max_length=255)
