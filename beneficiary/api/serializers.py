@@ -6,6 +6,7 @@ from beneficiary.models import (
     BeneficiaryUserAddress,
     CharityAnnouncementToBeneficiary,
     BeneficiaryUserAdditionalInfo,
+    BeneficiaryUserFamilyInfo,
     Province,
     City,
 )
@@ -39,10 +40,16 @@ class BeneficiaryUserAdditionalInfoSerializer(serializers.ModelSerializer):
         model = BeneficiaryUserAdditionalInfo
         fields = '__all__'
 
+class BeneficiaryUserFamilyInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserFamilyInfo
+        fields = '__all__'
+
 class BeneficiaryUserSerializer(serializers.ModelSerializer):
     beneficiary_user_information = BeneficiaryUserInformationSerializer()
     beneficiary_user_address = BeneficiaryUserAddressSerializer()
     beneficiary_user_additional_info = serializers.SerializerMethodField()
+    beneficiary_user_family_info = BeneficiaryUserFamilyInfoSerializer(many=True)
 
     class Meta:
         model = BeneficiaryUserRegistration
@@ -53,6 +60,26 @@ class BeneficiaryUserSerializer(serializers.ModelSerializer):
             beneficiary_user_additional_info_is_created_by_charity=False
         )
         return BeneficiaryUserAdditionalInfoSerializer(additional_infos, many=True).data
+    
+class BeneficiaryUserFamilyInfoCreate(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryUserFamilyInfo
+        exclude = ['beneficiary_user_registration_id']
+    
+    def validate_first_name(self, value):
+         # Regular expression to match Persian characters and common punctuation
+        persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
+        
+        if not persian_regex.match(value):
+            raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
+        return value
+    def validate_last_name(self, value):
+         # Regular expression to match Persian characters and common punctuation
+        persian_regex = re.compile(r'^[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F\s]+$')
+        
+        if not persian_regex.match(value):
+            raise serializers.ValidationError("This field must contain only Farsi (Persian) characters.")
+        return value
 
 
 class BeneficiaryRequestSerializer(serializers.ModelSerializer):

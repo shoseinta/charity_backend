@@ -34,6 +34,7 @@ from .views import (BeneficiaryUserView,
                     UpdateBeneficiaryUserRegistration,
                     RequestAnnouncementForRequestSeenView,
                     BeneficiaryAnnouncementSeenView,
+                    BeneficiaryUserFamilyCreateView,
                     )
 
 from django.urls import path
@@ -43,6 +44,7 @@ urlpatterns = [
     path('beneficiary/<int:pk>/create-user-information/',CreateBeneficiaryInformation.as_view(), name="create-beneficiary-information"),
     path('beneficiary/<int:pk>/create-user-address/',CreateAddress.as_view(), name="create-user-address"),
     path('beneficiary/<int:pk>/create-user-additional-info/',CreateAdditionalInfo.as_view(), name="create-user-additional-info"),
+    path('beneficiary/<int:pk>/create-user-family/', BeneficiaryUserFamilyCreateView.as_view(), name="create-user-family-info"),
     path('beneficiary/<int:pk>/update-user-register/',UpdateBeneficiaryUserRegistration.as_view(), name='update-user-register'),
     path('beneficiary/<int:pk>/update-user-information/',UpdateBeneficiaryInformationView.as_view(), name="update-user-information"),
     path('beneficiary/<int:pk>/update-user-address/',UpdateBeneficiaryAddressView.as_view(),name="update-user-address"),

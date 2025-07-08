@@ -36,7 +36,8 @@ from .serializers import (BeneficiaryUserSerializer,
                           BeneficiaryAddressUpdateSerializer,
                           BeneficiaryAdditionalInfoUpdateSerializer,
                           UpdatingDeletingBeneficiaryUserRegistrationSerializer,
-                          BeneficiaryRequestGetSingleSerializer,)
+                          BeneficiaryRequestGetSingleSerializer,
+                          BeneficiaryUserFamilyInfoCreate)
 from request.models import (BeneficiaryRequestProcessingStage,
                             BeneficiaryRequest,
                             BeneficiaryRequestDurationOnetime,
@@ -55,6 +56,25 @@ from django.db.models import F, Case, When, Value, DateTimeField
 from core.cache_manager import GlobalCacheManager
 from datetime import timedelta
 from django.utils import timezone
+
+class BeneficiaryUserFamilyCreateView(generics.CreateAPIView):
+    permission_classes = [IsCertainBeneficiary]
+    serializer_class = BeneficiaryUserFamilyInfoCreate
+
+    def post(self, request, *args, **kwargs):
+        pk = self.kwargs.get('pk')
+
+        # Check if the user registration exists
+        try:
+            beneficiary = BeneficiaryUserRegistration.objects.get(pk=pk)
+        except BeneficiaryUserRegistration.DoesNotExist:
+            return Response({'detail': 'BeneficiaryUserRegistration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Create new information
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(beneficiary_user_registration_id=beneficiary)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class BeneficiaryAllRequestsGetView(generics.ListAPIView):
     permission_classes = [IsCertainBeneficiary]
